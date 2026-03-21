@@ -3,8 +3,10 @@ package com.pokiepaws.mobile.ui.auth
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -22,21 +24,26 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.ui.theme.PokieWhite
+import com.pokiepaws.mobile.util.popularCountries
 
 @Composable
-fun LoginScreen(
-    onLoginSuccess: () -> Unit,
-    onRegisterClick: () -> Unit,
+fun RegisterScreen(
+    onRegisterSuccess: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    var phoneNumber by remember { mutableStateOf("") }
+    var selectedCountry by remember { mutableStateOf(popularCountries.first()) }
 
     LaunchedEffect(uiState) {
         if (uiState is AuthUiState.Success) {
-            onLoginSuccess()
+            onRegisterSuccess()
             viewModel.resetState()
         }
     }
@@ -49,17 +56,18 @@ fun LoginScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = 24.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "PokiePaws Logo",
-                modifier = Modifier.size(360.dp)
+                modifier = Modifier.size(240.dp)
             )
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -72,13 +80,43 @@ fun LoginScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Zaloguj się",
+                        text = "Utwórz konto",
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
 
+                    Text(
+                        text = "Dołącz do PokiePaws już dziś!",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
                     Spacer(modifier = Modifier.height(20.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = firstName,
+                            onValueChange = { firstName = it },
+                            label = { Text("Imię") },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        OutlinedTextField(
+                            value = lastName,
+                            onValueChange = { lastName = it },
+                            label = { Text("Nazwisko") },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     OutlinedTextField(
                         value = email,
@@ -115,36 +153,34 @@ fun LoginScreen(
                         isError = uiState is AuthUiState.Error
                     )
 
-                    // Zapomniałeś hasła?
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        TextButton(
-                            onClick = { /* TODO: feature/forgot-password */ },
-                            contentPadding = PaddingValues(0.dp)
-                        ) {
-                            Text(
-                                text = "Zapomniałeś hasła?",
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    PhoneNumberField(
+                        phoneNumber = phoneNumber,
+                        onPhoneNumberChange = { phoneNumber = it },
+                        selectedCountry = selectedCountry,
+                        onCountrySelected = { selectedCountry = it },
+                        isError = uiState is AuthUiState.Error
+                    )
 
                     if (uiState is AuthUiState.Error) {
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = (uiState as AuthUiState.Error).message,
                             color = MaterialTheme.colorScheme.error,
                             fontSize = 12.sp
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
                     }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
                     Button(
-                        onClick = { viewModel.login(email, password) },
+                        onClick = {
+                            viewModel.register(
+                                email, password, firstName, lastName,
+                                "${selectedCountry.dialCode}$phoneNumber"
+                            )
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(52.dp),
@@ -159,7 +195,7 @@ fun LoginScreen(
                             )
                         } else {
                             Text(
-                                text = "Zaloguj się",
+                                text = "Zarejestruj się",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -168,15 +204,17 @@ fun LoginScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    TextButton(onClick = onRegisterClick) {
+                    TextButton(onClick = onNavigateToLogin) {
                         Text(
-                            text = "Nie masz konta? Zarejestruj się",
+                            text = "Masz już konto? Zaloguj się",
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Medium
                         )
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

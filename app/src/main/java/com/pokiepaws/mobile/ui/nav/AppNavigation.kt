@@ -6,6 +6,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.pokiepaws.mobile.ui.auth.LoginScreen
+import com.pokiepaws.mobile.ui.auth.RegisterScreen
+import com.pokiepaws.mobile.ui.profile.HomeScreen
 
 sealed class Screen(val route: String) {
     // Auth
@@ -46,10 +48,25 @@ fun AppNavigation(
             )
         }
         composable(Screen.Register.route) {
-            // RegisterScreen(...)
+            RegisterScreen(
+                onRegisterSuccess = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                },
+                onNavigateToLogin = {
+                    navController.popBackStack()
+                }
+            )
         }
         composable(Screen.Home.route) {
-            // HomeScreen(...)
+            HomeScreen(
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
         }
         composable(Screen.ClinicList.route) {
             // ClinicListScreen(...)

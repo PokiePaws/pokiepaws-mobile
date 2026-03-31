@@ -24,26 +24,45 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.ui.theme.PokieWhite
+import com.pokiepaws.mobile.util.Country
 import com.pokiepaws.mobile.util.popularCountries
 
 @Composable
 fun RegisterScreen(
-    onRegisterSuccess: () -> Unit,
+    onNavigateToVerification: (String) -> Unit,
     onNavigateToLogin: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var firstName by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
-    var phoneNumber by remember { mutableStateOf("") }
-    var selectedCountry by remember { mutableStateOf(popularCountries.first()) }
 
+    // --- Stany Formularza ---
+    var email               by remember { mutableStateOf("") }
+    var password            by remember { mutableStateOf("") }
+    var confirmPassword     by remember { mutableStateOf("") }
+    var firstName           by remember { mutableStateOf("") }
+    var lastName            by remember { mutableStateOf("") }
+    var passwordVisible     by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
+    var phoneNumber         by remember { mutableStateOf("") }
+
+    var phoneCountry        by remember { mutableStateOf(popularCountries.first()) }
+    var residenceCountry    by remember {
+        mutableStateOf(popularCountries.find { it.name == "Polska" } ?: popularCountries.first())
+    }
+
+    var street              by remember { mutableStateOf("") }
+    var houseNumber         by remember { mutableStateOf("") }
+    var apartmentNumber     by remember { mutableStateOf("") }
+    var city                by remember { mutableStateOf("") }
+    var postalCode          by remember { mutableStateOf("") }
+
+    // Walidacja haseł
+    val passwordsMatch = password == confirmPassword || confirmPassword.isEmpty()
+
+    // --- LOGIKA NAWIGACJI PO SUKCESIE ---
     LaunchedEffect(uiState) {
-        if (uiState is AuthUiState.Success) {
-            onRegisterSuccess()
+        if (uiState is AuthUiState.RegisterSuccess) {
+            onNavigateToVerification(email)
             viewModel.resetState()
         }
     }
@@ -58,13 +77,15 @@ fun RegisterScreen(
                 .fillMaxSize()
                 .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.height(48.dp))
+
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "PokiePaws Logo",
-                modifier = Modifier.size(240.dp)
+                modifier = Modifier.size(140.dp)
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -73,26 +94,80 @@ fun RegisterScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(containerColor = PokieWhite),
-                elevation = CardDefaults.cardElevation(8.dp)
+                elevation = CardDefaults.cardElevation(4.dp)
             ) {
                 Column(
-                    modifier = Modifier.padding(24.dp),
+                    modifier = Modifier.padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
                         text = "Utwórz konto",
-                        fontSize = 22.sp,
+                        style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
-
                     Text(
-                        text = "Dołącz do PokiePaws już dziś!",
-                        fontSize = 13.sp,
+                        text = "Wypełnij dane, aby dołączyć do nas",
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    SectionLabel("Dane konta")
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = { email = it },
+                        label = { Text("Email") },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedTextField(
+                        value = password,
+                        onValueChange = { password = it },
+                        label = { Text("Hasło") },
+                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        trailingIcon = {
+                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                Icon(if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility, null)
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedTextField(
+                        value = confirmPassword,
+                        onValueChange = { confirmPassword = it },
+                        label = { Text("Powtórz hasło") },
+                        isError = !passwordsMatch,
+                        supportingText = {
+                            if (!passwordsMatch) {
+                                Text("Hasła nie są identyczne", color = MaterialTheme.colorScheme.error)
+                            }
+                        },
+                        visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        trailingIcon = {
+                            IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                                Icon(if (confirmPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility, null)
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+
                     Spacer(modifier = Modifier.height(20.dp))
+
+                    SectionLabel("Dane osobowe")
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -102,7 +177,6 @@ fun RegisterScreen(
                             value = firstName,
                             onValueChange = { firstName = it },
                             label = { Text("Imię") },
-                            singleLine = true,
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(12.dp)
                         )
@@ -110,61 +184,94 @@ fun RegisterScreen(
                             value = lastName,
                             onValueChange = { lastName = it },
                             label = { Text("Nazwisko") },
-                            singleLine = true,
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(12.dp)
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
+                    // Zakładam, że masz komponent PhoneNumberField w util lub ui/components
+                    // Jeśli nie, możesz tu użyć zwykłego OutlinedTextField
                     OutlinedTextField(
-                        value = email,
-                        onValueChange = { email = it },
-                        label = { Text("Email") },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                        value = phoneNumber,
+                        onValueChange = { phoneNumber = it },
+                        label = { Text("Numer telefonu") },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
-                        isError = uiState is AuthUiState.Error
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                        prefix = { Text("${phoneCountry.dialCode} ") }
                     )
 
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    SectionLabel("Adres zamieszkania")
                     Spacer(modifier = Modifier.height(12.dp))
+
+                    CountryDropdownField(
+                        selectedCountry = residenceCountry,
+                        onCountrySelected = { residenceCountry = it }
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     OutlinedTextField(
-                        value = password,
-                        onValueChange = { password = it },
-                        label = { Text("Hasło") },
-                        singleLine = true,
-                        visualTransformation = if (passwordVisible)
-                            VisualTransformation.None else PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                        trailingIcon = {
-                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                Icon(
-                                    imageVector = if (passwordVisible)
-                                        Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                    contentDescription = null
-                                )
-                            }
-                        },
+                        value = street,
+                        onValueChange = { street = it },
+                        label = { Text("Ulica") },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        isError = uiState is AuthUiState.Error
+                        shape = RoundedCornerShape(12.dp)
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    PhoneNumberField(
-                        phoneNumber = phoneNumber,
-                        onPhoneNumberChange = { phoneNumber = it },
-                        selectedCountry = selectedCountry,
-                        onCountrySelected = { selectedCountry = it },
-                        isError = uiState is AuthUiState.Error
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = houseNumber,
+                            onValueChange = { houseNumber = it },
+                            label = { Text("Nr domu") },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        OutlinedTextField(
+                            value = apartmentNumber,
+                            onValueChange = { apartmentNumber = it },
+                            label = { Text("Lokal") },
+                            placeholder = { Text("opcjonalnie") },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                    }
 
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = postalCode,
+                            onValueChange = { postalCode = it },
+                            label = { Text("Kod") },
+                            modifier = Modifier.weight(0.45f),
+                            shape = RoundedCornerShape(12.dp),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        )
+                        OutlinedTextField(
+                            value = city,
+                            onValueChange = { city = it },
+                            label = { Text("Miasto") },
+                            modifier = Modifier.weight(0.55f),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                    }
+
+                    // Obsługa błędów z ViewModel
                     if (uiState is AuthUiState.Error) {
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = (uiState as AuthUiState.Error).message,
                             color = MaterialTheme.colorScheme.error,
@@ -172,49 +279,111 @@ fun RegisterScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
                     Button(
                         onClick = {
                             viewModel.register(
-                                email, password, firstName, lastName,
-                                "${selectedCountry.dialCode}$phoneNumber"
+                                email           = email,
+                                password        = password,
+                                firstName       = firstName,
+                                lastName        = lastName,
+                                phoneNumber     = "${phoneCountry.dialCode}$phoneNumber",
+                                street          = street,
+                                houseNumber     = houseNumber,
+                                apartmentNumber = apartmentNumber.ifBlank { null },
+                                city            = city,
+                                postalCode      = postalCode,
+                                country         = residenceCountry.name
                             )
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(52.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        enabled = uiState !is AuthUiState.Loading
+                            .height(54.dp),
+                        shape = RoundedCornerShape(14.dp),
+                        enabled = (uiState !is AuthUiState.Loading) && passwordsMatch && email.isNotEmpty()
                     ) {
                         if (uiState is AuthUiState.Loading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
-                                color = PokieWhite,
-                                strokeWidth = 2.dp
-                            )
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = PokieWhite)
                         } else {
-                            Text(
-                                text = "Zarejestruj się",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
+                            Text("Zarejestruj się", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    TextButton(onClick = onNavigateToLogin) {
-                        Text(
-                            text = "Masz już konto? Zaloguj się",
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Medium
-                        )
+                    TextButton(
+                        onClick = onNavigateToLogin,
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
+                        Text("Masz już konto? Zaloguj się")
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(48.dp))
+        }
+    }
+}
 
-            Spacer(modifier = Modifier.height(24.dp))
+@Composable
+private fun SectionLabel(title: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        HorizontalDivider(modifier = Modifier.weight(1f), thickness = 0.5.dp)
+        Text(
+            text = "  ${title.uppercase()}  ",
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+        )
+        HorizontalDivider(modifier = Modifier.weight(1f), thickness = 0.5.dp)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CountryDropdownField(
+    selectedCountry: Country,
+    onCountrySelected: (Country) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        OutlinedTextField(
+            value = "${selectedCountry.flag} ${selectedCountry.name}",
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Kraj zamieszkania") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable, true).fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            popularCountries.forEach { country ->
+                DropdownMenuItem(
+                    text = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(country.flag, fontSize = 18.sp)
+                            Spacer(Modifier.width(12.dp))
+                            Text(country.name)
+                        }
+                    },
+                    onClick = {
+                        onCountrySelected(country)
+                        expanded = false
+                    },
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                )
+            }
         }
     }
 }

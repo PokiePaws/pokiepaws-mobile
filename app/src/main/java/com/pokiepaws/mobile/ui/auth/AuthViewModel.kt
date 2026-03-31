@@ -15,7 +15,8 @@ import javax.inject.Inject
 sealed class AuthUiState {
     object Idle : AuthUiState()
     object Loading : AuthUiState()
-    data class Success(val token: String, val role: String) : AuthUiState()
+    data class LoginSuccess(val token: String, val role: String) : AuthUiState()
+    object RegisterSuccess : AuthUiState()
     data class Error(val message: String) : AuthUiState()
 }
 
@@ -32,7 +33,7 @@ class AuthViewModel @Inject constructor(
             _uiState.value = AuthUiState.Loading
             try {
                 val response = authApiService.login(LoginRequest(email, password))
-                _uiState.value = AuthUiState.Success(response.token, response.role)
+                _uiState.value = AuthUiState.LoginSuccess(response.token, response.role)
             } catch (e: Exception) {
                 _uiState.value = AuthUiState.Error(e.message ?: "Błąd logowania")
             }
@@ -40,25 +41,30 @@ class AuthViewModel @Inject constructor(
     }
 
     fun register(
-        email: String,
-        password: String,
-        firstName: String,
-        lastName: String,
-        phoneNumber: String
+        email: String, password: String, firstName: String, lastName: String,
+        phoneNumber: String, street: String, houseNumber: String,
+        apartmentNumber: String?, city: String, postalCode: String, country: String
     ) {
         viewModelScope.launch {
             _uiState.value = AuthUiState.Loading
             try {
                 val response = authApiService.register(
-                    RegisterRequest(email, password, firstName, lastName, phoneNumber)
+                    RegisterRequest(
+                        email, password, firstName, lastName, phoneNumber,
+                        street, houseNumber, apartmentNumber, city, postalCode, country
+                    )
                 )
-                _uiState.value = AuthUiState.Success(response.token, response.role)
+
+                if (response.isSuccessful) {
+                    _uiState.value = AuthUiState.RegisterSuccess
+                } else {
+                    _uiState.value = AuthUiState.Error("Błąd: ${response.code()}")
+                }
             } catch (e: Exception) {
-                _uiState.value = AuthUiState.Error(e.message ?: "Błąd rejestracji")
+                _uiState.value = AuthUiState.Error(e.message ?: "Błąd połączenia z serwerem")
             }
         }
     }
-
     fun resetState() {
         _uiState.value = AuthUiState.Idle
     }

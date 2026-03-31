@@ -25,7 +25,7 @@ import com.pokiepaws.mobile.ui.theme.PokieWhite
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit,
+    onLoginSuccess: (String, String) -> Unit,
     onRegisterClick: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
@@ -35,8 +35,9 @@ fun LoginScreen(
     var passwordVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState) {
-        if (uiState is AuthUiState.Success) {
-            onLoginSuccess()
+        if (uiState is AuthUiState.LoginSuccess) {
+            val success = uiState as AuthUiState.LoginSuccess
+            onLoginSuccess(success.token, success.role)
             viewModel.resetState()
         }
     }
@@ -115,7 +116,6 @@ fun LoginScreen(
                         isError = uiState is AuthUiState.Error
                     )
 
-                    // Zapomniałeś hasła?
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End

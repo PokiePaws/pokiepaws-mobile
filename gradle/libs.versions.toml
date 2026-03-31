@@ -39,6 +39,7 @@ coroutines = "1.8.1"
 
 # KSP
 ksp = "2.0.0-1.0.21"
+firebaseDatabase = "22.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -91,6 +92,7 @@ firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging
 # Tests
 androidx-junit = { group = "androidx.test.ext", name = "junit", version = "1.2.1" }
 junit = { group = "junit", name = "junit", version = "4.13.2" }
+firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
 
 
 [plugins]

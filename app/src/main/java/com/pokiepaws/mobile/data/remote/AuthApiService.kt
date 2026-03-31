@@ -1,5 +1,6 @@
 package com.pokiepaws.mobile.data.remote
 
+import retrofit2.Response
 import kotlinx.serialization.Serializable
 import retrofit2.http.Body
 import retrofit2.http.POST
@@ -16,7 +17,13 @@ data class RegisterRequest(
     val password: String,
     val firstName: String,
     val lastName: String,
-    val phoneNumber: String
+    val phoneNumber: String,
+    val street: String,
+    val houseNumber: String,
+    val apartmentNumber: String?,
+    val city: String,
+    val postalCode: String,
+    val country: String
 )
 
 @Serializable
@@ -31,5 +38,5 @@ interface AuthApiService {
     suspend fun login(@Body request: LoginRequest): AuthResponse
 
     @POST("api/auth/register")
-    suspend fun register(@Body request: RegisterRequest): AuthResponse
+    suspend fun register(@Body request: RegisterRequest): Response<Unit>
 }

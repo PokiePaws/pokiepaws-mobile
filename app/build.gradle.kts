@@ -6,8 +6,10 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.google.services)
-    //id("com.android.application") Z tutorialu firebase
-    //id("com.google.gms.google-services")
+    alias(libs.plugins.ktlint)
+    alias(libs.plugins.detekt)
+    // id("com.android.application") Z tutorialu firebase
+    // id("com.google.gms.google-services")
 }
 
 android {
@@ -28,7 +30,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -105,4 +107,21 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.ui.tooling)
+    lintChecks("com.slack.lint.compose:compose-lint-checks:1.3.1")
+}
+// Konfiguracja Detekt
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+    // Wskazuje na plik z Twoimi zasadami (pamiętaj, aby go stworzyć!)
+    config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
+}
+
+// Konfiguracja ktlint
+ktlint {
+    android = true // Włącza reguły specyficzne dla Androida
+    ignoreFailures = false
+    reporters {
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.PLAIN)
+    }
 }

@@ -9,25 +9,24 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val PokiePawsColorScheme = lightColorScheme(
-    primary = PokieBlue,
-    onPrimary = PokieWhite,
-    primaryContainer = PokieBlueLight,
-    onPrimaryContainer = PokieDarkText,
-    secondary = PokieRed,
-    onSecondary = PokieWhite,
-    background = PokieBlue,
-    onBackground = PokieWhite,
-    surface = PokieWhite,
-    onSurface = PokieDarkText,
-    onSurfaceVariant = PokieLightText,
-    error = PokieRed,
-)
+private val PokiePawsColorScheme =
+    lightColorScheme(
+        primary = PokieBlue,
+        onPrimary = PokieWhite,
+        primaryContainer = PokieBlueLight,
+        onPrimaryContainer = PokieDarkText,
+        secondary = PokieRed,
+        onSecondary = PokieWhite,
+        background = PokieBlue,
+        onBackground = PokieWhite,
+        surface = PokieWhite,
+        onSurface = PokieDarkText,
+        onSurfaceVariant = PokieLightText,
+        error = PokieRed,
+    )
 
 @Composable
-fun PokiePawsTheme(
-    content: @Composable () -> Unit
-) {
+fun PokiePawsTheme(content: @Composable () -> Unit) {
     val colorScheme = PokiePawsColorScheme
     val view = LocalView.current
 
@@ -40,6 +39,6 @@ fun PokiePawsTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
-        content = content
+        content = content,
     )
 }

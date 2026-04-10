@@ -37,6 +37,7 @@ import com.pokiepaws.mobile.ui.auth.ForgotPasswordScreen
 import com.pokiepaws.mobile.ui.auth.LoginScreen
 import com.pokiepaws.mobile.ui.auth.RegisterScreen
 import com.pokiepaws.mobile.ui.profile.HomeScreen
+import com.pokiepaws.mobile.ui.profile.ProfileScreen
 import com.pokiepaws.mobile.ui.theme.PokieBlue
 import com.pokiepaws.mobile.ui.theme.PokieBlueLight
 import com.pokiepaws.mobile.ui.theme.PokieLightText
@@ -181,7 +182,13 @@ fun AppNavigation(
             }
 
             composable(Screen.Profile.route) {
-                PlaceholderScreen("👤")
+                ProfileScreen(
+                    onLogout = {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
+                )
             }
 
             composable(Screen.AppointmentDetail.route) { backStackEntry ->

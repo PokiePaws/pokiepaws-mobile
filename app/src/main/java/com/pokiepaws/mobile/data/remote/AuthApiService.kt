@@ -33,6 +33,16 @@ data class AuthResponse(
     val role: String,
 )
 
+@Serializable
+data class ForgotPasswordRequest(
+    val email: String,
+)
+
+@Serializable
+data class MessageResponse(
+    val message: String,
+)
+
 interface AuthApiService {
     @POST("api/auth/login")
     suspend fun login(
@@ -43,4 +53,9 @@ interface AuthApiService {
     suspend fun register(
         @Body request: RegisterRequest,
     ): Response<Unit>
+
+    @POST("api/auth/forgot-password")
+    suspend fun forgotPassword(
+        @Body request: ForgotPasswordRequest,
+    ): Response<MessageResponse>
 }

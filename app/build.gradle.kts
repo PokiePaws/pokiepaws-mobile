@@ -47,6 +47,12 @@ android {
     buildFeatures {
         compose = true
     }
+    lint {
+        disable.add("ComposeParameterOrder")
+        abortOnError = true
+        textReport = true
+        checkDependencies = true
+    }
 }
 
 dependencies {
@@ -107,7 +113,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.ui.tooling)
-    lintChecks("com.slack.lint.compose:compose-lint-checks:1.3.1")
+    lintChecks(libs.compose.lint.checks)
+    implementation("com.google.code.gson:gson:2.10.1")
 }
 // Konfiguracja Detekt
 detekt {

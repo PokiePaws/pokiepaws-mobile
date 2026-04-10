@@ -3,6 +3,7 @@ package com.pokiepaws.mobile.ui.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pokiepaws.mobile.data.remote.AuthApiService
+import com.pokiepaws.mobile.data.remote.ForgotPasswordRequest
 import com.pokiepaws.mobile.data.remote.LoginRequest
 import com.pokiepaws.mobile.data.remote.RegisterRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -79,6 +80,29 @@ class AuthViewModel
                     }
                 } catch (e: Exception) {
                     _uiState.value = AuthUiState.Error(e.message ?: "Błąd połączenia z serwerem")
+                }
+            }
+        }
+
+        fun forgotPassword(email: String) {
+            if (email.isBlank()) {
+                _uiState.value = AuthUiState.Error("Wpisz adres email")
+                return
+            }
+
+            viewModelScope.launch {
+                _uiState.value = AuthUiState.Loading
+                try {
+                    val response = authApiService.forgotPassword(ForgotPasswordRequest(email))
+                    if (response.isSuccessful) {
+                        _uiState.value = AuthUiState.Idle
+                    } else {
+                        _uiState.value = AuthUiState.Error("Nie udało się wysłać linku. Sprawdź email.")
+                    }
+                } catch (e: java.io.IOException) {
+                    _uiState.value = AuthUiState.Error("Błąd połączenia z serwerem.")
+                } catch (e: Exception) {
+                    _uiState.value = AuthUiState.Error(e.message ?: "Wystąpił nieoczekiwany błąd")
                 }
             }
         }

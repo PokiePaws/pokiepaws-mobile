@@ -33,6 +33,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.pokiepaws.mobile.ui.auth.EmailVerificationScreen
+import com.pokiepaws.mobile.ui.auth.ForgotPasswordScreen
 import com.pokiepaws.mobile.ui.auth.LoginScreen
 import com.pokiepaws.mobile.ui.auth.RegisterScreen
 import com.pokiepaws.mobile.ui.profile.HomeScreen
@@ -40,47 +41,6 @@ import com.pokiepaws.mobile.ui.theme.PokieBlue
 import com.pokiepaws.mobile.ui.theme.PokieBlueLight
 import com.pokiepaws.mobile.ui.theme.PokieLightText
 import com.pokiepaws.mobile.ui.theme.PokieWhite
-
-sealed class Screen(val route: String) {
-    data object Login : Screen("login")
-
-    data object Register : Screen("register")
-
-    data object EmailVerification : Screen("email_verification/{email}") {
-        fun createRoute(email: String) = "email_verification/$email"
-    }
-
-    data object Home : Screen("home")
-
-    data object ClinicList : Screen("clinic_list")
-
-    data object AnimalList : Screen("animal_list")
-
-    data object AppointmentList : Screen("appointment_list")
-
-    data object Profile : Screen("profile")
-
-    data object AppointmentDetail : Screen("appointment_detail/{appointmentId}") {
-        fun createRoute(appointmentId: Long) = "appointment_detail/$appointmentId"
-    }
-}
-
-private data class BottomNavItem(
-    val screen: Screen,
-    val label: String,
-    val icon: ImageVector,
-)
-
-private val bottomNavItems =
-    listOf(
-        BottomNavItem(Screen.Home, "Home", Icons.Default.Home),
-        BottomNavItem(Screen.AnimalList, "Zwierzęta", Icons.Default.Pets),
-        BottomNavItem(Screen.AppointmentList, "Wizyty", Icons.Default.CalendarMonth),
-        BottomNavItem(Screen.ClinicList, "Gabinety", Icons.Default.LocalHospital),
-        BottomNavItem(Screen.Profile, "Profil", Icons.Default.Person),
-    )
-
-private val bottomNavRoutes = bottomNavItems.map { it.screen.route }.toSet()
 
 @Composable
 fun AppNavigation(
@@ -98,9 +58,7 @@ fun AppNavigation(
                     tonalElevation = 8.dp,
                 ) {
                     bottomNavItems.forEach { item ->
-                        val isSelected =
-                            navBackStackEntry?.destination
-                                ?.hierarchy?.any { it.route == item.screen.route } == true
+                        val isSelected = navBackStackEntry?.destination?.hierarchy?.any { it.route == item.screen.route } == true
 
                         NavigationBarItem(
                             selected = isSelected,
@@ -144,15 +102,18 @@ fun AppNavigation(
             startDestination = startDestination,
             modifier = Modifier.padding(innerPadding),
         ) {
-            composable("login") {
+            composable(Screen.Login.route) {
                 LoginScreen(
                     onLoginSuccess = { token, role ->
-                        navController.navigate("home") {
-                            popUpTo("login") { inclusive = true }
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Login.route) { inclusive = true }
                         }
                     },
                     onRegisterClick = {
-                        navController.navigate("register")
+                        navController.navigate(Screen.Register.route)
+                    },
+                    onForgotPasswordClick = {
+                        navController.navigate("forgot_password")
                     },
                 )
             }
@@ -164,6 +125,17 @@ fun AppNavigation(
                     },
                     onNavigateToLogin = {
                         navController.popBackStack()
+                    },
+                )
+            }
+
+            composable("forgot_password") {
+                ForgotPasswordScreen(
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    },
+                    onEmailSent = { email ->
+                        navController.navigate(Screen.EmailVerification.createRoute(email))
                     },
                 )
             }
@@ -213,8 +185,7 @@ fun AppNavigation(
             }
 
             composable(Screen.AppointmentDetail.route) { backStackEntry ->
-                val appointmentId = backStackEntry.arguments?.getString("appointmentId")?.toLongOrNull()
-                // AppointmentDetailScreen(navController, appointmentId)
+                // Logika dla detali wizyty
             }
         }
     }
@@ -226,3 +197,20 @@ private fun PlaceholderScreen(name: String) {
         Text(name, style = MaterialTheme.typography.headlineMedium)
     }
 }
+
+private data class BottomNavItem(
+    val screen: Screen,
+    val label: String,
+    val icon: ImageVector,
+)
+
+private val bottomNavItems =
+    listOf(
+        BottomNavItem(Screen.Home, "Home", Icons.Default.Home),
+        BottomNavItem(Screen.AnimalList, "Zwierzęta", Icons.Default.Pets),
+        BottomNavItem(Screen.AppointmentList, "Wizyty", Icons.Default.CalendarMonth),
+        BottomNavItem(Screen.ClinicList, "Gabinety", Icons.Default.LocalHospital),
+        BottomNavItem(Screen.Profile, "Profil", Icons.Default.Person),
+    )
+
+private val bottomNavRoutes = bottomNavItems.map { it.screen.route }.toSet()

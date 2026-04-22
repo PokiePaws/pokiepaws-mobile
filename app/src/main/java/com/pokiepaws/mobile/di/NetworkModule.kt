@@ -57,4 +57,10 @@ object NetworkModule {
     fun provideAuthApiService(retrofit: Retrofit): AuthApiService {
         return retrofit.create(AuthApiService::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun provideAnimalApiService(retrofit: Retrofit): com.pokiepaws.mobile.data.remote.AnimalApiService {
+        return retrofit.create(com.pokiepaws.mobile.data.remote.AnimalApiService::class.java)
+    }
 }

@@ -32,6 +32,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.pokiepaws.mobile.ui.animals.AddAnimalScreen
+import com.pokiepaws.mobile.ui.animals.AnimalListScreen
+import com.pokiepaws.mobile.ui.animals.AnimalScreen
 import com.pokiepaws.mobile.ui.auth.EmailVerificationScreen
 import com.pokiepaws.mobile.ui.auth.ForgotPasswordScreen
 import com.pokiepaws.mobile.ui.auth.LoginScreen
@@ -105,17 +108,13 @@ fun AppNavigation(
         ) {
             composable(Screen.Login.route) {
                 LoginScreen(
-                    onLoginSuccess = { token, role ->
+                    onLoginSuccess = { _, _ ->
                         navController.navigate(Screen.Home.route) {
                             popUpTo(Screen.Login.route) { inclusive = true }
                         }
                     },
-                    onRegisterClick = {
-                        navController.navigate(Screen.Register.route)
-                    },
-                    onForgotPasswordClick = {
-                        navController.navigate("forgot_password")
-                    },
+                    onRegisterClick = { navController.navigate(Screen.Register.route) },
+                    onForgotPasswordClick = { navController.navigate("forgot_password") },
                 )
             }
 
@@ -124,17 +123,13 @@ fun AppNavigation(
                     onNavigateToVerification = { email ->
                         navController.navigate(Screen.EmailVerification.createRoute(email))
                     },
-                    onNavigateToLogin = {
-                        navController.popBackStack()
-                    },
+                    onNavigateToLogin = { navController.popBackStack() },
                 )
             }
 
             composable("forgot_password") {
                 ForgotPasswordScreen(
-                    onNavigateBack = {
-                        navController.popBackStack()
-                    },
+                    onNavigateBack = { navController.popBackStack() },
                     onEmailSent = { email ->
                         navController.navigate(Screen.EmailVerification.createRoute(email))
                     },
@@ -169,18 +164,32 @@ fun AppNavigation(
                 )
             }
 
-            composable(Screen.ClinicList.route) {
-                PlaceholderScreen("🏥")
-            }
-
             composable(Screen.AnimalList.route) {
-                PlaceholderScreen("🐾")
+                AnimalListScreen(
+                    onAddAnimal = { navController.navigate(Screen.AddAnimal.route) },
+                    onAnimalClick = { id -> navController.navigate("animal_details/$id") },
+                )
             }
 
-            composable(Screen.AppointmentList.route) {
-                PlaceholderScreen("📅")
+            composable(Screen.AddAnimal.route) {
+                AddAnimalScreen(
+                    onBack = { navController.popBackStack() },
+                )
             }
 
+            composable(
+                route = "animal_details/{animalId}",
+                arguments = listOf(navArgument("animalId") { type = NavType.LongType }),
+            ) { backStackEntry ->
+                val animalId = backStackEntry.arguments?.getLong("animalId") ?: 0L
+                AnimalScreen(
+                    animalId = animalId,
+                    onBack = { navController.popBackStack() },
+                )
+            }
+
+            composable(Screen.ClinicList.route) { PlaceholderScreen("🏥 Gabinety") }
+            composable(Screen.AppointmentList.route) { PlaceholderScreen("📅 Wizyty") }
             composable(Screen.Profile.route) {
                 ProfileScreen(
                     onLogout = {
@@ -189,10 +198,6 @@ fun AppNavigation(
                         }
                     },
                 )
-            }
-
-            composable(Screen.AppointmentDetail.route) { backStackEntry ->
-                // Logika dla detali wizyty
             }
         }
     }

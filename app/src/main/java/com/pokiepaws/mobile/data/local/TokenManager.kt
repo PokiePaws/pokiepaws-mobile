@@ -18,21 +18,21 @@ class TokenManager
     constructor(
         @ApplicationContext private val context: Context,
     ) {
-        private val TOKEN_KEY = stringPreferencesKey("jwt_token")
+        private val tokenKey = stringPreferencesKey("jwt_token")
         val token: Flow<String?> =
             context.dataStore.data.map { preferences ->
-                preferences[TOKEN_KEY]
+                preferences[tokenKey]
             }
 
         suspend fun saveToken(token: String) {
             context.dataStore.edit { preferences ->
-                preferences[TOKEN_KEY] = token
+                preferences[tokenKey] = token
             }
         }
 
         suspend fun clearToken() {
             context.dataStore.edit { preferences ->
-                preferences.remove(TOKEN_KEY)
+                preferences.remove(tokenKey)
             }
         }
     }

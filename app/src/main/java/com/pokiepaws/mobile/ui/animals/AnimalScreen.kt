@@ -1,33 +1,45 @@
 package com.pokiepaws.mobile.ui.animals
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pokiepaws.mobile.domain.model.Animal
 import com.pokiepaws.mobile.ui.theme.PokieBlue
-import com.pokiepaws.mobile.ui.theme.PokieBlueLight
 import com.pokiepaws.mobile.ui.theme.PokieWhite
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
-
 
 @Composable
 fun AnimalScreen(
@@ -37,8 +49,6 @@ fun AnimalScreen(
     viewModel: AnimalViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
-
 
     Box(modifier = modifier.fillMaxSize()) {
         when (val state = uiState) {
@@ -71,8 +81,6 @@ fun AnimalScreen(
     }
 }
 
-
-
 @Composable
 fun AnimalDetailsContent(
     animal: Animal,
@@ -86,41 +94,35 @@ fun AnimalDetailsContent(
                 .background(PokieWhite)
                 .verticalScroll(rememberScrollState()),
     ) {
-
-        // ───────────────────────────────────────────────
-        // ZAOKRĄGLONY NAGŁÓWEK (jak w AnimalList)
-        // ───────────────────────────────────────────────
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = PokieBlue,
-                    shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
-                )
-                .padding(top = 48.dp, bottom = 32.dp)
-                .padding(horizontal = 24.dp),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = PokieBlue,
+                        shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp),
+                    )
+                    .padding(top = 48.dp, bottom = 32.dp)
+                    .padding(horizontal = 24.dp),
+            contentAlignment = Alignment.Center,
         ) {
-
-            // Przycisk powrotu
             IconButton(
                 onClick = onBack,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(PokieWhite.copy(alpha = 0.3f))
+                modifier =
+                    Modifier
+                        .align(Alignment.TopStart)
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(PokieWhite.copy(alpha = 0.3f)),
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Powrót",
-                    tint = PokieWhite
+                    tint = PokieWhite,
                 )
             }
 
-            // Centralna część nagłówka
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-
                 Text(
                     text = "🐾",
                     fontSize = 48.sp,
@@ -137,19 +139,13 @@ fun AnimalDetailsContent(
             }
         }
 
-        // ───────────────────────────────────────────────
-        // SEKCJA DANYCH
-        // ───────────────────────────────────────────────
-        // ───────────────────────────────────────────────
-// SEKCJA DANYCH — WSZYSTKO W DATACARD
-// ───────────────────────────────────────────────
         Column(
-            modifier = Modifier
-                .padding(horizontal = 20.dp, vertical = 16.dp)
-                .fillMaxWidth(),
+            modifier =
+                Modifier
+                    .padding(horizontal = 20.dp, vertical = 16.dp)
+                    .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-
             DataCard(
                 label = "Gatunek",
                 value = animal.species,
@@ -162,12 +158,13 @@ fun AnimalDetailsContent(
 
             DataCard(
                 label = "Płeć",
-                value = when (animal.gender) {
-                    "MALE" -> "Samiec"
-                    "FEMALE" -> "Samica"
-                    "HERMAPHRODITE" -> "Obojnak"
-                    else -> "Brak danych"
-                }
+                value =
+                    when (animal.gender) {
+                        "MALE" -> "Samiec"
+                        "FEMALE" -> "Samica"
+                        "HERMAPHRODITE" -> "Obojnak"
+                        else -> "Brak danych"
+                    },
             )
 
             DataCard(
@@ -182,11 +179,11 @@ fun AnimalDetailsContent(
             val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
             DataCard(
                 label = "Data urodzenia",
-                value = animal.birthDate?.let {
-                    LocalDate.parse(it).format(formatter)
-                } ?: "Brak danych"
+                value =
+                    animal.birthDate?.let {
+                        LocalDate.parse(it).format(formatter)
+                    } ?: "Brak danych",
             )
-
 
             DataCard(
                 label = "Waga",
@@ -203,8 +200,6 @@ fun AnimalDetailsContent(
                 value = if (animal.notes.isNullOrBlank()) "Brak notatek" else animal.notes,
             )
         }
-
-
     }
 }
 
@@ -217,9 +212,10 @@ fun DataCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+            ),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
         Row(

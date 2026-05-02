@@ -2,7 +2,16 @@ package com.pokiepaws.mobile.ui.animals
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -10,8 +19,29 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Pets
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -30,10 +60,9 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun AddAnimalScreen(
     onBack: () -> Unit,
-    modifier: Modifier = Modifier, // Poprawka błędów z image_56b69b.png
+    modifier: Modifier = Modifier,
     viewModel: AnimalViewModel = hiltViewModel(),
 ) {
-    // Stan formularza
     var name by remember { mutableStateOf("") }
     var species by remember { mutableStateOf("") }
     var breed by remember { mutableStateOf("") }
@@ -43,14 +72,12 @@ fun AddAnimalScreen(
     var weight by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
 
-    // Konfiguracja kalendarza z blokadą dat przyszłych
     var showDatePicker by remember { mutableStateOf(false) }
 
     val selectableDates =
         remember {
             object : SelectableDates {
                 override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                    // Blokada dat późniejszych niż dzisiejsza [obsługa widoku z image_60c1a9.png]
                     return utcTimeMillis <= System.currentTimeMillis()
                 }
 
@@ -68,7 +95,6 @@ fun AddAnimalScreen(
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     val scrollState = rememberScrollState()
 
-    // Dialog kalendarza
     if (showDatePicker) {
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
@@ -120,7 +146,6 @@ fun AddAnimalScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // Ikona podglądu pacjenta
             Surface(
                 modifier = Modifier.size(100.dp),
                 shape = RoundedCornerShape(30.dp),
@@ -138,7 +163,6 @@ fun AddAnimalScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Pola formularza
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
@@ -180,7 +204,6 @@ fun AddAnimalScreen(
                     singleLine = true,
                 )
 
-                // Interaktywne pole daty
                 Box(modifier = Modifier.weight(1f)) {
                     OutlinedTextField(
                         value = birthDate,
@@ -229,7 +252,6 @@ fun AddAnimalScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Przycisk zapisu zintegrowany z API
             Button(
                 onClick = {
                     val request =
@@ -238,7 +260,7 @@ fun AddAnimalScreen(
                             species = species,
                             breed = breed.ifBlank { null },
                             gender = gender,
-                            color = null, // Pole widoczne w strukturze DTO
+                            color = null,
                             birthDate = birthDate.ifBlank { null },
                             microchipNumber = microchipNumber.ifBlank { null },
                             weight = weight.toDoubleOrNull(),

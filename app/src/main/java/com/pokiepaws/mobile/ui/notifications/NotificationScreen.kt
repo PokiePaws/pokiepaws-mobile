@@ -3,9 +3,21 @@ package com.pokiepaws.mobile.ui.notifications
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,8 +27,20 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,13 +52,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pokiepaws.mobile.data.local.room.entities.NotificationEntity
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.*
-
-// ---------------------------------------------------------------------------
-// Notification type → visual style mapping
-// ---------------------------------------------------------------------------
+import java.util.Date
+import java.util.Locale
 
 private data class NotifStyle(
     val iconVector: ImageVector,
@@ -45,10 +67,6 @@ private data class NotifStyle(
 
 private val PRIMARY_TEAL = Color(0xFF7FCEDF)
 
-/**
- * Maps the [NotificationEntity.type] string to a visual style.
- * Falls back to a generic bell style for unknown types.
- */
 private fun styleFor(type: String?): NotifStyle =
     when (type?.lowercase()) {
         "reminder" ->
@@ -81,10 +99,6 @@ private fun styleFor(type: String?): NotifStyle =
             )
     }
 
-// ---------------------------------------------------------------------------
-// Screen
-// ---------------------------------------------------------------------------
-
 @Composable
 fun NotificationScreen(
     onBack: () -> Unit,
@@ -99,7 +113,6 @@ fun NotificationScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background),
     ) {
-        // ── Top Bar ──────────────────────────────────────────────────────────
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shadowElevation = 4.dp,
@@ -138,7 +151,6 @@ fun NotificationScreen(
             }
         }
 
-        // ── List ─────────────────────────────────────────────────────────────
         if (notifications.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -166,10 +178,6 @@ fun NotificationScreen(
     }
 }
 
-// ---------------------------------------------------------------------------
-// Animated wrapper (slides in from left, fades in)
-// ---------------------------------------------------------------------------
-
 @Composable
 private fun AnimatedNotificationItem(
     notification: NotificationEntity,
@@ -182,7 +190,7 @@ private fun AnimatedNotificationItem(
 
     LaunchedEffect(notification.id) {
         scope.launch {
-            kotlinx.coroutines.delay(animationDelay.toLong())
+            delay(animationDelay.toLong())
             launch { alpha.animateTo(1f, tween(durationMillis = 300)) }
             launch { offsetX.animateTo(0f, tween(durationMillis = 300)) }
         }
@@ -198,10 +206,6 @@ private fun AnimatedNotificationItem(
     )
 }
 
-// ---------------------------------------------------------------------------
-// Single notification card
-// ---------------------------------------------------------------------------
-
 @Composable
 fun NotificationItem(
     notification: NotificationEntity,
@@ -216,7 +220,6 @@ fun NotificationItem(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
-            // ── Unread indicator: 4 dp coloured left border ──────────────────
             if (!notification.isRead) {
                 Box(
                     modifier =
@@ -230,7 +233,6 @@ fun NotificationItem(
                 )
             }
 
-            // ── Content ──────────────────────────────────────────────────────
             Row(
                 modifier =
                     Modifier
@@ -242,7 +244,6 @@ fun NotificationItem(
                         ),
                 verticalAlignment = Alignment.Top,
             ) {
-                // Colour-coded icon
                 Box(
                     modifier =
                         Modifier
@@ -295,9 +296,5 @@ fun NotificationItem(
         }
     }
 }
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 private fun formatTimestamp(timestamp: Long): String = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(timestamp))

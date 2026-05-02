@@ -77,7 +77,7 @@ class PokiePawsMessagingService : FirebaseMessagingService() {
                 NotificationChannel(
                     channelId,
                     "Przypomnienia o wizytach",
-                    NotificationManager.IMPORTANCE_HIGH, // Kluczowe dla baneru na górze
+                    NotificationManager.IMPORTANCE_HIGH,
                 ).apply {
                     description = "Powiadomienia o zbliżających się wizytach u weterynarza"
                 }
@@ -99,12 +99,11 @@ class PokiePawsMessagingService : FirebaseMessagingService() {
 
         val notificationBuilder =
             NotificationCompat.Builder(this, channelId)
-                .setSmallIcon(android.R.drawable.ic_dialog_info) // Ikona systemowa
-                .setContentTitle(title)
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentText(message)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
-                .setPriority(NotificationCompat.PRIORITY_HIGH) // Wysoki priorytet dla baneru
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
 
         notificationManager.notify(notificationId, notificationBuilder.build())
     }

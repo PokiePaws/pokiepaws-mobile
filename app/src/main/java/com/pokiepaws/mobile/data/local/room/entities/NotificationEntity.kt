@@ -10,5 +10,5 @@ data class NotificationEntity(
     val content: String,
     val timestamp: Long,
     val isRead: Boolean = false,
-    val type: String? = null, // "reminder" | "vaccine" | "success" | null (fallback)
+    val type: String? = null,
 )

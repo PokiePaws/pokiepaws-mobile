@@ -39,7 +39,6 @@ class AnimalViewModel
             viewModelScope.launch {
                 _uiState.value = AnimalUiState.Loading
                 try {
-                    // Pobieramy listę czystych modeli domenowych
                     val animals = repository.getAnimals()
                     _uiState.value = AnimalUiState.Success(animals)
                 } catch (e: Exception) {
@@ -55,7 +54,7 @@ class AnimalViewModel
             viewModelScope.launch {
                 val result = repository.addAnimal(request)
                 result.onSuccess {
-                    loadAnimals() // Odświeżamy listę po dodaniu
+                    loadAnimals()
                     onSuccess()
                 }.onFailure { e ->
                     _uiState.value = AnimalUiState.Error(e.message ?: "Błąd podczas dodawania zwierzaka")
@@ -67,7 +66,7 @@ class AnimalViewModel
             viewModelScope.launch {
                 val result = repository.deleteAnimal(id)
                 result.onSuccess {
-                    loadAnimals() // Odświeżamy listę po usunięciu
+                    loadAnimals()
                 }.onFailure { e ->
                     _uiState.value = AnimalUiState.Error(e.message ?: "Nie udało się usunąć wpisu")
                 }

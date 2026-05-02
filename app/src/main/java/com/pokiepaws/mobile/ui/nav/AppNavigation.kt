@@ -4,9 +4,23 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocalHospital
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -16,15 +30,25 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
-import androidx.navigation.compose.*
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.pokiepaws.mobile.data.local.TokenManager
-import com.pokiepaws.mobile.ui.animals.*
-import com.pokiepaws.mobile.ui.auth.*
+import com.pokiepaws.mobile.ui.animals.AddAnimalScreen
+import com.pokiepaws.mobile.ui.animals.AnimalListScreen
+import com.pokiepaws.mobile.ui.animals.AnimalScreen
+import com.pokiepaws.mobile.ui.auth.EmailVerificationScreen
+import com.pokiepaws.mobile.ui.auth.ForgotPasswordScreen
+import com.pokiepaws.mobile.ui.auth.LoginScreen
+import com.pokiepaws.mobile.ui.auth.RegisterScreen
 import com.pokiepaws.mobile.ui.notifications.NotificationScreen
 import com.pokiepaws.mobile.ui.profile.HomeScreen
 import com.pokiepaws.mobile.ui.profile.ProfileScreen
-import com.pokiepaws.mobile.ui.theme.*
+import com.pokiepaws.mobile.ui.theme.PokieBlue
+import com.pokiepaws.mobile.ui.theme.PokieBlueLight
+import com.pokiepaws.mobile.ui.theme.PokieWhite
 import kotlinx.coroutines.launch
 
 @Composable
@@ -60,7 +84,10 @@ fun AppNavigation(
                     tonalElevation = 10.dp,
                 ) {
                     bottomNavItems.forEach { item ->
-                        val isSelected = navBackStackEntry?.destination?.hierarchy?.any { it.route == item.screen.route } == true
+                        val isSelected =
+                            navBackStackEntry?.destination?.hierarchy?.any {
+                                it.route == item.screen.route
+                            } == true
 
                         NavigationBarItem(
                             selected = isSelected,
@@ -97,7 +124,6 @@ fun AppNavigation(
         NavHost(
             navController = navController,
             startDestination = dynamicStartDestination,
-            // Poprawka: Modifier (duże M) — nowy obiekt, nie reużywamy parametru modifier
             modifier = Modifier.padding(innerPadding),
         ) {
             composable(Screen.Login.route) {

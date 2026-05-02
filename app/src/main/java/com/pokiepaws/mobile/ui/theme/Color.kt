@@ -2,10 +2,11 @@ package com.pokiepaws.mobile.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
-
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val PokieBlue = Color(0xFF4BB8D4)
+val PokieBlueDark = Color(0xFF2E9AB5)
+val PokieBlueLight = Color(0xFF7FCEDF)
+val PokieCream = Color(0xFFF5EDD6)
+val PokieRed = Color(0xFFE05A5A)
+val PokieWhite = Color(0xFFFFFFFF)
+val PokieDarkText = Color(0xFF2C3E50)
+val PokieLightText = Color(0xFF7F8C8D)

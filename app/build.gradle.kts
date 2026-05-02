@@ -1,3 +1,16 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.io.FileInputStream
+import java.util.Properties
+val env =
+    Properties().apply {
+        val envFile = rootProject.file(".env")
+        if (envFile.exists()) {
+            load(FileInputStream(envFile))
+        }
+    }
+
+fun getEnv(key: String): String = env.getProperty(key) ?: ""
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -8,26 +21,35 @@ plugins {
     alias(libs.plugins.google.services)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.detekt)
-    // id("com.android.application") Z tutorialu firebase
-    // id("com.google.gms.google-services")
+    alias(libs.plugins.sonarqube)
+    alias(libs.plugins.secrets.gradle)
+    id("jacoco")
 }
 
 android {
     namespace = "com.pokiepaws.mobile"
+    //noinspection GradleDependency
     compileSdk = 35
 
     defaultConfig {
         applicationId = "com.pokiepaws.mobile"
         minSdk = 26
+        //noinspection OldTargetApi
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "BASE_URL", "\"${getEnv("BASE_URL")}\"")
     }
 
     buildTypes {
+        debug {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
@@ -40,13 +62,17 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
     }
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
+
     lint {
         disable.add("ComposeParameterOrder")
         abortOnError = true
@@ -55,80 +81,92 @@ android {
     }
 }
 
+secrets {
+    propertiesFileName = ".env"
+    defaultPropertiesFileName = ".env.example"
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "PokiePaws_Mobile")
+        property("sonar.projectName", "PokiePaws Mobile")
+        property("sonar.host.url", "http://localhost:9000")
+        property("sonar.language", "kotlin")
+        property("sonar.token", getEnv("SONAR_TOKEN"))
+
+        property("sonar.sources", "src/main/java")
+        property("sonar.tests", "src/test/java")
+        property("sonar.java.binaries", "build/tmp/kotlin-classes/debug")
+        property(
+            "sonar.coverage.jacoco.xmlReportPaths",
+            "${project.layout.buildDirectory.get()}/reports/jacoco/testDebugUnitTestCoverage/testDebugUnitTestCoverage.xml",
+        )
+        property("sonar.exclusions", "**/dto/**, **/di/**, **/*_Hilt*.kt, **/BuildConfig.kt")
+    }
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+    config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
+}
+
+ktlint {
+    android = true
+    ignoreFailures = false
+    reporters {
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.PLAIN)
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE)
+    }
+}
+
 dependencies {
-    // Core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)
     implementation(libs.libphonenumber)
 
-    // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.compose.material.icons.extended)
 
-    // Navigation
     implementation(libs.androidx.navigation.compose)
 
-    // Hilt
     implementation(libs.hilt.android)
-    implementation(libs.firebase.database)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
 
-    // Retrofit
     implementation(libs.retrofit.core)
     implementation(libs.retrofit.kotlin.serialization)
     implementation(libs.okhttp.core)
     implementation(libs.okhttp.logging)
 
-    // Room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
-    // DataStore
     implementation(libs.datastore.preferences)
-
-    // Kotlin Serialization
     implementation(libs.kotlinx.serialization.json)
-
-    // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
-    // Coil
     implementation(libs.coil.compose)
+    implementation(libs.gson)
 
-    // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
-    implementation(platform("com.google.firebase:firebase-bom:34.9.0"))
-    implementation("com.google.firebase:firebase-analytics")
+    implementation(libs.firebase.database)
+    implementation(libs.firebase.analytics)
 
-    // Tests
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.ui.tooling)
     lintChecks(libs.compose.lint.checks)
-    implementation("com.google.code.gson:gson:2.10.1")
-}
-// Konfiguracja Detekt
-detekt {
-    buildUponDefaultConfig = true
-    allRules = false
-    // Wskazuje na plik z Twoimi zasadami (pamiętaj, aby go stworzyć!)
-    config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
-}
-
-// Konfiguracja ktlint
-ktlint {
-    android = true // Włącza reguły specyficzne dla Androida
-    ignoreFailures = false
-    reporters {
-        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.PLAIN)
-    }
 }

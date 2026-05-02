@@ -1,16 +1,8 @@
 package com.pokiepaws.mobile.ui.animals
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -18,23 +10,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Pets
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -42,16 +19,21 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.pokiepaws.mobile.data.remote.AnimalRequest
+import com.pokiepaws.mobile.data.remote.dto.animal.AnimalRequest
 import com.pokiepaws.mobile.ui.theme.PokieBlue
 import com.pokiepaws.mobile.ui.theme.PokieWhite
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddAnimalScreen(
     onBack: () -> Unit,
+    modifier: Modifier = Modifier, // Poprawka błędów z image_56b69b.png
     viewModel: AnimalViewModel = hiltViewModel(),
 ) {
+    // Stan formularza
     var name by remember { mutableStateOf("") }
     var species by remember { mutableStateOf("") }
     var breed by remember { mutableStateOf("") }
@@ -61,9 +43,57 @@ fun AddAnimalScreen(
     var weight by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
 
+    // Konfiguracja kalendarza z blokadą dat przyszłych
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    val selectableDates =
+        remember {
+            object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    // Blokada dat późniejszych niż dzisiejsza [obsługa widoku z image_60c1a9.png]
+                    return utcTimeMillis <= System.currentTimeMillis()
+                }
+
+                override fun isSelectableYear(year: Int): Boolean {
+                    return year <= java.time.LocalDate.now().year
+                }
+            }
+        }
+
+    val datePickerState =
+        rememberDatePickerState(
+            selectableDates = selectableDates,
+        )
+
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     val scrollState = rememberScrollState()
 
+    // Dialog kalendarza
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val date =
+                            Instant.ofEpochMilli(millis)
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate()
+                        birthDate = date.format(formatter)
+                    }
+                    showDatePicker = false
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("Anuluj") }
+            },
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
     Scaffold(
+        modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("Dodaj zwierzaka", fontWeight = FontWeight.Bold) },
@@ -90,7 +120,7 @@ fun AddAnimalScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // Ikona podglądu
+            // Ikona podglądu pacjenta
             Surface(
                 modifier = Modifier.size(100.dp),
                 shape = RoundedCornerShape(30.dp),
@@ -108,13 +138,14 @@ fun AddAnimalScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Formularz
+            // Pola formularza
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
                 label = { Text("Imię pupila") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
+                singleLine = true,
             )
 
             OutlinedTextField(
@@ -123,6 +154,7 @@ fun AddAnimalScreen(
                 label = { Text("Gatunek (np. Pies, Kot)") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
+                singleLine = true,
             )
 
             OutlinedTextField(
@@ -131,6 +163,7 @@ fun AddAnimalScreen(
                 label = { Text("Rasa") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
+                singleLine = true,
             )
 
             Row(
@@ -144,15 +177,34 @@ fun AddAnimalScreen(
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     shape = RoundedCornerShape(12.dp),
+                    singleLine = true,
                 )
-                OutlinedTextField(
-                    value = birthDate,
-                    onValueChange = { birthDate = it },
-                    label = { Text("Data ur.") },
-                    placeholder = { Text("YYYY-MM-DD") },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp),
-                )
+
+                // Interaktywne pole daty
+                Box(modifier = Modifier.weight(1f)) {
+                    OutlinedTextField(
+                        value = birthDate,
+                        onValueChange = { },
+                        label = { Text("Data ur.") },
+                        placeholder = { Text("RRRR-MM-DD") },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        readOnly = true,
+                        enabled = false,
+                        colors =
+                            OutlinedTextFieldDefaults.colors(
+                                disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                                disabledBorderColor = MaterialTheme.colorScheme.outline,
+                                disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            ),
+                    )
+                    Box(
+                        modifier =
+                            Modifier
+                                .matchParentSize()
+                                .clickable { showDatePicker = true },
+                    )
+                }
             }
 
             OutlinedTextField(
@@ -161,6 +213,7 @@ fun AddAnimalScreen(
                 label = { Text("Numer chipa") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
+                singleLine = true,
             )
 
             OutlinedTextField(
@@ -176,18 +229,20 @@ fun AddAnimalScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Przycisk zapisu zintegrowany z API
             Button(
                 onClick = {
                     val request =
                         AnimalRequest(
                             name = name,
                             species = species,
-                            breed = breed,
+                            breed = breed.ifBlank { null },
                             gender = gender,
-                            birthDate = birthDate,
-                            microchipNumber = microchipNumber,
-                            weight = weight.toDoubleOrNull() ?: 0.0,
-                            notes = notes,
+                            color = null, // Pole widoczne w strukturze DTO
+                            birthDate = birthDate.ifBlank { null },
+                            microchipNumber = microchipNumber.ifBlank { null },
+                            weight = weight.toDoubleOrNull(),
+                            notes = notes.ifBlank { null },
                         )
                     viewModel.addAnimal(request) {
                         onBack()
@@ -199,6 +254,7 @@ fun AddAnimalScreen(
                         .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = PokieBlue),
+                enabled = name.isNotBlank() && species.isNotBlank(),
             ) {
                 Text(
                     text = "Zapisz w systemie",

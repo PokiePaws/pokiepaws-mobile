@@ -1,4 +1,4 @@
-package com.pokiepaws.mobile.data.remote
+package com.pokiepaws.mobile.data.remote.dto.animal
 
 import kotlinx.serialization.Serializable
 

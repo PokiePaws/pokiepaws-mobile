@@ -5,18 +5,20 @@ coreKtx = "1.16.0"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.9.3"
 composeBom = "2024.12.01"
+composeMaterial = "1.7.8"
 libphonenumber = "8.13.30"
-
-# Navigation
+spotless = "6.25.0"
 navigationCompose = "2.8.9"
+secretsPlugin = "2.0.1"
 
 # Hilt
 hilt = "2.51.1"
 hiltNavigationCompose = "1.2.0"
 
-# Retrofit
+# Retrofit & Gson
 retrofit = "2.11.0"
 okhttp = "4.12.0"
+gson = "2.11.0"
 
 # Room
 room = "2.6.1"
@@ -34,16 +36,15 @@ coil = "2.7.0"
 googleServices = "4.4.2"
 firebaseBom = "33.7.0"
 
-# Coroutines
-coroutines = "1.8.1"
-
-# KSP
-ksp = "2.0.0-1.0.21"
-firebaseDatabase = "22.0.1"
-
+# Jakość kodu
+sonar = "5.1.0.4882"
 ktlint = "12.1.1"
 detekt = "1.23.8"
 composeLint = "1.3.1"
+
+# Inne
+coroutines = "1.8.1"
+ksp = "2.0.0-1.0.21"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -56,8 +57,15 @@ androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+
+
+# NOWE: Ikony rozszerzone i Gson
+compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "composeMaterial" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+
 libphonenumber = { group = "com.googlecode.libphonenumber", name = "libphonenumber", version.ref = "libphonenumber" }
 compose-lint-checks = { module = "com.slack.lint.compose:compose-lint-checks", version.ref = "composeLint" }
+
 # Navigation
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
@@ -89,14 +97,15 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 # Coil
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 
-# Firebase
+# Firebase (zmieniono na referencje do BOM tam gdzie to możliwe)
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
-firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version = "23.4.1" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
+firebase-database = { group = "com.google.firebase", name = "firebase-database" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 
 # Tests
 androidx-junit = { group = "androidx.test.ext", name = "junit", version = "1.2.1" }
 junit = { group = "junit", name = "junit", version = "4.13.2" }
-firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -108,3 +117,6 @@ google-services = { id = "com.google.gms.google-services", version.ref = "google
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+sonarqube = { id = "org.sonarqube", version.ref = "sonar" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+secrets-gradle = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "secretsPlugin" }

@@ -2,7 +2,7 @@ package com.pokiepaws.mobile.ui.animals
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pokiepaws.mobile.data.remote.AnimalRequest
+import com.pokiepaws.mobile.data.remote.dto.animal.AnimalRequest
 import com.pokiepaws.mobile.domain.model.Animal
 import com.pokiepaws.mobile.domain.repository.AnimalRepository
 import dagger.hilt.android.lifecycle.HiltViewModel

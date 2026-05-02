@@ -4,20 +4,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocalHospital
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Pets
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -27,39 +16,48 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.*
 import androidx.navigation.navArgument
-import com.pokiepaws.mobile.ui.animals.AddAnimalScreen
-import com.pokiepaws.mobile.ui.animals.AnimalListScreen
-import com.pokiepaws.mobile.ui.animals.AnimalScreen
-import com.pokiepaws.mobile.ui.auth.EmailVerificationScreen
-import com.pokiepaws.mobile.ui.auth.ForgotPasswordScreen
-import com.pokiepaws.mobile.ui.auth.LoginScreen
-import com.pokiepaws.mobile.ui.auth.RegisterScreen
+import com.pokiepaws.mobile.data.local.TokenManager
+import com.pokiepaws.mobile.ui.animals.*
+import com.pokiepaws.mobile.ui.auth.*
+import com.pokiepaws.mobile.ui.notifications.NotificationScreen
 import com.pokiepaws.mobile.ui.profile.HomeScreen
 import com.pokiepaws.mobile.ui.profile.ProfileScreen
-import com.pokiepaws.mobile.ui.theme.PokieBlue
-import com.pokiepaws.mobile.ui.theme.PokieBlueLight
-import com.pokiepaws.mobile.ui.theme.PokieLightText
-import com.pokiepaws.mobile.ui.theme.PokieWhite
+import com.pokiepaws.mobile.ui.theme.*
+import kotlinx.coroutines.launch
 
 @Composable
 fun AppNavigation(
+    modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Screen.Login.route,
+    tokenManager: TokenManager,
 ) {
+    val scope = rememberCoroutineScope()
+    val tokenState by tokenManager.token.collectAsState(initial = "loading")
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    if (tokenState == "loading") {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            CircularProgressIndicator(color = PokieBlue)
+        }
+        return
+    }
+
+    val dynamicStartDestination = if (tokenState != null) Screen.Home.route else Screen.Login.route
+
     Scaffold(
+        modifier = modifier,
         bottomBar = {
             if (currentRoute in bottomNavRoutes) {
                 NavigationBar(
-                    containerColor = PokieWhite,
-                    tonalElevation = 8.dp,
+                    containerColor = PokieBlueLight,
+                    tonalElevation = 10.dp,
                 ) {
                     bottomNavItems.forEach { item ->
                         val isSelected = navBackStackEntry?.destination?.hierarchy?.any { it.route == item.screen.route } == true
@@ -75,12 +73,7 @@ fun AppNavigation(
                                     restoreState = true
                                 }
                             },
-                            icon = {
-                                Icon(
-                                    imageVector = item.icon,
-                                    contentDescription = item.label,
-                                )
-                            },
+                            icon = { Icon(imageVector = item.icon, contentDescription = item.label) },
                             label = {
                                 Text(
                                     text = item.label,
@@ -89,11 +82,11 @@ fun AppNavigation(
                             },
                             colors =
                                 NavigationBarItemDefaults.colors(
-                                    selectedIconColor = PokieBlue,
-                                    selectedTextColor = PokieBlue,
-                                    indicatorColor = PokieBlueLight.copy(alpha = 0.2f),
-                                    unselectedIconColor = PokieLightText,
-                                    unselectedTextColor = PokieLightText,
+                                    selectedIconColor = PokieWhite,
+                                    selectedTextColor = PokieWhite,
+                                    indicatorColor = PokieWhite.copy(alpha = 0.2f),
+                                    unselectedIconColor = PokieWhite,
+                                    unselectedTextColor = PokieWhite,
                                 ),
                         )
                     }
@@ -103,7 +96,8 @@ fun AppNavigation(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = startDestination,
+            startDestination = dynamicStartDestination,
+            // Poprawka: Modifier (duże M) — nowy obiekt, nie reużywamy parametru modifier
             modifier = Modifier.padding(innerPadding),
         ) {
             composable(Screen.Login.route) {
@@ -153,15 +147,15 @@ fun AppNavigation(
 
             composable(Screen.Home.route) {
                 HomeScreen(
-                    onLogout = {
-                        navController.navigate(Screen.Login.route) {
-                            popUpTo(0) { inclusive = true }
-                        }
-                    },
                     onNavigateToAnimals = { navController.navigate(Screen.AnimalList.route) },
                     onNavigateToAppointments = { navController.navigate(Screen.AppointmentList.route) },
+                    onNavigateToNotifications = { navController.navigate(Screen.Notifications.route) },
                     onNavigateToClinics = { navController.navigate(Screen.ClinicList.route) },
                 )
+            }
+
+            composable(Screen.Notifications.route) {
+                NotificationScreen(onBack = { navController.popBackStack() })
             }
 
             composable(Screen.AnimalList.route) {
@@ -190,11 +184,15 @@ fun AppNavigation(
 
             composable(Screen.ClinicList.route) { PlaceholderScreen("🏥 Gabinety") }
             composable(Screen.AppointmentList.route) { PlaceholderScreen("📅 Wizyty") }
+
             composable(Screen.Profile.route) {
                 ProfileScreen(
                     onLogout = {
-                        navController.navigate(Screen.Login.route) {
-                            popUpTo(0) { inclusive = true }
+                        scope.launch {
+                            tokenManager.clearToken()
+                            navController.navigate(Screen.Login.route) {
+                                popUpTo(0) { inclusive = true }
+                            }
                         }
                     },
                 )
@@ -204,8 +202,14 @@ fun AppNavigation(
 }
 
 @Composable
-private fun PlaceholderScreen(name: String) {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+private fun PlaceholderScreen(
+    name: String,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
         Text(name, style = MaterialTheme.typography.headlineMedium)
     }
 }

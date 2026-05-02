@@ -2,10 +2,11 @@ package com.pokiepaws.mobile.ui.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pokiepaws.mobile.data.remote.AuthApiService
-import com.pokiepaws.mobile.data.remote.ForgotPasswordRequest
-import com.pokiepaws.mobile.data.remote.LoginRequest
-import com.pokiepaws.mobile.data.remote.RegisterRequest
+import com.pokiepaws.mobile.data.local.TokenManager
+import com.pokiepaws.mobile.data.remote.dto.ForgotPasswordRequest
+import com.pokiepaws.mobile.data.remote.dto.LoginRequest
+import com.pokiepaws.mobile.data.remote.dto.RegisterRequest
+import com.pokiepaws.mobile.data.remote.service.AuthApiService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,6 +31,7 @@ class AuthViewModel
     @Inject
     constructor(
         private val authApiService: AuthApiService,
+        private val tokenManager: TokenManager,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
         val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
@@ -42,6 +44,10 @@ class AuthViewModel
                 _uiState.value = AuthUiState.Loading
                 try {
                     val response = authApiService.login(LoginRequest(email, password))
+
+                    // Zapisujemy token w DataStore, aby był dostępny dla wszystkich przyszłych zapytań
+                    tokenManager.saveToken(response.token)
+
                     _uiState.value = AuthUiState.LoginSuccess(response.token, response.role)
                 } catch (e: Exception) {
                     _uiState.value = AuthUiState.Error(e.message ?: "Błąd logowania")

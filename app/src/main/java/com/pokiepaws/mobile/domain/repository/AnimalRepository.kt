@@ -1,6 +1,6 @@
 package com.pokiepaws.mobile.domain.repository
 
-import com.pokiepaws.mobile.data.remote.AnimalRequest
+import com.pokiepaws.mobile.data.remote.dto.animal.AnimalRequest
 import com.pokiepaws.mobile.domain.model.Animal
 
 interface AnimalRepository {

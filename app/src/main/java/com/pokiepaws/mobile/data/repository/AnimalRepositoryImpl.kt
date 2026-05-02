@@ -1,7 +1,7 @@
 package com.pokiepaws.mobile.data.repository
 
-import com.pokiepaws.mobile.data.remote.AnimalApiService
-import com.pokiepaws.mobile.data.remote.AnimalRequest
+import com.pokiepaws.mobile.data.remote.dto.animal.AnimalRequest
+import com.pokiepaws.mobile.data.remote.service.AnimalApiService
 import com.pokiepaws.mobile.domain.model.Animal
 import com.pokiepaws.mobile.domain.repository.AnimalRepository
 import javax.inject.Inject
@@ -12,10 +12,7 @@ class AnimalRepositoryImpl
         private val apiService: AnimalApiService,
     ) : AnimalRepository {
         override suspend fun getAnimals(): List<Animal> {
-            // Pobieramy dane z API
             val response = apiService.getMyAnimals()
-
-            // Mapujemy AnimalResponse na czysty model Animal z Domain
             return response.map { responseItem ->
                 Animal(
                     id = responseItem.id,

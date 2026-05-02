@@ -1,5 +1,6 @@
-package com.pokiepaws.mobile.data.remote
+package com.pokiepaws.mobile.data.remote.dto.animal
 
+import com.pokiepaws.mobile.domain.model.Animal
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -16,13 +17,15 @@ data class AnimalResponse(
     val notes: String? = null,
 )
 
-// Funkcja rozszerzająca (Mapper), która zamienia model API na model domenowy
-fun AnimalResponse.toDomain(): com.pokiepaws.mobile.domain.model.Animal {
-    return com.pokiepaws.mobile.domain.model.Animal(
+fun AnimalResponse.toDomain(): Animal {
+    return Animal(
         id = this.id,
         name = this.name,
         species = this.species,
         breed = this.breed,
+        gender = this.gender,
+        color = this.color,
+        microchipNumber = this.microchipNumber,
         weight = this.weight,
         birthDate = this.birthDate,
         notes = this.notes,

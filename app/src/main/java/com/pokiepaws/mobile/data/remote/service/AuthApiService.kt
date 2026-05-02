@@ -1,10 +1,10 @@
 package com.pokiepaws.mobile.data.remote.service
 
-import com.pokiepaws.mobile.data.remote.dto.AuthResponse
-import com.pokiepaws.mobile.data.remote.dto.ForgotPasswordRequest
-import com.pokiepaws.mobile.data.remote.dto.LoginRequest
-import com.pokiepaws.mobile.data.remote.dto.MessageResponse
-import com.pokiepaws.mobile.data.remote.dto.RegisterRequest
+import com.pokiepaws.mobile.data.remote.dto.auth.AuthResponse
+import com.pokiepaws.mobile.data.remote.dto.auth.ForgotPasswordRequest
+import com.pokiepaws.mobile.data.remote.dto.auth.LoginRequest
+import com.pokiepaws.mobile.data.remote.dto.auth.MessageResponse
+import com.pokiepaws.mobile.data.remote.dto.auth.RegisterRequest
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST

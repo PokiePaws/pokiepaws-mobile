@@ -1,4 +1,4 @@
-package com.pokiepaws.mobile.data.remote.interceptors
+package com.pokiepaws.mobile.data.remote
 
 import com.pokiepaws.mobile.data.local.TokenManager
 import kotlinx.coroutines.flow.first

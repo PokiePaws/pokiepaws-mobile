@@ -42,6 +42,22 @@ import com.pokiepaws.mobile.domain.model.Animal
 import com.pokiepaws.mobile.ui.theme.PokieBlueDark
 import com.pokiepaws.mobile.ui.theme.PokieWhite
 
+private val ANIMAL_AVATAR_BG = Color(0xFFF0F8FA)
+private const val HEADER_ROUNDING = 32
+private const val CARD_ROUNDING = 24
+private const val AVATAR_ROUNDING = 16
+private const val BUTTON_ROUNDING = 12
+private const val AVATAR_SIZE = 72
+private const val ADD_BUTTON_SIZE = 48
+private const val HEADER_TOP_PADDING = 48
+private const val HEADER_BOTTOM_PADDING = 32
+private const val LIST_SPACING = 16
+private const val CARD_ELEVATION = 4
+private const val FONT_SIZE_TITLE = 24
+private const val FONT_SIZE_NAME = 18
+private const val FONT_SIZE_EMOJI = 36
+private const val EMPTY_STATE_EMOJI_SIZE = 64
+
 @Composable
 fun AnimalListScreen(
     onAddAnimal: () -> Unit,
@@ -57,45 +73,7 @@ fun AnimalListScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surface),
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp),
-                    )
-                    .padding(top = 48.dp, bottom = 32.dp)
-                    .padding(horizontal = 24.dp),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = "Moje zwierzęta",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = PokieWhite,
-                )
-
-                IconButton(
-                    onClick = onAddAnimal,
-                    modifier =
-                        Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(PokieWhite.copy(alpha = 0.2f)),
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Dodaj zwierzę",
-                        tint = PokieWhite,
-                    )
-                }
-            }
-        }
+        AnimalListHeader(onAddAnimal)
 
         when (val state = uiState) {
             is AnimalUiState.Loading -> {
@@ -115,25 +93,79 @@ fun AnimalListScreen(
                 if (state.animals.isEmpty()) {
                     EmptyAnimalsView(onAddAnimal)
                 } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        contentPadding =
-                            PaddingValues(
-                                horizontal = 24.dp,
-                                vertical = 24.dp,
-                            ),
-                    ) {
-                        items(state.animals) { animal ->
-                            AnimalCard(
-                                animal = animal,
-                                onClick = { onAnimalClick(animal.id) },
-                            )
-                        }
-                    }
+                    AnimalLazyList(
+                        animals = state.animals,
+                        onAnimalClick = onAnimalClick,
+                    )
                 }
             }
             else -> {}
+        }
+    }
+}
+
+@Composable
+private fun AnimalListHeader(onAddAnimal: () -> Unit) {
+    Box(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape =
+                        RoundedCornerShape(
+                            bottomStart = HEADER_ROUNDING.dp,
+                            bottomEnd = HEADER_ROUNDING.dp,
+                        ),
+                )
+                .padding(top = HEADER_TOP_PADDING.dp, bottom = HEADER_BOTTOM_PADDING.dp)
+                .padding(horizontal = 24.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "Moje zwierzęta",
+                fontSize = FONT_SIZE_TITLE.sp,
+                fontWeight = FontWeight.Bold,
+                color = PokieWhite,
+            )
+
+            IconButton(
+                onClick = onAddAnimal,
+                modifier =
+                    Modifier
+                        .size(ADD_BUTTON_SIZE.dp)
+                        .clip(CircleShape)
+                        .background(PokieWhite.copy(alpha = 0.2f)),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Dodaj zwierzę",
+                    tint = PokieWhite,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AnimalLazyList(
+    animals: List<Animal>,
+    onAnimalClick: (Long) -> Unit,
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(LIST_SPACING.dp),
+        contentPadding = PaddingValues(all = 24.dp),
+    ) {
+        items(animals) { animal ->
+            AnimalCard(
+                animal = animal,
+                onClick = { onAnimalClick(animal.id) },
+            )
         }
     }
 }
@@ -149,9 +181,9 @@ fun AnimalCard(
             modifier
                 .fillMaxWidth()
                 .clickable { onClick() },
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(CARD_ROUNDING.dp),
         colors = CardDefaults.cardColors(containerColor = PokieWhite),
-        elevation = CardDefaults.cardElevation(4.dp),
+        elevation = CardDefaults.cardElevation(CARD_ELEVATION.dp),
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -160,12 +192,12 @@ fun AnimalCard(
             Box(
                 modifier =
                     Modifier
-                        .size(72.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFFF0F8FA)),
+                        .size(AVATAR_SIZE.dp)
+                        .clip(RoundedCornerShape(AVATAR_ROUNDING.dp))
+                        .background(ANIMAL_AVATAR_BG),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(text = "🐾", fontSize = 36.sp)
+                Text(text = "🐾", fontSize = FONT_SIZE_EMOJI.sp)
             }
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -173,7 +205,7 @@ fun AnimalCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = animal.name,
-                    fontSize = 18.sp,
+                    fontSize = FONT_SIZE_NAME.sp,
                     fontWeight = FontWeight.Bold,
                     color = PokieBlueDark,
                 )
@@ -204,7 +236,7 @@ fun EmptyAnimalsView(
 ) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "🐾", fontSize = 64.sp)
+            Text(text = "🐾", fontSize = EMPTY_STATE_EMOJI_SIZE.sp)
             Text(
                 text = "Nie masz jeszcze żadnych zwierzaków",
                 fontWeight = FontWeight.Bold,
@@ -213,7 +245,7 @@ fun EmptyAnimalsView(
             Button(
                 onClick = onAddAnimal,
                 modifier = Modifier.padding(top = 16.dp),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(BUTTON_ROUNDING.dp),
             ) {
                 Text("Dodaj pierwszego towarzysza")
             }

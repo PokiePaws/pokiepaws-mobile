@@ -1,17 +1,20 @@
 package com.pokiepaws.mobile.ui.auth
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pokiepaws.mobile.data.local.TokenManager
-import com.pokiepaws.mobile.data.remote.dto.ForgotPasswordRequest
-import com.pokiepaws.mobile.data.remote.dto.LoginRequest
-import com.pokiepaws.mobile.data.remote.dto.RegisterRequest
+import com.pokiepaws.mobile.data.remote.dto.auth.ForgotPasswordRequest
+import com.pokiepaws.mobile.data.remote.dto.auth.LoginRequest
+import com.pokiepaws.mobile.data.remote.dto.auth.RegisterRequest
 import com.pokiepaws.mobile.data.remote.service.AuthApiService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 
 sealed class AuthUiState {
@@ -44,13 +47,14 @@ class AuthViewModel
                 _uiState.value = AuthUiState.Loading
                 try {
                     val response = authApiService.login(LoginRequest(email, password))
-
-                    // Zapisujemy token w DataStore, aby był dostępny dla wszystkich przyszłych zapytań
                     tokenManager.saveToken(response.token)
-
                     _uiState.value = AuthUiState.LoginSuccess(response.token, response.role)
-                } catch (e: Exception) {
+                } catch (e: HttpException) {
+                    Log.e("AuthViewModel", "Błąd HTTP przy logowaniu", e)
                     _uiState.value = AuthUiState.Error(e.message ?: "Błąd logowania")
+                } catch (e: IOException) {
+                    Log.e("AuthViewModel", "Błąd połączenia przy logowaniu", e)
+                    _uiState.value = AuthUiState.Error(e.message ?: "Błąd połączenia z serwerem")
                 }
             }
         }
@@ -78,13 +82,16 @@ class AuthViewModel
                                 street, houseNumber, apartmentNumber, city, postalCode, country,
                             ),
                         )
-
                     if (response.isSuccessful) {
                         _uiState.value = AuthUiState.RegisterSuccess
                     } else {
                         _uiState.value = AuthUiState.Error("Błąd: ${response.code()}")
                     }
-                } catch (e: Exception) {
+                } catch (e: HttpException) {
+                    Log.e("AuthViewModel", "Błąd HTTP przy rejestracji", e)
+                    _uiState.value = AuthUiState.Error(e.message ?: "Błąd połączenia z serwerem")
+                } catch (e: IOException) {
+                    Log.e("AuthViewModel", "Błąd połączenia przy rejestracji", e)
                     _uiState.value = AuthUiState.Error(e.message ?: "Błąd połączenia z serwerem")
                 }
             }
@@ -105,10 +112,12 @@ class AuthViewModel
                     } else {
                         _uiState.value = AuthUiState.Error("Nie udało się wysłać linku. Sprawdź email.")
                     }
-                } catch (e: java.io.IOException) {
+                } catch (e: HttpException) {
+                    Log.e("AuthViewModel", "Błąd HTTP przy resetowaniu hasła", e)
+                    _uiState.value = AuthUiState.Error(e.message ?: "Błąd serwera")
+                } catch (e: IOException) {
+                    Log.e("AuthViewModel", "Błąd połączenia przy resetowaniu hasła", e)
                     _uiState.value = AuthUiState.Error("Błąd połączenia z serwerem.")
-                } catch (e: Exception) {
-                    _uiState.value = AuthUiState.Error(e.message ?: "Wystąpił nieoczekiwany błąd")
                 }
             }
         }

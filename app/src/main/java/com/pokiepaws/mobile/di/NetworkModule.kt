@@ -21,6 +21,8 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
+    private const val TIMEOUT_SECONDS = 30L
+
     @Provides
     @Singleton
     fun provideJson(): Json =
@@ -35,9 +37,7 @@ object NetworkModule {
         return OkHttpClient.Builder()
             .addInterceptor { chain ->
                 val token = runBlocking { tokenManager.token.first() }
-
                 val request = chain.request().newBuilder()
-
                 if (!token.isNullOrEmpty()) {
                     request.addHeader("Authorization", "Bearer $token")
                 }
@@ -48,9 +48,9 @@ object NetworkModule {
                     level = HttpLoggingInterceptor.Level.HEADERS
                 },
             )
-            .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-            .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-            .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+            .connectTimeout(TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
+            .writeTimeout(TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
             .build()
     }
 

@@ -52,6 +52,27 @@ import com.pokiepaws.mobile.ui.theme.PokieBlue
 import com.pokiepaws.mobile.ui.theme.PokieCream
 import com.pokiepaws.mobile.ui.theme.PokieWhite
 
+// ── Stałe ────────────────────────────────────────────────────────────────────
+
+private const val AVATAR_OUTER_SIZE = 96
+private const val AVATAR_INNER_SIZE = 88
+private const val AVATAR_OFFSET = -40
+private const val CONTENT_OFFSET = -32
+private const val MENU_ANIMATION_DELAY = 100
+private const val CARD_ROUNDING = 16
+private const val ICON_BG_ROUNDING = 12
+private const val LOGOUT_COLOR = 0xFFEF4444
+
+// Kolory pozycji menu
+private val PersonIconTint = Color(0xFF3B82F6)
+private val PersonIconBg = Color(0xFFDBEAFE)
+private val NotifIconTint = Color(0xFFF97316)
+private val NotifIconBg = Color(0xFFFFEDD5)
+private val SettingsIconTint = Color(0xFF6B7280)
+private val SettingsIconBg = Color(0xFFE5E7EB)
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 data class ProfileMenuItem(
     val icon: ImageVector,
     val label: String,
@@ -62,32 +83,34 @@ data class ProfileMenuItem(
 @Composable
 fun ProfileScreen(onLogout: () -> Unit) {
     val menuItems =
-        listOf(
-            ProfileMenuItem(
-                icon = Icons.Default.Person,
-                label = "Dane użytkownika",
-                iconColor = Color(0xFF3B82F6),
-                bgColor = Color(0xFFDBEAFE),
-            ),
-            ProfileMenuItem(
-                icon = Icons.Default.Language,
-                label = "Język (Polski)",
-                iconColor = PokieBlue,
-                bgColor = PokieCream,
-            ),
-            ProfileMenuItem(
-                icon = Icons.Default.Notifications,
-                label = "Ustawienia powiadomień",
-                iconColor = Color(0xFFF97316),
-                bgColor = Color(0xFFFFEDD5),
-            ),
-            ProfileMenuItem(
-                icon = Icons.Default.Settings,
-                label = "Ustawienia aplikacji",
-                iconColor = Color(0xFF6B7280),
-                bgColor = Color(0xFFE5E7EB),
-            ),
-        )
+        remember {
+            listOf(
+                ProfileMenuItem(
+                    icon = Icons.Default.Person,
+                    label = "Dane użytkownika",
+                    iconColor = PersonIconTint,
+                    bgColor = PersonIconBg,
+                ),
+                ProfileMenuItem(
+                    icon = Icons.Default.Language,
+                    label = "Język (Polski)",
+                    iconColor = PokieBlue,
+                    bgColor = PokieCream,
+                ),
+                ProfileMenuItem(
+                    icon = Icons.Default.Notifications,
+                    label = "Ustawienia powiadomień",
+                    iconColor = NotifIconTint,
+                    bgColor = NotifIconBg,
+                ),
+                ProfileMenuItem(
+                    icon = Icons.Default.Settings,
+                    label = "Ustawienia aplikacji",
+                    iconColor = SettingsIconTint,
+                    bgColor = SettingsIconBg,
+                ),
+            )
+        }
 
     Box(
         modifier =
@@ -96,58 +119,23 @@ fun ProfileScreen(onLogout: () -> Unit) {
                 .background(MaterialTheme.colorScheme.background),
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .background(
-                            color = MaterialTheme.colorScheme.primary,
-                            shape = RoundedCornerShape(bottomStart = 40.dp, bottomEnd = 40.dp),
-                        )
-                        .padding(top = 48.dp, bottom = 56.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = "Mój Profil",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = PokieWhite,
-                )
-            }
+            ProfileHeader()
 
             Box(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .offset(y = (-40).dp),
+                        .offset(y = AVATAR_OFFSET.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                Box(
-                    modifier =
-                        Modifier
-                            .size(96.dp)
-                            .clip(CircleShape)
-                            .background(PokieWhite),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .size(88.dp)
-                                .clip(CircleShape)
-                                .background(PokieCream),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(text = "👩", fontSize = 36.sp)
-                    }
-                }
+                AvatarDisplay()
             }
 
             Column(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .offset(y = (-32).dp)
+                        .offset(y = CONTENT_OFFSET.dp)
                         .verticalScroll(rememberScrollState())
                         .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -168,32 +156,82 @@ fun ProfileScreen(onLogout: () -> Unit) {
                 Spacer(modifier = Modifier.height(24.dp))
 
                 menuItems.forEachIndexed { index, item ->
-                    AnimatedMenuItem(item = item, delayMs = index * 100)
+                    AnimatedMenuItem(item = item, delayMs = index * MENU_ANIMATION_DELAY)
                     Spacer(modifier = Modifier.height(12.dp))
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                TextButton(
-                    onClick = onLogout,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ExitToApp,
-                        contentDescription = null,
-                        tint = Color(0xFFEF4444),
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Wyloguj się",
-                        color = Color(0xFFEF4444),
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
+                LogoutButton(onLogout)
 
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }
+    }
+}
+
+@Composable
+private fun ProfileHeader() {
+    Box(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(bottomStart = 40.dp, bottomEnd = 40.dp),
+                )
+                .padding(top = 48.dp, bottom = 56.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = "Mój Profil",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = PokieWhite,
+        )
+    }
+}
+
+@Composable
+private fun AvatarDisplay() {
+    Box(
+        modifier =
+            Modifier
+                .size(AVATAR_OUTER_SIZE.dp)
+                .clip(CircleShape)
+                .background(PokieWhite),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .size(AVATAR_INNER_SIZE.dp)
+                    .clip(CircleShape)
+                    .background(PokieCream),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(text = "👩", fontSize = 36.sp)
+        }
+    }
+}
+
+@Composable
+private fun LogoutButton(onLogout: () -> Unit) {
+    TextButton(
+        onClick = onLogout,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Icon(
+            imageVector = Icons.Default.ExitToApp,
+            contentDescription = null,
+            tint = Color(LOGOUT_COLOR),
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = "Wyloguj się",
+            color = Color(LOGOUT_COLOR),
+            fontWeight = FontWeight.Bold,
+        )
     }
 }
 
@@ -217,7 +255,7 @@ private fun AnimatedMenuItem(
                 .fillMaxWidth()
                 .alpha(alpha)
                 .clickable { },
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(CARD_ROUNDING.dp),
         colors = CardDefaults.cardColors(containerColor = PokieWhite),
         elevation = CardDefaults.cardElevation(4.dp),
     ) {
@@ -234,7 +272,7 @@ private fun AnimatedMenuItem(
                     modifier =
                         Modifier
                             .size(40.dp)
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(RoundedCornerShape(ICON_BG_ROUNDING.dp))
                             .background(item.bgColor),
                     contentAlignment = Alignment.Center,
                 ) {

@@ -52,8 +52,10 @@ class PokiePawsMessagingService : FirebaseMessagingService() {
                     )
                 notificationDao.insertNotification(entity)
                 Log.d("FCM_DATABASE", "Powiadomienie zapisane lokalnie w Room")
-            } catch (e: Exception) {
-                Log.e("FCM_DATABASE", "Błąd zapisu do bazy: ${e.message}")
+            } catch (e: android.database.sqlite.SQLiteException) {
+                Log.e("FCM_DATABASE", "Błąd SQLite przy zapisie powiadomienia", e)
+            } catch (e: IllegalStateException) {
+                Log.e("FCM_DATABASE", "Baza danych niedostępna", e)
             }
         }
     }
@@ -100,6 +102,7 @@ class PokiePawsMessagingService : FirebaseMessagingService() {
         val notificationBuilder =
             NotificationCompat.Builder(this, channelId)
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentTitle(title)
                 .setContentText(message)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)

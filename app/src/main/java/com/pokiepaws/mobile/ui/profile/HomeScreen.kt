@@ -59,6 +59,25 @@ import com.pokiepaws.mobile.ui.theme.PokieBlueLight
 import com.pokiepaws.mobile.ui.theme.PokieRed
 import com.pokiepaws.mobile.ui.theme.PokieWhite
 
+// Poprawione nazewnictwo stałych (UPPER_SNAKE_CASE)
+private val PET_AVATAR_BG = Color(0xFFF0F8FA)
+private val APPOINTMENT_ICON_BG = Color(0xFFE3F6FC)
+private val APPOINTMENT_CARD_BG = Color(0xFFF0F8FA)
+private const val ADD_PET_BORDER_ALPHA = 0.5f
+
+// Stałe UI zapobiegające błędom MagicNumber
+private const val CORNER_RADIUS_HEADER = 18
+private const val CORNER_RADIUS_CARD = 16
+private const val CORNER_RADIUS_PET_CARD = 24
+private const val OFFSET_SEARCH_BAR = -24
+private const val PET_CARD_WIDTH = 140
+private const val PET_CARD_HEIGHT = 160
+private const val AVATAR_SIZE = 70
+private const val ICON_SIZE_LARGE = 56
+private const val QUICK_ACTION_ICON_SIZE = 50
+private const val SECTION_SPACING = 24
+private const val QUICK_ACTION_WEIGHT_PRIMARY = 1.5f
+
 @Composable
 fun HomeScreen(
     onNavigateToNotifications: () -> Unit,
@@ -104,65 +123,12 @@ fun HomeScreenContent(
                     .fillMaxSize()
                     .verticalScroll(scrollState),
         ) {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .background(
-                            color = MaterialTheme.colorScheme.primary,
-                            shape = RoundedCornerShape(bottomStart = 18.dp, bottomEnd = 18.dp),
-                        )
-                        .padding(bottom = 40.dp, top = 16.dp)
-                        .padding(horizontal = 24.dp),
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = "Welcome to PokiePaws 🐾",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = PokieWhite,
-                    )
-                    IconButton(
-                        onClick = onNavigateToNotifications,
-                        modifier =
-                            Modifier
-                                .clip(CircleShape)
-                                .background(PokieWhite.copy(alpha = 0.2f)),
-                    ) {
-                        Icon(Icons.Default.Notifications, "Notifications", tint = PokieWhite)
-                    }
-                }
-            }
-            Card(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                        .offset(y = (-24).dp),
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(6.dp),
-                colors = CardDefaults.cardColors(containerColor = PokieWhite),
-            ) {
-                TextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    placeholder = { Text("Search for a clinic...", color = Color.Gray) },
-                    leadingIcon = { Icon(Icons.Default.Search, "Search", tint = PokieBlue) },
-                    colors =
-                        TextFieldDefaults.colors(
-                            unfocusedContainerColor = Color.Transparent,
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                        ),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                )
-            }
+            HomeHeader(onNavigateToNotifications)
+
+            SearchBar(
+                query = searchQuery,
+                onQueryChange = { searchQuery = it },
+            )
 
             Column(modifier = Modifier.padding(horizontal = 36.dp)) {
                 SectionHeader(
@@ -173,7 +139,7 @@ fun HomeScreenContent(
 
                 AppointmentCard(onClick = onNavigateToAppointments)
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(SECTION_SPACING.dp))
 
                 Text(
                     text = "Quick actions",
@@ -182,9 +148,10 @@ fun HomeScreenContent(
                     color = PokieBlueDark,
                 )
                 Spacer(modifier = Modifier.height(12.dp))
+
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     QuickActionCard(
-                        modifier = Modifier.weight(1.5f),
+                        modifier = Modifier.weight(QUICK_ACTION_WEIGHT_PRIMARY),
                         icon = Icons.Default.CalendarMonth,
                         label = "Schedule your visit",
                         backgroundColor = PokieWhite.copy(alpha = 0.2f),
@@ -239,6 +206,80 @@ fun HomeScreenContent(
 }
 
 @Composable
+private fun HomeHeader(onNotificationsClick: () -> Unit) {
+    Box(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape =
+                        RoundedCornerShape(
+                            bottomStart = CORNER_RADIUS_HEADER.dp,
+                            bottomEnd = CORNER_RADIUS_HEADER.dp,
+                        ),
+                )
+                .padding(bottom = 40.dp, top = 16.dp)
+                .padding(horizontal = 24.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "Welcome to PokiePaws 🐾",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = PokieWhite,
+            )
+            IconButton(
+                onClick = onNotificationsClick,
+                modifier =
+                    Modifier
+                        .clip(CircleShape)
+                        .background(PokieWhite.copy(alpha = 0.2f)),
+            ) {
+                Icon(Icons.Default.Notifications, "Notifications", tint = PokieWhite)
+            }
+        }
+    }
+}
+
+@Composable
+private fun SearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+) {
+    Card(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .offset(y = OFFSET_SEARCH_BAR.dp),
+        shape = RoundedCornerShape(CORNER_RADIUS_CARD.dp),
+        elevation = CardDefaults.cardElevation(6.dp),
+        colors = CardDefaults.cardColors(containerColor = PokieWhite),
+    ) {
+        TextField(
+            value = query,
+            onValueChange = onQueryChange,
+            placeholder = { Text("Search for a clinic...", color = Color.Gray) },
+            leadingIcon = { Icon(Icons.Default.Search, "Search", tint = PokieBlue) },
+            colors =
+                TextFieldDefaults.colors(
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                ),
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+        )
+    }
+}
+
+@Composable
 fun SectionHeader(
     title: String,
     onClick: () -> Unit,
@@ -246,7 +287,10 @@ fun SectionHeader(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier.fillMaxWidth().padding(vertical = 8.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -268,23 +312,26 @@ fun PetCard(
     Card(
         modifier =
             modifier
-                .size(width = 140.dp, height = 160.dp)
+                .size(width = PET_CARD_WIDTH.dp, height = PET_CARD_HEIGHT.dp)
                 .clickable { onClick() },
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(CORNER_RADIUS_PET_CARD.dp),
         colors = CardDefaults.cardColors(containerColor = PokieWhite),
         elevation = CardDefaults.cardElevation(4.dp),
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(12.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
             Box(
                 modifier =
                     Modifier
-                        .size(70.dp)
+                        .size(AVATAR_SIZE.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFF0F8FA)),
+                        .background(PET_AVATAR_BG),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(emoji, fontSize = 36.sp)
@@ -306,7 +353,7 @@ fun AppointmentCard(
             modifier
                 .fillMaxWidth()
                 .clickable { onClick() },
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(CORNER_RADIUS_PET_CARD.dp),
         colors = CardDefaults.cardColors(containerColor = PokieWhite),
         elevation = CardDefaults.cardElevation(4.dp),
     ) {
@@ -317,9 +364,9 @@ fun AppointmentCard(
             Box(
                 modifier =
                     Modifier
-                        .size(56.dp)
+                        .size(ICON_SIZE_LARGE.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFE3F6FC)),
+                        .background(APPOINTMENT_ICON_BG),
                 contentAlignment = Alignment.Center,
             ) {
                 Text("🐾", fontSize = 28.sp)
@@ -331,9 +378,12 @@ fun AppointmentCard(
             }
             Card(
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F8FA)),
+                colors = CardDefaults.cardColors(containerColor = APPOINTMENT_CARD_BG),
             ) {
-                Column(modifier = Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(
+                    modifier = Modifier.padding(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
                     Text(
                         text = "Tomorrow",
                         fontSize = 11.sp,
@@ -355,11 +405,15 @@ fun AddPetCard(
     Card(
         modifier =
             modifier
-                .size(width = 140.dp, height = 160.dp)
+                .size(width = PET_CARD_WIDTH.dp, height = PET_CARD_HEIGHT.dp)
                 .clickable { onClick() },
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(CORNER_RADIUS_PET_CARD.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        border = androidx.compose.foundation.BorderStroke(2.dp, Color.LightGray.copy(alpha = 0.5f)),
+        border =
+            androidx.compose.foundation.BorderStroke(
+                2.dp,
+                Color.LightGray.copy(alpha = ADD_PET_BORDER_ALPHA),
+            ),
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -388,18 +442,21 @@ fun QuickActionCard(
 ) {
     Card(
         modifier = modifier.clickable { onClick() },
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(CORNER_RADIUS_PET_CARD.dp),
         colors = CardDefaults.cardColors(containerColor = PokieBlueLight),
         elevation = CardDefaults.cardElevation(5.dp),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            modifier =
+                Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Box(
                 modifier =
                     Modifier
-                        .size(50.dp)
+                        .size(QUICK_ACTION_ICON_SIZE.dp)
                         .clip(CircleShape)
                         .background(backgroundColor),
                 contentAlignment = Alignment.Center,

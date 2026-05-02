@@ -1,4 +1,4 @@
-package com.pokiepaws.mobile.data.remote.dto
+package com.pokiepaws.mobile.data.remote.dto.auth
 
 import kotlinx.serialization.Serializable
 

@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 
 sealed class AnimalUiState {
@@ -41,8 +43,10 @@ class AnimalViewModel
                 try {
                     val animals = repository.getAnimals()
                     _uiState.value = AnimalUiState.Success(animals)
-                } catch (e: Exception) {
+                } catch (e: HttpException) {
                     _uiState.value = AnimalUiState.Error(e.message ?: "Nie udało się załadować listy zwierząt")
+                } catch (e: IOException) {
+                    _uiState.value = AnimalUiState.Error(e.message ?: "Błąd połączenia z serwerem")
                 }
             }
         }

@@ -58,10 +58,27 @@ import com.pokiepaws.mobile.ui.theme.PokieWhite
 import com.pokiepaws.mobile.util.Country
 import com.pokiepaws.mobile.util.popularCountries
 
+private const val WEIGHT_POSTAL_CODE = 0.45f
+private const val WEIGHT_CITY = 0.55f
+private const val SECTION_DIVIDER_ALPHA = 0.7f
+private const val CARD_ELEVATION = 4
+private const val LOGO_SIZE = 140
+private const val CARD_ROUNDING = 24
+private const val INPUT_ROUNDING = 12
+private const val BUTTON_ROUNDING = 14
+private const val BUTTON_HEIGHT = 54
+private const val SPACING_LARGE = 48
+private const val SPACING_MEDIUM = 24
+private const val SPACING_SMALL = 8
+private const val FONT_SIZE_BUTTON = 16
+private const val FONT_SIZE_ERROR = 12
+private const val FONT_SIZE_FLAG = 18
+
 @Composable
 fun RegisterScreen(
     onNavigateToVerification: (String) -> Unit,
     onNavigateToLogin: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: AuthViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -97,7 +114,7 @@ fun RegisterScreen(
 
     Box(
         modifier =
-            Modifier
+            modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background),
     ) {
@@ -110,21 +127,21 @@ fun RegisterScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(SPACING_LARGE.dp))
 
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "PokiePaws Logo",
-                modifier = Modifier.size(140.dp),
+                modifier = Modifier.size(LOGO_SIZE.dp),
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(SPACING_MEDIUM.dp))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
+                shape = RoundedCornerShape(CARD_ROUNDING.dp),
                 colors = CardDefaults.cardColors(containerColor = PokieWhite),
-                elevation = CardDefaults.cardElevation(4.dp),
+                elevation = CardDefaults.cardElevation(CARD_ELEVATION.dp),
             ) {
                 Column(
                     modifier = Modifier.padding(20.dp),
@@ -142,7 +159,7 @@ fun RegisterScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(SPACING_MEDIUM.dp))
 
                     SectionLabel("Dane konta")
                     Spacer(modifier = Modifier.height(12.dp))
@@ -152,27 +169,39 @@ fun RegisterScreen(
                         onValueChange = { email = it },
                         label = { Text("Email") },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(SPACING_SMALL.dp))
 
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
                         label = { Text("Hasło") },
-                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        visualTransformation =
+                            if (passwordVisible) {
+                                VisualTransformation.None
+                            } else {
+                                PasswordVisualTransformation()
+                            },
                         trailingIcon = {
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                Icon(if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility, null)
+                                Icon(
+                                    if (passwordVisible) {
+                                        Icons.Default.VisibilityOff
+                                    } else {
+                                        Icons.Default.Visibility
+                                    },
+                                    null,
+                                )
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(SPACING_SMALL.dp))
 
                     OutlinedTextField(
                         value = confirmPassword,
@@ -184,14 +213,26 @@ fun RegisterScreen(
                                 Text("Hasła nie są identyczne", color = MaterialTheme.colorScheme.error)
                             }
                         },
-                        visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        visualTransformation =
+                            if (confirmPasswordVisible) {
+                                VisualTransformation.None
+                            } else {
+                                PasswordVisualTransformation()
+                            },
                         trailingIcon = {
                             IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
-                                Icon(if (confirmPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility, null)
+                                Icon(
+                                    if (confirmPasswordVisible) {
+                                        Icons.Default.VisibilityOff
+                                    } else {
+                                        Icons.Default.Visibility
+                                    },
+                                    null,
+                                )
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
@@ -208,25 +249,25 @@ fun RegisterScreen(
                             onValueChange = { firstName = it },
                             label = { Text("Imię") },
                             modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                         )
                         OutlinedTextField(
                             value = lastName,
                             onValueChange = { lastName = it },
                             label = { Text("Nazwisko") },
                             modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(SPACING_SMALL.dp))
 
                     OutlinedTextField(
                         value = phoneNumber,
                         onValueChange = { phoneNumber = it },
                         label = { Text("Numer telefonu") },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                         prefix = { Text("${phoneCountry.dialCode} ") },
                     )
@@ -241,17 +282,17 @@ fun RegisterScreen(
                         onCountrySelected = { residenceCountry = it },
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(SPACING_SMALL.dp))
 
                     OutlinedTextField(
                         value = street,
                         onValueChange = { street = it },
                         label = { Text("Ulica") },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(SPACING_SMALL.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -262,7 +303,7 @@ fun RegisterScreen(
                             onValueChange = { houseNumber = it },
                             label = { Text("Nr domu") },
                             modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                         )
                         OutlinedTextField(
                             value = apartmentNumber,
@@ -270,11 +311,11 @@ fun RegisterScreen(
                             label = { Text("Lokal") },
                             placeholder = { Text("opcjonalnie") },
                             modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(SPACING_SMALL.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -284,16 +325,16 @@ fun RegisterScreen(
                             value = postalCode,
                             onValueChange = { postalCode = it },
                             label = { Text("Kod") },
-                            modifier = Modifier.weight(0.45f),
-                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.weight(WEIGHT_POSTAL_CODE),
+                            shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         )
                         OutlinedTextField(
                             value = city,
                             onValueChange = { city = it },
                             label = { Text("Miasto") },
-                            modifier = Modifier.weight(0.55f),
-                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.weight(WEIGHT_CITY),
+                            shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                         )
                     }
 
@@ -302,11 +343,11 @@ fun RegisterScreen(
                         Text(
                             text = (uiState as AuthUiState.Error).message,
                             color = MaterialTheme.colorScheme.error,
-                            fontSize = 12.sp,
+                            fontSize = FONT_SIZE_ERROR.sp,
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(SPACING_MEDIUM.dp))
 
                     Button(
                         onClick = {
@@ -327,14 +368,14 @@ fun RegisterScreen(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .height(54.dp),
-                        shape = RoundedCornerShape(14.dp),
+                                .height(BUTTON_HEIGHT.dp),
+                        shape = RoundedCornerShape(BUTTON_ROUNDING.dp),
                         enabled = (uiState !is AuthUiState.Loading) && passwordsMatch && email.isNotEmpty(),
                     ) {
                         if (uiState is AuthUiState.Loading) {
                             CircularProgressIndicator(modifier = Modifier.size(24.dp), color = PokieWhite)
                         } else {
-                            Text("Zarejestruj się", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Text("Zarejestruj się", fontSize = FONT_SIZE_BUTTON.sp, fontWeight = FontWeight.Bold)
                         }
                     }
 
@@ -346,15 +387,18 @@ fun RegisterScreen(
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(SPACING_LARGE.dp))
         }
     }
 }
 
 @Composable
-private fun SectionLabel(title: String) {
+private fun SectionLabel(
+    title: String,
+    modifier: Modifier = Modifier,
+) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         HorizontalDivider(modifier = Modifier.weight(1f), thickness = 0.5.dp)
@@ -362,7 +406,7 @@ private fun SectionLabel(title: String) {
             text = "  ${title.uppercase()}  ",
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+            color = MaterialTheme.colorScheme.primary.copy(alpha = SECTION_DIVIDER_ALPHA),
         )
         HorizontalDivider(modifier = Modifier.weight(1f), thickness = 0.5.dp)
     }
@@ -373,13 +417,14 @@ private fun SectionLabel(title: String) {
 fun CountryDropdownField(
     selectedCountry: Country,
     onCountrySelected: (Country) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = !expanded },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         OutlinedTextField(
             value = "${selectedCountry.flag} ${selectedCountry.name}",
@@ -388,8 +433,11 @@ fun CountryDropdownField(
             label = { Text("Kraj zamieszkania") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable, true).fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
+            modifier =
+                Modifier
+                    .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
+                    .fillMaxWidth(),
+            shape = RoundedCornerShape(INPUT_ROUNDING.dp),
         )
 
         ExposedDropdownMenu(
@@ -400,7 +448,7 @@ fun CountryDropdownField(
                 DropdownMenuItem(
                     text = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(country.flag, fontSize = 18.sp)
+                            Text(country.flag, fontSize = FONT_SIZE_FLAG.sp)
                             Spacer(Modifier.width(12.dp))
                             Text(country.name)
                         }

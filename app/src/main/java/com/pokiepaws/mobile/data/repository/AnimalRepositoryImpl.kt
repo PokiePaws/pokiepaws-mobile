@@ -4,6 +4,8 @@ import com.pokiepaws.mobile.data.remote.dto.animal.AnimalRequest
 import com.pokiepaws.mobile.data.remote.service.AnimalApiService
 import com.pokiepaws.mobile.domain.model.Animal
 import com.pokiepaws.mobile.domain.repository.AnimalRepository
+import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 
 class AnimalRepositoryImpl
@@ -30,7 +32,9 @@ class AnimalRepositoryImpl
             return try {
                 apiService.addAnimal(request)
                 Result.success(Unit)
-            } catch (e: Exception) {
+            } catch (e: HttpException) {
+                Result.failure(e)
+            } catch (e: IOException) {
                 Result.failure(e)
             }
         }
@@ -39,7 +43,9 @@ class AnimalRepositoryImpl
             return try {
                 apiService.deleteAnimal(id)
                 Result.success(Unit)
-            } catch (e: Exception) {
+            } catch (e: HttpException) {
+                Result.failure(e)
+            } catch (e: IOException) {
                 Result.failure(e)
             }
         }

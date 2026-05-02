@@ -58,6 +58,24 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+private const val ANIMATION_DELAY_PER_ITEM_MS = 80
+private const val ITEM_ANIMATION_DURATION = 300
+private const val INITIAL_OFFSET_X = -20f
+private const val CARD_ROUNDING = 16
+private const val ICON_BG_SIZE = 48
+private const val ICON_SIZE = 24
+private const val INDICATOR_WIDTH = 4
+private const val LIST_SPACING = 12
+private const val CARD_ELEVATION = 2
+private val PRIMARY_TEAL = Color(0xFF7FCEDF)
+private val ReminderIconTint = Color(0xFF3B82F6)
+private val ReminderIconBg = Color(0xFFDBEAFE)
+private val VaccineIconTint = Color(0xFFF97316)
+private val VaccineIconBg = Color(0xFFFFEDD5)
+private val SuccessIconTint = Color(0xFF22C55E)
+private val SuccessIconBg = Color(0xFFDCFCE7)
+private val DefaultIconBg = Color(0xFFE3F6FC)
+
 private data class NotifStyle(
     val iconVector: ImageVector,
     val iconTint: Color,
@@ -65,36 +83,34 @@ private data class NotifStyle(
     val borderColor: Color,
 )
 
-private val PRIMARY_TEAL = Color(0xFF7FCEDF)
-
 private fun styleFor(type: String?): NotifStyle =
     when (type?.lowercase()) {
         "reminder" ->
             NotifStyle(
                 iconVector = Icons.Default.CalendarToday,
-                iconTint = Color(0xFF3B82F6),
-                iconBg = Color(0xFFDBEAFE),
-                borderColor = Color(0xFF3B82F6),
+                iconTint = ReminderIconTint,
+                iconBg = ReminderIconBg,
+                borderColor = ReminderIconTint,
             )
         "vaccine" ->
             NotifStyle(
                 iconVector = Icons.Default.MedicalServices,
-                iconTint = Color(0xFFF97316),
-                iconBg = Color(0xFFFFEDD5),
-                borderColor = Color(0xFFF97316),
+                iconTint = VaccineIconTint,
+                iconBg = VaccineIconBg,
+                borderColor = VaccineIconTint,
             )
         "success" ->
             NotifStyle(
                 iconVector = Icons.Default.CheckCircle,
-                iconTint = Color(0xFF22C55E),
-                iconBg = Color(0xFFDCFCE7),
-                borderColor = Color(0xFF22C55E),
+                iconTint = SuccessIconTint,
+                iconBg = SuccessIconBg,
+                borderColor = SuccessIconTint,
             )
         else ->
             NotifStyle(
                 iconVector = Icons.Default.Notifications,
                 iconTint = PRIMARY_TEAL,
-                iconBg = Color(0xFFE3F6FC),
+                iconBg = DefaultIconBg,
                 borderColor = PRIMARY_TEAL,
             )
     }
@@ -162,7 +178,7 @@ fun NotificationScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(LIST_SPACING.dp),
             ) {
                 itemsIndexed(
                     items = notifications,
@@ -170,7 +186,7 @@ fun NotificationScreen(
                 ) { index, notification ->
                     AnimatedNotificationItem(
                         notification = notification,
-                        animationDelay = index * 80,
+                        animationDelay = index * ANIMATION_DELAY_PER_ITEM_MS,
                     )
                 }
             }
@@ -185,14 +201,18 @@ private fun AnimatedNotificationItem(
     modifier: Modifier = Modifier,
 ) {
     val alpha = remember { Animatable(0f) }
-    val offsetX = remember { Animatable(-20f) }
+    val offsetX = remember { Animatable(INITIAL_OFFSET_X) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(notification.id) {
         scope.launch {
             delay(animationDelay.toLong())
-            launch { alpha.animateTo(1f, tween(durationMillis = 300)) }
-            launch { offsetX.animateTo(0f, tween(durationMillis = 300)) }
+            launch {
+                alpha.animateTo(1f, tween(durationMillis = ITEM_ANIMATION_DURATION))
+            }
+            launch {
+                offsetX.animateTo(0f, tween(durationMillis = ITEM_ANIMATION_DURATION))
+            }
         }
     }
 
@@ -215,9 +235,9 @@ fun NotificationItem(
 
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(CARD_ROUNDING.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION.dp),
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
             if (!notification.isRead) {
@@ -225,10 +245,14 @@ fun NotificationItem(
                     modifier =
                         Modifier
                             .fillMaxHeight()
-                            .width(4.dp)
+                            .width(INDICATOR_WIDTH.dp)
                             .background(
                                 color = style.borderColor,
-                                shape = RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp),
+                                shape =
+                                    RoundedCornerShape(
+                                        topStart = CARD_ROUNDING.dp,
+                                        bottomStart = CARD_ROUNDING.dp,
+                                    ),
                             ),
                 )
             }
@@ -247,7 +271,7 @@ fun NotificationItem(
                 Box(
                     modifier =
                         Modifier
-                            .size(48.dp)
+                            .size(ICON_BG_SIZE.dp)
                             .clip(CircleShape)
                             .background(style.iconBg),
                     contentAlignment = Alignment.Center,
@@ -256,7 +280,7 @@ fun NotificationItem(
                         imageVector = style.iconVector,
                         contentDescription = null,
                         tint = style.iconTint,
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(ICON_SIZE.dp),
                     )
                 }
 

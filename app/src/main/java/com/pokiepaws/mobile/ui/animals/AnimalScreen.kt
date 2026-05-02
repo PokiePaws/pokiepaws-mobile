@@ -1,5 +1,6 @@
 package com.pokiepaws.mobile.ui.animals
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -40,6 +41,29 @@ import com.pokiepaws.mobile.ui.theme.PokieWhite
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
+
+private val DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+
+private fun formatGender(gender: String?): String =
+    when (gender) {
+        "MALE" -> "Samiec"
+        "FEMALE" -> "Samica"
+        "HERMAPHRODITE" -> "Obojnak"
+        else -> "Brak danych"
+    }
+
+private fun formatBirthDate(birthDate: String?): String =
+    birthDate?.let {
+        try {
+            LocalDate.parse(it).format(DATE_FORMATTER)
+        } catch (e: DateTimeParseException) {
+            Log.w("AnimalScreen", "Cannot parse birth date: $it", e)
+            "Brak danych"
+        }
+    } ?: "Brak danych"
+
+private fun formatWeight(weight: Double?): String = weight?.let { "%.1f kg".format(it) } ?: "Nie podano"
 
 @Composable
 fun AnimalScreen(
@@ -94,50 +118,7 @@ fun AnimalDetailsContent(
                 .background(PokieWhite)
                 .verticalScroll(rememberScrollState()),
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .background(
-                        color = PokieBlue,
-                        shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp),
-                    )
-                    .padding(top = 48.dp, bottom = 32.dp)
-                    .padding(horizontal = 24.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            IconButton(
-                onClick = onBack,
-                modifier =
-                    Modifier
-                        .align(Alignment.TopStart)
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(PokieWhite.copy(alpha = 0.3f)),
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Powrót",
-                    tint = PokieWhite,
-                )
-            }
-
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "🐾",
-                    fontSize = 48.sp,
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Text(
-                    text = animal.name,
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = PokieWhite,
-                )
-            }
-        }
+        AnimalHeader(name = animal.name, onBack = onBack)
 
         Column(
             modifier =
@@ -146,58 +127,61 @@ fun AnimalDetailsContent(
                     .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            DataCard(
-                label = "Gatunek",
-                value = animal.species,
-            )
+            DataCard(label = "Gatunek", value = animal.species)
+            DataCard(label = "Rasa", value = animal.breed ?: "Nieznana rasa")
+            DataCard(label = "Płeć", value = formatGender(animal.gender))
+            DataCard(label = "Umaszczenie", value = animal.color ?: "Brak danych")
+            DataCard(label = "Wiek", value = animal.birthDate?.let { calculateAge(it) } ?: "Brak danych")
+            DataCard(label = "Data urodzenia", value = formatBirthDate(animal.birthDate))
+            DataCard(label = "Waga", value = formatWeight(animal.weight))
+            DataCard(label = "Mikrochip", value = animal.microchipNumber ?: "Brak")
+            DataCard(label = "Notatki", value = animal.notes.takeUnless { it.isNullOrBlank() } ?: "Brak notatek")
+        }
+    }
+}
 
-            DataCard(
-                label = "Rasa",
-                value = animal.breed ?: "Nieznana rasa",
+@Composable
+private fun AnimalHeader(
+    name: String,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(
+                    color = PokieBlue,
+                    shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp),
+                )
+                .padding(top = 48.dp, bottom = 32.dp)
+                .padding(horizontal = 24.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        IconButton(
+            onClick = onBack,
+            modifier =
+                Modifier
+                    .align(Alignment.TopStart)
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(PokieWhite.copy(alpha = 0.3f)),
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Powrót",
+                tint = PokieWhite,
             )
+        }
 
-            DataCard(
-                label = "Płeć",
-                value =
-                    when (animal.gender) {
-                        "MALE" -> "Samiec"
-                        "FEMALE" -> "Samica"
-                        "HERMAPHRODITE" -> "Obojnak"
-                        else -> "Brak danych"
-                    },
-            )
-
-            DataCard(
-                label = "Umaszczenie",
-                value = animal.color ?: "Brak danych",
-            )
-
-            DataCard(
-                label = "Wiek",
-                value = animal.birthDate?.let { calculateAge(it) } ?: "Brak danych",
-            )
-            val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-            DataCard(
-                label = "Data urodzenia",
-                value =
-                    animal.birthDate?.let {
-                        LocalDate.parse(it).format(formatter)
-                    } ?: "Brak danych",
-            )
-
-            DataCard(
-                label = "Waga",
-                value = animal.weight?.let { "%.1f kg".format(it) } ?: "Nie podano",
-            )
-
-            DataCard(
-                label = "Mikrochip",
-                value = animal.microchipNumber ?: "Brak",
-            )
-
-            DataCard(
-                label = "Notatki",
-                value = if (animal.notes.isNullOrBlank()) "Brak notatek" else animal.notes,
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = "🐾", fontSize = 48.sp)
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = name,
+                fontSize = 30.sp,
+                fontWeight = FontWeight.Bold,
+                color = PokieWhite,
             )
         }
     }
@@ -212,10 +196,7 @@ fun DataCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-            ),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
         Row(
@@ -252,7 +233,8 @@ fun calculateAge(birthDate: String): String {
             period.months > 0 -> "${period.months} mies."
             else -> "Noworodek"
         }
-    } catch (e: Exception) {
+    } catch (e: DateTimeParseException) {
+        Log.w("AnimalScreen", "Cannot parse age from: $birthDate", e)
         "Brak danych"
     }
 }

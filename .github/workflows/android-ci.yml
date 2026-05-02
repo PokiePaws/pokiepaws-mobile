@@ -24,6 +24,10 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # Google-service
+      - name: Create google-services.json
+        run: echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > app/google-services.json
+
       # 1. Kontrola jakości
       - name: Run ktlint
         run: ./gradlew ktlintCheck
@@ -38,8 +42,9 @@ jobs:
       - name: Build debug APK
         run: ./gradlew assembleDebug
 
+      # 3. Raporty (zmieniono numerację dla porządku)
       - name: Upload Lint Reports
-        if: always() # Raporty zostaną wysłane nawet jeśli build się wywali
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pokiepaws-quality-reports
@@ -50,7 +55,7 @@ jobs:
 
       # 4. Wrzucanie gotowej aplikacji APK
       - name: Upload Debug APK
-        if: success() # APK wysyłamy tylko, gdy wszystko przeszło pomyślnie
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: pokiepaws-app-debug

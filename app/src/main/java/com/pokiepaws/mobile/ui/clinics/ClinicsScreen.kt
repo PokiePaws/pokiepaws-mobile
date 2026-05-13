@@ -3,6 +3,7 @@ package com.pokiepaws.mobile.ui.clinics
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,34 +36,60 @@ fun ClinicsScreen(
 
     LaunchedEffect(Unit) { viewModel.load() }
 
-    when (val s = state) {
-        ClinicsUiState.Loading ->
-            Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+    Box(modifier = modifier.fillMaxSize()) {
+        ClinicsContent(
+            state = state,
+            onClinicClick = onClinicClick,
+        )
+    }
+}
 
-        is ClinicsUiState.Error ->
-            Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Błąd: ${s.message}") }
+@Composable
+private fun ClinicsContent(
+    state: ClinicsUiState,
+    onClinicClick: (Long) -> Unit,
+) {
+    when (state) {
+        ClinicsUiState.Loading -> LoadingView()
+        is ClinicsUiState.Error -> MessageView(text = "Blad: ${state.message}")
+        is ClinicsUiState.Success -> ClinicsResult(state = state, onClinicClick = onClinicClick)
+    }
+}
 
-        is ClinicsUiState.Success -> {
-            if (s.clinics.isEmpty()) {
-                Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Brak gabinetów")
-                }
-                return
-            }
-
-            LazyColumn(
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = modifier.fillMaxSize(),
-            ) {
-                items(s.clinics, key = { it.id }) { clinic ->
-                    ClinicCard(
-                        clinic = clinic,
-                        onClick = { onClinicClick(clinic.id) },
-                    )
-                }
+@Composable
+private fun ClinicsResult(
+    state: ClinicsUiState.Success,
+    onClinicClick: (Long) -> Unit,
+) {
+    if (state.clinics.isEmpty()) {
+        MessageView(text = "Brak gabinetow")
+    } else {
+        LazyColumn(
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            items(state.clinics, key = { it.id }) { clinic ->
+                ClinicCard(
+                    clinic = clinic,
+                    onClick = { onClinicClick(clinic.id) },
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun LoadingView() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+private fun MessageView(text: String) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(text)
     }
 }
 
@@ -78,7 +105,7 @@ private fun ClinicCard(
                 .fillMaxWidth()
                 .clickable { onClick() },
     ) {
-        androidx.compose.foundation.layout.Column(Modifier.padding(16.dp)) {
+        Column(Modifier.padding(16.dp)) {
             Text(clinic.clinicName, style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(4.dp))
             Text(
@@ -87,7 +114,7 @@ private fun ClinicCard(
             )
             clinic.phone?.let {
                 Spacer(Modifier.height(4.dp))
-                Text("📞 $it", style = MaterialTheme.typography.bodySmall)
+                Text("Phone: $it", style = MaterialTheme.typography.bodySmall)
             }
         }
     }

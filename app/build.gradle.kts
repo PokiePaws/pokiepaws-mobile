@@ -9,7 +9,7 @@ val env =
         }
     }
 
-fun getEnv(key: String): String = env.getProperty(key) ?: ""
+fun getEnv(key: String): String = System.getenv(key) ?: env.getProperty(key) ?: ""
 
 plugins {
     alias(libs.plugins.android.application)
@@ -166,7 +166,9 @@ dependencies {
     implementation(libs.firebase.analytics)
 
     testImplementation(libs.junit)
+    testImplementation(libs.konsist)
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.ui.tooling)
     lintChecks(libs.compose.lint.checks)
+    detektPlugins(libs.compose.rules.detekt)
 }

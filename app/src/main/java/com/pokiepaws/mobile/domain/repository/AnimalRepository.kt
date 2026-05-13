@@ -1,12 +1,12 @@
 package com.pokiepaws.mobile.domain.repository
 
-import com.pokiepaws.mobile.data.remote.dto.animal.AnimalRequest
 import com.pokiepaws.mobile.domain.model.Animal
+import com.pokiepaws.mobile.domain.model.AnimalDraft
 
 interface AnimalRepository {
     suspend fun getAnimals(): List<Animal>
 
-    suspend fun addAnimal(request: AnimalRequest): Result<Unit>
+    suspend fun addAnimal(animal: AnimalDraft)
 
-    suspend fun deleteAnimal(id: Long): Result<Unit>
+    suspend fun deleteAnimal(id: Long)
 }

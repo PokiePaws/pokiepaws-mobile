@@ -51,7 +51,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.pokiepaws.mobile.data.local.room.entities.NotificationEntity
+import com.pokiepaws.mobile.domain.model.AppNotification
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -196,7 +196,7 @@ fun NotificationScreen(
 
 @Composable
 private fun AnimatedNotificationItem(
-    notification: NotificationEntity,
+    notification: AppNotification,
     animationDelay: Int,
     modifier: Modifier = Modifier,
 ) {
@@ -228,7 +228,7 @@ private fun AnimatedNotificationItem(
 
 @Composable
 fun NotificationItem(
-    notification: NotificationEntity,
+    notification: AppNotification,
     modifier: Modifier = Modifier,
 ) {
     val style = styleFor(notification.type)

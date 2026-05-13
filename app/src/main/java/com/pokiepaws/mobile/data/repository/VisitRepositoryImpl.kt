@@ -3,6 +3,7 @@ package com.pokiepaws.mobile.data.repository
 import com.pokiepaws.mobile.data.remote.dto.visit.CreateVisitRequest
 import com.pokiepaws.mobile.data.remote.dto.visit.VisitResponse
 import com.pokiepaws.mobile.data.remote.service.VisitApiService
+import com.pokiepaws.mobile.domain.model.CreateVisitDraft
 import com.pokiepaws.mobile.domain.model.Visit
 import com.pokiepaws.mobile.domain.repository.VisitRepository
 import javax.inject.Inject
@@ -18,8 +19,17 @@ class VisitRepositoryImpl
 
         override suspend fun getById(visitId: Long): Visit = api.getVisitById(visitId).toDomain()
 
-        override suspend fun create(request: CreateVisitRequest): Visit = api.createVisit(request).toDomain()
+        override suspend fun create(visit: CreateVisitDraft): Visit = api.createVisit(visit.toRequest()).toDomain()
     }
+
+private fun CreateVisitDraft.toRequest(): CreateVisitRequest =
+    CreateVisitRequest(
+        animalId = animalId,
+        clinicId = clinicId,
+        vetUserId = vetUserId,
+        startsAt = startsAt,
+        description = description,
+    )
 
 private fun VisitResponse.toDomain(): Visit =
     Visit(

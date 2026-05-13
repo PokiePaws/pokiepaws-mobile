@@ -2,8 +2,8 @@ package com.pokiepaws.mobile.ui.notifications
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pokiepaws.mobile.data.local.dao.NotificationDao
-import com.pokiepaws.mobile.data.local.room.entities.NotificationEntity
+import com.pokiepaws.mobile.domain.model.AppNotification
+import com.pokiepaws.mobile.domain.repository.NotificationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -15,10 +15,10 @@ import javax.inject.Inject
 class NotificationsViewModel
     @Inject
     constructor(
-        private val notificationDao: NotificationDao,
+        private val notificationRepository: NotificationRepository,
     ) : ViewModel() {
-        val notifications: StateFlow<List<NotificationEntity>> =
-            notificationDao.getAllNotifications()
+        val notifications: StateFlow<List<AppNotification>> =
+            notificationRepository.notifications
                 .stateIn(
                     scope = viewModelScope,
                     started = SharingStarted.WhileSubscribed(5000),
@@ -27,13 +27,13 @@ class NotificationsViewModel
 
         fun markAsRead(notificationId: Int) {
             viewModelScope.launch {
-                notificationDao.markAsRead(notificationId)
+                notificationRepository.markAsRead(notificationId)
             }
         }
 
         fun markAllAsRead() {
             viewModelScope.launch {
-                notificationDao.markAllAsRead()
+                notificationRepository.markAllAsRead()
             }
         }
     }

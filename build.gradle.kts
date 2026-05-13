@@ -8,6 +8,25 @@ plugins {
     alias(libs.plugins.google.services) apply false
     alias(libs.plugins.ktlint) apply false
     alias(libs.plugins.detekt) apply false
-    alias (libs.plugins.sonarqube) apply false
+    alias(libs.plugins.sonarqube) apply false
     // id("com.google.gms.google-services") version "4.4.4" apply false  Z tutorialu firebase
+}
+
+tasks.register("qualityCheck") {
+    group = "verification"
+    description = "Runs ktlint, detekt, Android Lint, and Konsist architecture tests."
+
+    dependsOn(
+        ":app:ktlintCheck",
+        ":app:detekt",
+        ":app:lintDebug",
+        ":app:testDebugUnitTest",
+    )
+}
+
+tasks.register("qualityFormat") {
+    group = "formatting"
+    description = "Formats Kotlin code with ktlint."
+
+    dependsOn(":app:ktlintFormat")
 }

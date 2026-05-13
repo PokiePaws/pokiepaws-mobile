@@ -3,6 +3,7 @@ package com.pokiepaws.mobile.ui.clinics
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,31 +37,57 @@ fun VetListScreen(
 
     LaunchedEffect(clinicId) { viewModel.load(clinicId) }
 
-    when (val s = state) {
-        VetsUiState.Loading ->
-            Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+    Box(modifier = modifier.fillMaxSize()) {
+        VetsContent(
+            state = state,
+            onVetClick = onVetClick,
+        )
+    }
+}
 
-        is VetsUiState.Error ->
-            Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Błąd: ${s.message}") }
+@Composable
+private fun VetsContent(
+    state: VetsUiState,
+    onVetClick: (Long) -> Unit,
+) {
+    when (state) {
+        VetsUiState.Loading -> LoadingView()
+        is VetsUiState.Error -> MessageView(text = "Blad: ${state.message}")
+        is VetsUiState.Success -> VetsResult(state = state, onVetClick = onVetClick)
+    }
+}
 
-        is VetsUiState.Success -> {
-            if (s.vets.isEmpty()) {
-                Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Brak weterynarzy w tym gabinecie")
-                }
-                return
-            }
-
-            LazyColumn(
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = modifier.fillMaxSize(),
-            ) {
-                items(s.vets, key = { it.userId }) { vet ->
-                    VetCard(vet = vet, onClick = { onVetClick(vet.userId) })
-                }
+@Composable
+private fun VetsResult(
+    state: VetsUiState.Success,
+    onVetClick: (Long) -> Unit,
+) {
+    if (state.vets.isEmpty()) {
+        MessageView(text = "Brak weterynarzy w tym gabinecie")
+    } else {
+        LazyColumn(
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            items(state.vets, key = { it.userId }) { vet ->
+                VetCard(vet = vet, onClick = { onVetClick(vet.userId) })
             }
         }
+    }
+}
+
+@Composable
+private fun LoadingView() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+private fun MessageView(text: String) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(text)
     }
 }
 
@@ -76,7 +103,7 @@ private fun VetCard(
                 .fillMaxWidth()
                 .clickable { onClick() },
     ) {
-        androidx.compose.foundation.layout.Column(Modifier.padding(16.dp)) {
+        Column(Modifier.padding(16.dp)) {
             Text("${vet.firstName} ${vet.lastName}", style = MaterialTheme.typography.titleMedium)
             vet.specialization?.let {
                 Spacer(Modifier.height(4.dp))

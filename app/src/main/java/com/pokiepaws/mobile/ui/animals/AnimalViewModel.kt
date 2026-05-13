@@ -2,8 +2,8 @@ package com.pokiepaws.mobile.ui.animals
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pokiepaws.mobile.data.remote.dto.animal.AnimalRequest
 import com.pokiepaws.mobile.domain.model.Animal
+import com.pokiepaws.mobile.domain.model.AnimalDraft
 import com.pokiepaws.mobile.domain.repository.AnimalRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,40 +40,42 @@ class AnimalViewModel
         fun loadAnimals() {
             viewModelScope.launch {
                 _uiState.value = AnimalUiState.Loading
-                try {
-                    val animals = repository.getAnimals()
-                    _uiState.value = AnimalUiState.Success(animals)
-                } catch (e: HttpException) {
-                    _uiState.value = AnimalUiState.Error(e.message ?: "Nie udało się załadować listy zwierząt")
-                } catch (e: IOException) {
-                    _uiState.value = AnimalUiState.Error(e.message ?: "Błąd połączenia z serwerem")
-                }
+                runCatching { repository.getAnimals() }
+                    .onSuccess { animals -> _uiState.value = AnimalUiState.Success(animals) }
+                    .onFailure { error -> _uiState.value = AnimalUiState.Error(error.toLoadMessage()) }
             }
         }
 
         fun addAnimal(
-            request: AnimalRequest,
+            animal: AnimalDraft,
             onSuccess: () -> Unit,
         ) {
             viewModelScope.launch {
-                val result = repository.addAnimal(request)
-                result.onSuccess {
-                    loadAnimals()
-                    onSuccess()
-                }.onFailure { e ->
-                    _uiState.value = AnimalUiState.Error(e.message ?: "Błąd podczas dodawania zwierzaka")
-                }
+                runCatching { repository.addAnimal(animal) }
+                    .onSuccess {
+                        loadAnimals()
+                        onSuccess()
+                    }
+                    .onFailure { error ->
+                        _uiState.value = AnimalUiState.Error(error.message ?: "Blad podczas dodawania zwierzaka")
+                    }
             }
         }
 
         fun deleteAnimal(id: Long) {
             viewModelScope.launch {
-                val result = repository.deleteAnimal(id)
-                result.onSuccess {
-                    loadAnimals()
-                }.onFailure { e ->
-                    _uiState.value = AnimalUiState.Error(e.message ?: "Nie udało się usunąć wpisu")
-                }
+                runCatching { repository.deleteAnimal(id) }
+                    .onSuccess { loadAnimals() }
+                    .onFailure { error ->
+                        _uiState.value = AnimalUiState.Error(error.message ?: "Nie udalo sie usunac wpisu")
+                    }
             }
         }
+    }
+
+private fun Throwable.toLoadMessage(): String =
+    when (this) {
+        is HttpException -> message ?: "Nie udalo sie zaladowac listy zwierzat"
+        is IOException -> message ?: "Blad polaczenia z serwerem"
+        else -> message ?: "Nie udalo sie zaladowac listy zwierzat"
     }

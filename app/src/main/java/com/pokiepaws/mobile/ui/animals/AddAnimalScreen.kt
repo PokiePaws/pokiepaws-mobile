@@ -49,7 +49,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.pokiepaws.mobile.data.remote.dto.animal.AnimalRequest
+import com.pokiepaws.mobile.domain.model.AnimalDraft
 import com.pokiepaws.mobile.ui.theme.PokieBlue
 import com.pokiepaws.mobile.ui.theme.PokieWhite
 import java.time.Instant
@@ -254,8 +254,8 @@ fun AddAnimalScreen(
 
             Button(
                 onClick = {
-                    val request =
-                        AnimalRequest(
+                    val animal =
+                        AnimalDraft(
                             name = name,
                             species = species,
                             breed = breed.ifBlank { null },
@@ -266,7 +266,7 @@ fun AddAnimalScreen(
                             weight = weight.toDoubleOrNull(),
                             notes = notes.ifBlank { null },
                         )
-                    viewModel.addAnimal(request) {
+                    viewModel.addAnimal(animal) {
                         onBack()
                     }
                 },

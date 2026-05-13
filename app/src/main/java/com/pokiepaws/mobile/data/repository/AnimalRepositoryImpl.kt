@@ -1,11 +1,11 @@
 package com.pokiepaws.mobile.data.repository
 
 import com.pokiepaws.mobile.data.remote.dto.animal.AnimalRequest
+import com.pokiepaws.mobile.data.remote.dto.animal.AnimalResponse
 import com.pokiepaws.mobile.data.remote.service.AnimalApiService
 import com.pokiepaws.mobile.domain.model.Animal
+import com.pokiepaws.mobile.domain.model.AnimalDraft
 import com.pokiepaws.mobile.domain.repository.AnimalRepository
-import retrofit2.HttpException
-import java.io.IOException
 import javax.inject.Inject
 
 class AnimalRepositoryImpl
@@ -15,38 +15,38 @@ class AnimalRepositoryImpl
     ) : AnimalRepository {
         override suspend fun getAnimals(): List<Animal> {
             val response = apiService.getMyAnimals()
-            return response.map { responseItem ->
-                Animal(
-                    id = responseItem.id,
-                    name = responseItem.name,
-                    species = responseItem.species,
-                    breed = responseItem.breed,
-                    weight = responseItem.weight,
-                    birthDate = responseItem.birthDate,
-                    notes = responseItem.notes,
-                )
-            }
+            return response.map { responseItem -> responseItem.toDomain() }
         }
 
-        override suspend fun addAnimal(request: AnimalRequest): Result<Unit> {
-            return try {
-                apiService.addAnimal(request)
-                Result.success(Unit)
-            } catch (e: HttpException) {
-                Result.failure(e)
-            } catch (e: IOException) {
-                Result.failure(e)
-            }
+        override suspend fun addAnimal(animal: AnimalDraft) {
+            apiService.addAnimal(animal.toRequest())
         }
 
-        override suspend fun deleteAnimal(id: Long): Result<Unit> {
-            return try {
-                apiService.deleteAnimal(id)
-                Result.success(Unit)
-            } catch (e: HttpException) {
-                Result.failure(e)
-            } catch (e: IOException) {
-                Result.failure(e)
-            }
+        override suspend fun deleteAnimal(id: Long) {
+            apiService.deleteAnimal(id)
         }
     }
+
+private fun AnimalResponse.toDomain(): Animal =
+    Animal(
+        id = id,
+        name = name,
+        species = species,
+        breed = breed,
+        weight = weight,
+        birthDate = birthDate,
+        notes = notes,
+    )
+
+private fun AnimalDraft.toRequest(): AnimalRequest =
+    AnimalRequest(
+        name = name,
+        species = species,
+        breed = breed,
+        gender = gender,
+        color = color,
+        microchipNumber = microchipNumber,
+        weight = weight,
+        birthDate = birthDate,
+        notes = notes,
+    )

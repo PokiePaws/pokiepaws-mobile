@@ -2,13 +2,11 @@ package com.pokiepaws.mobile.ui.visits
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pokiepaws.mobile.data.remote.dto.clinic.ClinicResponse
-import com.pokiepaws.mobile.data.remote.dto.vet.VetListResponse
-import com.pokiepaws.mobile.data.remote.dto.visit.CreateVisitRequest
-import com.pokiepaws.mobile.data.remote.service.ClinicApiService
-import com.pokiepaws.mobile.data.remote.service.VetApiService
 import com.pokiepaws.mobile.domain.model.Clinic
+import com.pokiepaws.mobile.domain.model.CreateVisitDraft
 import com.pokiepaws.mobile.domain.model.Vet
+import com.pokiepaws.mobile.domain.repository.ClinicRepository
+import com.pokiepaws.mobile.domain.repository.VetRepository
 import com.pokiepaws.mobile.domain.repository.VisitRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,27 +27,27 @@ private const val VISIT_INTERVAL_MINUTES = 30L
 class CreateVisitViewModel
     @Inject
     constructor(
-        private val clinicApi: ClinicApiService,
-        private val vetApi: VetApiService,
+        private val clinicRepository: ClinicRepository,
+        private val vetRepository: VetRepository,
         private val visitRepository: VisitRepository,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(CreateVisitUiState())
         val uiState: StateFlow<CreateVisitUiState> = _uiState.asStateFlow()
 
         fun loadClinics() {
-            if (_uiState.value.clinics.isNotEmpty()) return
-
-            viewModelScope.launch {
-                _uiState.update { it.copy(isLoading = true, error = null) }
-                runCatching { clinicApi.getAll().map { response -> response.toDomain() } }
-                    .onSuccess { clinics ->
-                        _uiState.update { it.copy(isLoading = false, clinics = clinics) }
-                    }
-                    .onFailure { error ->
-                        _uiState.update {
-                            it.copy(isLoading = false, error = error.message ?: "Nie udało się załadować gabinetów")
+            if (_uiState.value.clinics.isEmpty()) {
+                viewModelScope.launch {
+                    _uiState.update { it.copy(isLoading = true, error = null) }
+                    runCatching { clinicRepository.getClinics() }
+                        .onSuccess { clinics ->
+                            _uiState.update { it.copy(isLoading = false, clinics = clinics) }
                         }
-                    }
+                        .onFailure { error ->
+                            _uiState.update {
+                                it.copy(isLoading = false, error = error.message ?: "Nie udalo sie zaladowac gabinetow")
+                            }
+                        }
+                }
             }
         }
 
@@ -83,20 +81,19 @@ class CreateVisitViewModel
         }
 
         fun selectDate(date: String) {
-            val parsedDate =
-                runCatching { LocalDate.parse(date) }
-                    .getOrElse {
-                        _uiState.update { state -> state.copy(error = "Podaj datę w formacie YYYY-MM-DD") }
-                        return
-                    }
+            val parsedDate = parseVisitDate(date)
 
-            _uiState.update {
-                it.copy(
-                    selectedDate = date,
-                    availableSlots = generateSlots(parsedDate),
-                    selectedSlot = null,
-                    error = null,
-                )
+            if (parsedDate == null) {
+                _uiState.update { state -> state.copy(error = "Podaj date w formacie YYYY-MM-DD") }
+            } else {
+                _uiState.update {
+                    it.copy(
+                        selectedDate = date,
+                        availableSlots = generateSlots(parsedDate),
+                        selectedSlot = null,
+                        error = null,
+                    )
+                }
             }
         }
 
@@ -111,36 +108,23 @@ class CreateVisitViewModel
         }
 
         fun confirm(animalId: Long) {
-            val state = _uiState.value
-            val clinic = state.selectedClinic
-            val vet = state.selectedVet
-            val slot = state.selectedSlot
+            val request = _uiState.value.toCreateVisitDraft(animalId)
 
-            if (clinic == null || vet == null || slot == null) {
-                _uiState.update { it.copy(error = "Uzupełnij wszystkie dane wizyty") }
-                return
-            }
-
-            viewModelScope.launch {
-                _uiState.update { it.copy(isLoading = true, error = null) }
-                val request =
-                    CreateVisitRequest(
-                        animalId = animalId,
-                        clinicId = clinic.id,
-                        vetUserId = vet.userId,
-                        startsAt = slot,
-                        description = state.description.takeIf { it.isNotBlank() },
-                    )
-
-                runCatching { visitRepository.create(request) }
-                    .onSuccess {
-                        _uiState.update { it.copy(isLoading = false, success = true) }
-                    }
-                    .onFailure { error ->
-                        _uiState.update {
-                            it.copy(isLoading = false, error = error.message ?: "Nie udało się umówić wizyty")
+            if (request == null) {
+                _uiState.update { it.copy(error = "Uzupelnij wszystkie dane wizyty") }
+            } else {
+                viewModelScope.launch {
+                    _uiState.update { it.copy(isLoading = true, error = null) }
+                    runCatching { visitRepository.create(request) }
+                        .onSuccess {
+                            _uiState.update { it.copy(isLoading = false, success = true) }
                         }
-                    }
+                        .onFailure { error ->
+                            _uiState.update {
+                                it.copy(isLoading = false, error = error.message ?: "Nie udalo sie umowic wizyty")
+                            }
+                        }
+                }
             }
         }
 
@@ -176,18 +160,38 @@ class CreateVisitViewModel
         private fun loadVets(clinicId: Long) {
             viewModelScope.launch {
                 _uiState.update { it.copy(isLoading = true, error = null) }
-                runCatching { vetApi.getByClinicList(clinicId).map { response -> response.toDomain() } }
+                runCatching { vetRepository.getByClinic(clinicId) }
                     .onSuccess { vets ->
                         _uiState.update { it.copy(isLoading = false, vets = vets) }
                     }
                     .onFailure { error ->
                         _uiState.update {
-                            it.copy(isLoading = false, error = error.message ?: "Nie udało się załadować weterynarzy")
+                            it.copy(isLoading = false, error = error.message ?: "Nie udalo sie zaladowac weterynarzy")
                         }
                     }
             }
         }
     }
+
+private fun parseVisitDate(date: String): LocalDate? = runCatching { LocalDate.parse(date) }.getOrNull()
+
+private fun CreateVisitUiState.toCreateVisitDraft(animalId: Long): CreateVisitDraft? {
+    val clinic = selectedClinic
+    val vet = selectedVet
+    val slot = selectedSlot
+
+    return if (clinic == null || vet == null || slot == null) {
+        null
+    } else {
+        CreateVisitDraft(
+            animalId = animalId,
+            clinicId = clinic.id,
+            vetUserId = vet.userId,
+            startsAt = slot,
+            description = description.takeIf { it.isNotBlank() },
+        )
+    }
+}
 
 private fun generateSlots(date: LocalDate): List<String> {
     val start = LocalTime.of(FIRST_VISIT_HOUR, 0)
@@ -197,24 +201,3 @@ private fun generateSlots(date: LocalDate): List<String> {
         .map { time -> date.toString() + "T$time:00" }
         .toList()
 }
-
-private fun ClinicResponse.toDomain(): Clinic =
-    Clinic(
-        id = id,
-        clinicName = clinicName,
-        city = city,
-        street = street,
-        houseNumber = houseNumber,
-        postalCode = postalCode,
-        country = country,
-        phone = phone,
-        email = email,
-    )
-
-private fun VetListResponse.toDomain(): Vet =
-    Vet(
-        userId = userId,
-        firstName = firstName,
-        lastName = lastName,
-        specialization = specialization,
-    )

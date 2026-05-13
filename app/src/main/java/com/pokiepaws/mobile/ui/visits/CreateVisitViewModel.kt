@@ -22,6 +22,7 @@ import javax.inject.Inject
 
 private const val FIRST_VISIT_HOUR = 9
 private const val LAST_VISIT_HOUR = 16
+private const val LAST_VISIT_MINUTE = 30
 private const val VISIT_INTERVAL_MINUTES = 30L
 
 @HiltViewModel
@@ -186,16 +187,16 @@ class CreateVisitViewModel
                     }
             }
         }
-
-        private fun generateSlots(date: LocalDate): List<String> {
-            val start = LocalTime.of(FIRST_VISIT_HOUR, 0)
-            val end = LocalTime.of(LAST_VISIT_HOUR, 30)
-            return generateSequence(start) { it.plusMinutes(VISIT_INTERVAL_MINUTES) }
-                .takeWhile { !it.isAfter(end) }
-                .map { time -> "${date}T${time}:00" }
-                .toList()
-        }
     }
+
+private fun generateSlots(date: LocalDate): List<String> {
+    val start = LocalTime.of(FIRST_VISIT_HOUR, 0)
+    val end = LocalTime.of(LAST_VISIT_HOUR, LAST_VISIT_MINUTE)
+    return generateSequence(start) { it.plusMinutes(VISIT_INTERVAL_MINUTES) }
+        .takeWhile { !it.isAfter(end) }
+        .map { time -> date.toString() + "T$time:00" }
+        .toList()
+}
 
 private fun ClinicResponse.toDomain(): Clinic =
     Clinic(

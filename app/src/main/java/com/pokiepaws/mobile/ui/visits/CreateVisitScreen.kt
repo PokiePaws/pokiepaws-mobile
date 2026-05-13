@@ -49,6 +49,9 @@ import com.pokiepaws.mobile.domain.model.Clinic
 import com.pokiepaws.mobile.domain.model.Vet
 import com.pokiepaws.mobile.ui.theme.PokieBlueDark
 
+private const val TIME_LABEL_LENGTH = 5
+
+@Suppress("CyclomaticComplexMethod")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateVisitScreen(
@@ -71,19 +74,23 @@ fun CreateVisitScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = when (state.step) {
-                            CreateVisitStep.SELECT_CLINIC -> "Wybierz gabinet"
-                            CreateVisitStep.SELECT_VET -> "Wybierz weterynarza"
-                            CreateVisitStep.SELECT_SLOT -> "Wybierz termin"
-                            CreateVisitStep.SELECT_ANIMAL -> "Wybierz zwierzÄ™"
-                            CreateVisitStep.CONFIRM -> "Potwierdź wizytę"
-                        },
+                        text =
+                            when (state.step) {
+                                CreateVisitStep.SELECT_CLINIC -> "Wybierz gabinet"
+                                CreateVisitStep.SELECT_VET -> "Wybierz weterynarza"
+                                CreateVisitStep.SELECT_SLOT -> "Wybierz termin"
+                                CreateVisitStep.SELECT_ANIMAL -> "Wybierz zwierzÄ™"
+                                CreateVisitStep.CONFIRM -> "Potwierdź wizytę"
+                            },
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        if (state.step == CreateVisitStep.SELECT_CLINIC) onBack()
-                        else viewModel.goBack()
+                        if (state.step == CreateVisitStep.SELECT_CLINIC) {
+                            onBack()
+                        } else {
+                            viewModel.goBack()
+                        }
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -95,13 +102,15 @@ fun CreateVisitScreen(
         },
     ) { innerPadding ->
         Box(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(innerPadding),
+            modifier =
+                modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
         ) {
             when (state.step) {
                 CreateVisitStep.SELECT_ANIMAL,
-                CreateVisitStep.SELECT_CLINIC -> {
+                CreateVisitStep.SELECT_CLINIC,
+                -> {
                     if (state.isLoading) {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                     } else {
@@ -123,29 +132,32 @@ fun CreateVisitScreen(
                     }
                 }
 
-                CreateVisitStep.SELECT_SLOT -> SlotStep(
-                    selectedDate = state.selectedDate,
-                    slots = state.availableSlots,
-                    isLoading = state.isLoading,
-                    onDateSelected = viewModel::selectDate,
-                    onSlotSelected = viewModel::selectSlot,
-                )
+                CreateVisitStep.SELECT_SLOT ->
+                    SlotStep(
+                        selectedDate = state.selectedDate,
+                        slots = state.availableSlots,
+                        isLoading = state.isLoading,
+                        onDateSelected = viewModel::selectDate,
+                        onSlotSelected = viewModel::selectSlot,
+                    )
 
-                CreateVisitStep.CONFIRM -> ConfirmStep(
-                    state = state,
-                    description = state.description,
-                    onDescriptionChange = viewModel::updateDescription,
-                    onConfirm = { viewModel.confirm(animalId) },
-                    isLoading = state.isLoading,
-                )
+                CreateVisitStep.CONFIRM ->
+                    ConfirmStep(
+                        state = state,
+                        description = state.description,
+                        onDescriptionChange = viewModel::updateDescription,
+                        onConfirm = { viewModel.confirm(animalId) },
+                        isLoading = state.isLoading,
+                    )
             }
 
             // Snackbar błędu
             state.error?.let { err ->
                 Snackbar(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(16.dp),
+                    modifier =
+                        Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(16.dp),
                     dismissAction = {
                         TextButton(onClick = { viewModel.clearError() }) {
                             Text("OK")
@@ -185,9 +197,10 @@ private fun ClinicListStep(
     ) {
         items(clinics, key = { it.id }) { clinic ->
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onSelect(clinic) },
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable { onSelect(clinic) },
                 shape = RoundedCornerShape(16.dp),
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -241,9 +254,10 @@ private fun VetListStep(
     ) {
         items(vets, key = { it.userId }) { vet ->
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onSelect(vet) },
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable { onSelect(vet) },
                 shape = RoundedCornerShape(16.dp),
             ) {
                 Row(
@@ -251,12 +265,13 @@ private fun VetListStep(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Box(
-                        modifier = Modifier
-                            .background(
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                shape = RoundedCornerShape(12.dp),
-                            )
-                            .padding(12.dp),
+                        modifier =
+                            Modifier
+                                .background(
+                                    color = MaterialTheme.colorScheme.primaryContainer,
+                                    shape = RoundedCornerShape(12.dp),
+                                )
+                                .padding(12.dp),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text("👨‍⚕️", fontSize = 24.sp)
@@ -292,9 +307,10 @@ private fun SlotStep(
     onSlotSelected: (String) -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         var dateInput by remember { mutableStateOf(selectedDate ?: "") }
@@ -345,11 +361,12 @@ private fun SlotStep(
             )
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(slots) { slot ->
-                    val time = slot.substringAfter("T").take(5)
+                    val time = slot.substringAfter("T").take(TIME_LABEL_LENGTH)
                     OutlinedCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onSlotSelected(slot) },
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable { onSlotSelected(slot) },
                         shape = RoundedCornerShape(12.dp),
                     ) {
                         Text(
@@ -374,9 +391,10 @@ private fun ConfirmStep(
     isLoading: Boolean,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(
@@ -400,21 +418,24 @@ private fun ConfirmStep(
                 )
                 SummaryRow(
                     label = "📍 Adres",
-                    value = state.selectedClinic?.let {
-                        "${it.street} ${it.houseNumber}, ${it.city}"
-                    } ?: "",
+                    value =
+                        state.selectedClinic?.let {
+                            "${it.street} ${it.houseNumber}, ${it.city}"
+                        } ?: "",
                 )
                 SummaryRow(
                     label = "👨‍⚕️ Weterynarz",
-                    value = state.selectedVet?.let {
-                        "${it.firstName} ${it.lastName}"
-                    } ?: "",
+                    value =
+                        state.selectedVet?.let {
+                            "${it.firstName} ${it.lastName}"
+                        } ?: "",
                 )
                 SummaryRow(
                     label = "📅 Termin",
-                    value = state.selectedSlot
-                        ?.replace("T", " ")
-                        ?.take(16) ?: "",
+                    value =
+                        state.selectedSlot
+                            ?.replace("T", " ")
+                            ?.take(16) ?: "",
                 )
             }
         }

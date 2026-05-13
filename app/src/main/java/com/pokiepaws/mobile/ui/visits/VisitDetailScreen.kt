@@ -66,24 +66,28 @@ fun VisitDetailScreen(
         },
     ) { innerPadding ->
         Box(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(innerPadding),
+            modifier =
+                modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
         ) {
             when (val s = state) {
-                is VisitDetailUiState.Loading -> CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center),
-                )
+                is VisitDetailUiState.Loading ->
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                    )
 
-                is VisitDetailUiState.Error -> Text(
-                    text = "Błąd: ${s.message}",
-                    modifier = Modifier.align(Alignment.Center),
-                )
+                is VisitDetailUiState.Error ->
+                    Text(
+                        text = "Błąd: ${s.message}",
+                        modifier = Modifier.align(Alignment.Center),
+                    )
 
-                is VisitDetailUiState.Success -> VisitDetailContent(
-                    visit = s.visit,
-                    onCancelClick = { showCancelDialog = true },
-                )
+                is VisitDetailUiState.Success ->
+                    VisitDetailContent(
+                        visit = s.visit,
+                        onCancelClick = { showCancelDialog = true },
+                    )
             }
         }
     }
@@ -99,9 +103,10 @@ fun VisitDetailScreen(
                         showCancelDialog = false
                         viewModel.cancel(visitId, onDone = onBack)
                     },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                    ),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                        ),
                 ) {
                     Text("Anuluj wizytę")
                 }
@@ -122,9 +127,10 @@ private fun VisitDetailContent(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         // --- Podstawowe informacje ---
@@ -145,9 +151,10 @@ private fun VisitDetailContent(
         }
 
         // --- Dane medyczne (PP-14) — widoczne po wizycie ---
-        val hasMedicalData = !visit.disease.isNullOrBlank()
-                || !visit.diagnosis.isNullOrBlank()
-                || !visit.recommendations.isNullOrBlank()
+        val hasMedicalData =
+            !visit.disease.isNullOrBlank() ||
+                !visit.diagnosis.isNullOrBlank() ||
+                !visit.recommendations.isNullOrBlank()
 
         if (hasMedicalData) {
             Card(modifier = Modifier.fillMaxWidth()) {
@@ -175,9 +182,10 @@ private fun VisitDetailContent(
             Button(
                 onClick = onCancelClick,
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error,
-                ),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                    ),
             ) {
                 Text("Anuluj wizytę")
             }
@@ -193,9 +201,10 @@ private fun DetailRow(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(
@@ -218,9 +227,10 @@ private fun DetailSection(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
     ) {
         Text(
             text = label,

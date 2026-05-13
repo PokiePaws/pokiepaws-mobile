@@ -4,9 +4,9 @@ import com.pokiepaws.mobile.BuildConfig
 import com.pokiepaws.mobile.data.local.TokenManager
 import com.pokiepaws.mobile.data.remote.service.AnimalApiService
 import com.pokiepaws.mobile.data.remote.service.AuthApiService
-import com.pokiepaws.mobile.data.remote.service.VisitApiService
 import com.pokiepaws.mobile.data.remote.service.ClinicApiService
 import com.pokiepaws.mobile.data.remote.service.VetApiService
+import com.pokiepaws.mobile.data.remote.service.VisitApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -14,8 +14,8 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -25,6 +25,7 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
+    private const val HTTP_UNAUTHORIZED = 401
     private const val TIMEOUT_SECONDS = 30L
     private val publicAuthPaths =
         setOf(
@@ -56,7 +57,7 @@ object NetworkModule {
                 }
                 val response = chain.proceed(request.build())
 
-                if (response.code == 401 && !isPublicAuthRequest) {
+                if (response.code == HTTP_UNAUTHORIZED && !isPublicAuthRequest) {
                     runBlocking { tokenManager.clearToken() }
                 }
 

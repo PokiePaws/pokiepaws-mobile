@@ -239,9 +239,10 @@ fun AppNavigation(
 
             composable(
                 route = Screen.CreateVisit.route,
-                arguments = listOf(
-                    navArgument("animalId") { type = NavType.LongType },
-                ),
+                arguments =
+                    listOf(
+                        navArgument("animalId") { type = NavType.LongType },
+                    ),
             ) { backStackEntry ->
                 val animalId = backStackEntry.arguments?.getLong("animalId") ?: 0L
 

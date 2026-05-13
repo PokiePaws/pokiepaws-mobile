@@ -3,20 +3,23 @@ package com.pokiepaws.mobile.ui.visits
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -39,15 +42,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import com.pokiepaws.mobile.domain.model.Animal
 import com.pokiepaws.mobile.domain.model.Visit
-import com.pokiepaws.mobile.ui.animals.AnimalViewModel
 import com.pokiepaws.mobile.ui.animals.AnimalUiState
+import com.pokiepaws.mobile.ui.animals.AnimalViewModel
 import com.pokiepaws.mobile.ui.theme.PokieBlueDark
 import com.pokiepaws.mobile.ui.theme.PokieWhite
 
@@ -59,7 +57,7 @@ private const val ADD_BUTTON_SIZE = 48
 @Composable
 fun VisitListScreen(
     onVisitClick: (Long) -> Unit,
-    onCreateVisit: (Long) -> Unit, // animalId
+    onCreateVisit: (Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: VisitViewModel = hiltViewModel(),
     animalViewModel: AnimalViewModel = hiltViewModel(),
@@ -71,23 +69,26 @@ fun VisitListScreen(
     LaunchedEffect(viewModel) { viewModel.loadUpcoming() }
 
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface),
     ) {
         // Header wzorowany na AnimalListScreen
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(
-                        bottomStart = HEADER_ROUNDING.dp,
-                        bottomEnd = HEADER_ROUNDING.dp,
-                    ),
-                )
-                .padding(top = HEADER_TOP_PADDING.dp, bottom = HEADER_BOTTOM_PADDING.dp)
-                .padding(horizontal = 24.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape =
+                            RoundedCornerShape(
+                                bottomStart = HEADER_ROUNDING.dp,
+                                bottomEnd = HEADER_ROUNDING.dp,
+                            ),
+                    )
+                    .padding(top = HEADER_TOP_PADDING.dp, bottom = HEADER_BOTTOM_PADDING.dp)
+                    .padding(horizontal = 24.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -104,10 +105,11 @@ fun VisitListScreen(
                 // FAB — taki sam jak "+" w AnimalListScreen
                 IconButton(
                     onClick = { showAnimalPicker = true },
-                    modifier = Modifier
-                        .size(ADD_BUTTON_SIZE.dp)
-                        .clip(CircleShape)
-                        .background(PokieWhite.copy(alpha = 0.2f)),
+                    modifier =
+                        Modifier
+                            .size(ADD_BUTTON_SIZE.dp)
+                            .clip(CircleShape)
+                            .background(PokieWhite.copy(alpha = 0.2f)),
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -120,19 +122,21 @@ fun VisitListScreen(
 
         // Lista wizyt
         when (val s = state) {
-            is VisitUiState.Loading -> Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator()
-            }
+            is VisitUiState.Loading ->
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
 
-            is VisitUiState.Error -> Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(text = "Błąd: ${s.message}")
-            }
+            is VisitUiState.Error ->
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(text = "Błąd: ${s.message}")
+                }
 
             is VisitUiState.Success -> {
                 val visits = s.visits.sortedBy { it.startsAt }
@@ -206,17 +210,19 @@ private fun AnimalPickerDialog(
         title = { Text("Wybierz zwierzę") },
         text = {
             when (animalState) {
-                is AnimalUiState.Loading -> Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator()
-                }
+                is AnimalUiState.Loading ->
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        CircularProgressIndicator()
+                    }
 
-                is AnimalUiState.Error -> Text(
-                    text = "Nie udało się załadować zwierząt",
-                    color = MaterialTheme.colorScheme.error,
-                )
+                is AnimalUiState.Error ->
+                    Text(
+                        text = "Nie udało się załadować zwierząt",
+                        color = MaterialTheme.colorScheme.error,
+                    )
 
                 is AnimalUiState.Success -> {
                     if (animalState.animals.isEmpty()) {
@@ -225,8 +231,9 @@ private fun AnimalPickerDialog(
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             animalState.animals.forEach { animal ->
                                 Card(
-                                    modifier = Modifier
-                                        .fillMaxWidth(),
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth(),
                                     onClick = { onAnimalSelected(animal) },
                                 ) {
                                     Row(
@@ -299,9 +306,10 @@ private fun VisitCard(
             if (visit.status == "SCHEDULED") {
                 TextButton(
                     onClick = { onCancel(visit.id) },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error,
-                    ),
+                    colors =
+                        ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error,
+                        ),
                 ) {
                     Text("Anuluj wizytę")
                 }

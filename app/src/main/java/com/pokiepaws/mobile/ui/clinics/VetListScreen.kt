@@ -71,9 +71,10 @@ private fun VetCard(
     modifier: Modifier = Modifier,
 ) {
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .clickable { onClick() },
     ) {
         androidx.compose.foundation.layout.Column(Modifier.padding(16.dp)) {
             Text("${vet.firstName} ${vet.lastName}", style = MaterialTheme.typography.titleMedium)

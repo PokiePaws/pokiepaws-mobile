@@ -11,27 +11,31 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class VisitDetailViewModel @Inject constructor(
-    private val repo: VisitRepository,
-) : ViewModel() {
+class VisitDetailViewModel
+    @Inject
+    constructor(
+        private val repo: VisitRepository,
+    ) : ViewModel() {
+        private val _uiState = MutableStateFlow<VisitDetailUiState>(VisitDetailUiState.Loading)
+        val uiState: StateFlow<VisitDetailUiState> = _uiState.asStateFlow()
 
-    private val _uiState = MutableStateFlow<VisitDetailUiState>(VisitDetailUiState.Loading)
-    val uiState: StateFlow<VisitDetailUiState> = _uiState.asStateFlow()
+        fun load(visitId: Long) {
+            viewModelScope.launch {
+                _uiState.value = VisitDetailUiState.Loading
+                runCatching { repo.getById(visitId) }
+                    .onSuccess { _uiState.value = VisitDetailUiState.Success(it) }
+                    .onFailure { _uiState.value = VisitDetailUiState.Error(it.message ?: "Błąd") }
+            }
+        }
 
-    fun load(visitId: Long) {
-        viewModelScope.launch {
-            _uiState.value = VisitDetailUiState.Loading
-            runCatching { repo.getById(visitId) }
-                .onSuccess { _uiState.value = VisitDetailUiState.Success(it) }
-                .onFailure { _uiState.value = VisitDetailUiState.Error(it.message ?: "Błąd") }
+        fun cancel(
+            visitId: Long,
+            onDone: () -> Unit,
+        ) {
+            viewModelScope.launch {
+                runCatching { repo.cancel(visitId) }
+                    .onSuccess { onDone() }
+                    .onFailure { _uiState.value = VisitDetailUiState.Error(it.message ?: "Błąd anulowania") }
+            }
         }
     }
-
-    fun cancel(visitId: Long, onDone: () -> Unit) {
-        viewModelScope.launch {
-            runCatching { repo.cancel(visitId) }
-                .onSuccess { onDone() }
-                .onFailure { _uiState.value = VisitDetailUiState.Error(it.message ?: "Błąd anulowania") }
-        }
-    }
-}

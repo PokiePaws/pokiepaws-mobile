@@ -37,6 +37,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,6 +59,8 @@ import com.pokiepaws.mobile.ui.theme.PokieBlueDark
 import com.pokiepaws.mobile.ui.theme.PokieBlueLight
 import com.pokiepaws.mobile.ui.theme.PokieRed
 import com.pokiepaws.mobile.ui.theme.PokieWhite
+import com.pokiepaws.mobile.ui.visits.VisitUiState
+import com.pokiepaws.mobile.ui.visits.VisitViewModel
 
 // Poprawione nazewnictwo stałych (UPPER_SNAKE_CASE)
 private val PET_AVATAR_BG = Color(0xFFF0F8FA)
@@ -86,11 +89,18 @@ fun HomeScreen(
     onNavigateToAppointments: () -> Unit = {},
     onNavigateToClinics: () -> Unit = {},
     viewModel: AnimalViewModel = hiltViewModel(),
+    visitViewModel: VisitViewModel = hiltViewModel(),
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val animalState by viewModel.uiState.collectAsState()
+    val visitState by visitViewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        visitViewModel.loadUpcoming()
+    }
 
     HomeScreenContent(
-        uiState = uiState,
+        animalState = animalState,
+        visitState = visitState,
         onNavigateToNotifications = onNavigateToNotifications,
         modifier = modifier,
         onNavigateToAnimals = onNavigateToAnimals,
@@ -101,7 +111,8 @@ fun HomeScreen(
 
 @Composable
 fun HomeScreenContent(
-    uiState: AnimalUiState,
+    animalState: AnimalUiState,
+    visitState: VisitUiState,
     onNavigateToNotifications: () -> Unit,
     modifier: Modifier = Modifier,
     onNavigateToAnimals: () -> Unit = {},
@@ -137,7 +148,10 @@ fun HomeScreenContent(
                     textColor = PokieBlueDark,
                 )
 
-                AppointmentCard(onClick = onNavigateToAppointments)
+                UpcomingVisitCard(
+                    visitState = visitState,
+                    onClick = onNavigateToAppointments,
+                )
 
                 Spacer(modifier = Modifier.height(SECTION_SPACING.dp))
 
@@ -178,7 +192,7 @@ fun HomeScreenContent(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     contentPadding = PaddingValues(bottom = 12.dp),
                 ) {
-                    when (val state = uiState) {
+                    when (val state = animalState) {
                         is AnimalUiState.Loading -> {
                             item { CircularProgressIndicator(modifier = Modifier.padding(16.dp)) }
                         }
@@ -313,7 +327,8 @@ fun PetCard(
         modifier =
             modifier
                 .size(width = PET_CARD_WIDTH.dp, height = PET_CARD_HEIGHT.dp)
-                .clickable { onClick() },
+                .background(Color.Transparent),
+        onClick = onClick,
         shape = RoundedCornerShape(CORNER_RADIUS_PET_CARD.dp),
         colors = CardDefaults.cardColors(containerColor = PokieWhite),
         elevation = CardDefaults.cardElevation(4.dp),
@@ -343,6 +358,10 @@ fun PetCard(
     }
 }
 
+/**
+ * Zostawiasz swoje AppointmentCard jeśli chcesz,
+ * ale teraz HomeScreen używa UpcomingVisitCard().
+ */
 @Composable
 fun AppointmentCard(
     onClick: () -> Unit,

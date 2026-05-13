@@ -11,7 +11,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -43,12 +42,17 @@ import com.pokiepaws.mobile.ui.auth.EmailVerificationScreen
 import com.pokiepaws.mobile.ui.auth.ForgotPasswordScreen
 import com.pokiepaws.mobile.ui.auth.LoginScreen
 import com.pokiepaws.mobile.ui.auth.RegisterScreen
+import com.pokiepaws.mobile.ui.clinics.ClinicsScreen
+import com.pokiepaws.mobile.ui.clinics.VetListScreen
 import com.pokiepaws.mobile.ui.notifications.NotificationScreen
 import com.pokiepaws.mobile.ui.profile.HomeScreen
 import com.pokiepaws.mobile.ui.profile.ProfileScreen
 import com.pokiepaws.mobile.ui.theme.PokieBlue
 import com.pokiepaws.mobile.ui.theme.PokieBlueLight
 import com.pokiepaws.mobile.ui.theme.PokieWhite
+import com.pokiepaws.mobile.ui.visits.CreateVisitScreen
+import com.pokiepaws.mobile.ui.visits.VisitDetailScreen
+import com.pokiepaws.mobile.ui.visits.VisitListScreen
 import kotlinx.coroutines.launch
 
 @Composable
@@ -73,7 +77,8 @@ fun AppNavigation(
         return
     }
 
-    val dynamicStartDestination = if (tokenState != null) Screen.Home.route else Screen.Login.route
+    val dynamicStartDestination =
+        if (!tokenState.isNullOrBlank() && tokenState != "loading") Screen.Home.route else Screen.Login.route
 
     Scaffold(
         modifier = modifier,
@@ -85,17 +90,13 @@ fun AppNavigation(
                 ) {
                     bottomNavItems.forEach { item ->
                         val isSelected =
-                            navBackStackEntry?.destination?.hierarchy?.any {
-                                it.route == item.screen.route
-                            } == true
+                            navBackStackEntry?.destination?.hierarchy?.any { it.route == item.screen.route } == true
 
                         NavigationBarItem(
                             selected = isSelected,
                             onClick = {
                                 navController.navigate(item.screen.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
+                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                                     launchSingleTop = true
                                     restoreState = true
                                 }
@@ -187,18 +188,16 @@ fun AppNavigation(
             composable(Screen.AnimalList.route) {
                 AnimalListScreen(
                     onAddAnimal = { navController.navigate(Screen.AddAnimal.route) },
-                    onAnimalClick = { id -> navController.navigate("animal_details/$id") },
+                    onAnimalClick = { id -> navController.navigate(Screen.AnimalDetail.createRoute(id)) },
                 )
             }
 
             composable(Screen.AddAnimal.route) {
-                AddAnimalScreen(
-                    onBack = { navController.popBackStack() },
-                )
+                AddAnimalScreen(onBack = { navController.popBackStack() })
             }
 
             composable(
-                route = "animal_details/{animalId}",
+                route = Screen.AnimalDetail.route,
                 arguments = listOf(navArgument("animalId") { type = NavType.LongType }),
             ) { backStackEntry ->
                 val animalId = backStackEntry.arguments?.getLong("animalId") ?: 0L
@@ -208,8 +207,66 @@ fun AppNavigation(
                 )
             }
 
-            composable(Screen.ClinicList.route) { PlaceholderScreen("🏥 Gabinety") }
-            composable(Screen.AppointmentList.route) { PlaceholderScreen("📅 Wizyty") }
+            composable(Screen.ClinicList.route) {
+                ClinicsScreen(
+                    onClinicClick = { clinicId ->
+                        navController.navigate(Screen.VetList.createRoute(clinicId))
+                    },
+                )
+            }
+
+            composable(
+                route = Screen.VetList.route,
+                arguments = listOf(navArgument("clinicId") { type = NavType.LongType }),
+            ) { backStackEntry ->
+                val clinicId = backStackEntry.arguments?.getLong("clinicId") ?: 0L
+                VetListScreen(
+                    clinicId = clinicId,
+                    onVetClick = {},
+                )
+            }
+
+            composable(Screen.AppointmentList.route) {
+                VisitListScreen(
+                    onVisitClick = { id ->
+                        navController.navigate(Screen.AppointmentDetail.createRoute(id))
+                    },
+                    onCreateVisit = { animalId ->
+                        navController.navigate(Screen.CreateVisit.createRoute(animalId))
+                    },
+                )
+            }
+
+            composable(
+                route = Screen.CreateVisit.route,
+                arguments =
+                    listOf(
+                        navArgument("animalId") { type = NavType.LongType },
+                    ),
+            ) { backStackEntry ->
+                val animalId = backStackEntry.arguments?.getLong("animalId") ?: 0L
+
+                CreateVisitScreen(
+                    animalId = animalId,
+                    onBack = { navController.popBackStack() },
+                    onSuccess = {
+                        navController.navigate(Screen.AppointmentList.route) {
+                            popUpTo(Screen.CreateVisit.route) { inclusive = true }
+                        }
+                    },
+                )
+            }
+
+            composable(
+                route = Screen.AppointmentDetail.route,
+                arguments = listOf(navArgument("appointmentId") { type = NavType.LongType }),
+            ) { backStackEntry ->
+                val visitId = backStackEntry.arguments?.getLong("appointmentId") ?: 0L
+                VisitDetailScreen(
+                    visitId = visitId,
+                    onBack = { navController.popBackStack() },
+                )
+            }
 
             composable(Screen.Profile.route) {
                 ProfileScreen(
@@ -224,19 +281,6 @@ fun AppNavigation(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun PlaceholderScreen(
-    name: String,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(name, style = MaterialTheme.typography.headlineMedium)
     }
 }
 

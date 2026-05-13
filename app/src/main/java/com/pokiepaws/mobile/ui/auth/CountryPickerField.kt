@@ -101,6 +101,7 @@ fun PhoneNumberField(
 fun CountryPickerDialog(
     onCountrySelected: (Country) -> Unit,
     onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var searchQuery by remember { mutableStateOf("") }
 
@@ -114,7 +115,7 @@ fun CountryPickerDialog(
         Card(
             shape = RoundedCornerShape(16.dp),
             modifier =
-                Modifier
+                modifier
                     .fillMaxWidth()
                     .heightIn(max = 500.dp),
         ) {

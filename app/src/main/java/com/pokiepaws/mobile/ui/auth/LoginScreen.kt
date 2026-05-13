@@ -57,6 +57,7 @@ fun LoginScreen(
     onLoginSuccess: (String, String) -> Unit,
     onRegisterClick: () -> Unit,
     onForgotPasswordClick: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: AuthViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -80,7 +81,7 @@ fun LoginScreen(
     ) { innerPadding ->
         Box(
             modifier =
-                Modifier
+                modifier
                     .fillMaxSize()
                     .padding(innerPadding),
         ) {

@@ -2,8 +2,7 @@ package com.pokiepaws.mobile.ui.clinics
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pokiepaws.mobile.data.remote.service.VetApiService
-import com.pokiepaws.mobile.domain.model.Vet
+import com.pokiepaws.mobile.domain.repository.VetRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +13,7 @@ import javax.inject.Inject
 class VetsViewModel
     @Inject
     constructor(
-        private val api: VetApiService,
+        private val vetRepository: VetRepository,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow<VetsUiState>(VetsUiState.Loading)
         val uiState: StateFlow<VetsUiState> = _uiState
@@ -22,20 +21,8 @@ class VetsViewModel
         fun load(clinicId: Long) {
             viewModelScope.launch {
                 _uiState.value = VetsUiState.Loading
-                runCatching { api.getByClinicList(clinicId) }
-                    .onSuccess { list ->
-                        _uiState.value =
-                            VetsUiState.Success(
-                                list.map {
-                                    Vet(
-                                        userId = it.userId,
-                                        firstName = it.firstName,
-                                        lastName = it.lastName,
-                                        specialization = it.specialization,
-                                    )
-                                },
-                            )
-                    }
+                runCatching { vetRepository.getByClinic(clinicId) }
+                    .onSuccess { vets -> _uiState.value = VetsUiState.Success(vets) }
                     .onFailure { _uiState.value = VetsUiState.Error(it.message ?: "Load vets failed") }
             }
         }

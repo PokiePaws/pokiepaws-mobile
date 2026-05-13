@@ -32,10 +32,11 @@ import com.pokiepaws.mobile.ui.theme.PokieWhite
 fun EmailVerificationScreen(
     email: String,
     onBackToLogin: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Box(
         modifier =
-            Modifier
+            modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background),
     ) {

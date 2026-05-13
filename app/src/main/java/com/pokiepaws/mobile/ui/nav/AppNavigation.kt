@@ -34,7 +34,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.pokiepaws.mobile.data.local.TokenManager
+import com.pokiepaws.mobile.domain.repository.AuthRepository
 import com.pokiepaws.mobile.ui.animals.AddAnimalScreen
 import com.pokiepaws.mobile.ui.animals.AnimalListScreen
 import com.pokiepaws.mobile.ui.animals.AnimalScreen
@@ -59,10 +59,10 @@ import kotlinx.coroutines.launch
 fun AppNavigation(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    tokenManager: TokenManager,
+    authRepository: AuthRepository,
 ) {
     val scope = rememberCoroutineScope()
-    val tokenState by tokenManager.token.collectAsState(initial = "loading")
+    val tokenState by authRepository.token.collectAsState(initial = "loading")
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -272,7 +272,7 @@ fun AppNavigation(
                 ProfileScreen(
                     onLogout = {
                         scope.launch {
-                            tokenManager.clearToken()
+                            authRepository.logout()
                             navController.navigate(Screen.Login.route) {
                                 popUpTo(0) { inclusive = true }
                             }

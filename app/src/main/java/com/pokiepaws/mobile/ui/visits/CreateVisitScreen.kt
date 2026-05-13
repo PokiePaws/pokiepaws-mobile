@@ -1,3 +1,5 @@
+@file:Suppress("FunctionNaming")
+
 package com.pokiepaws.mobile.ui.visits
 
 import androidx.compose.foundation.background
@@ -51,7 +53,6 @@ import com.pokiepaws.mobile.ui.theme.PokieBlueDark
 
 private const val TIME_LABEL_LENGTH = 5
 
-@Suppress("CyclomaticComplexMethod")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateVisitScreen(
@@ -71,33 +72,10 @@ fun CreateVisitScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text =
-                            when (state.step) {
-                                CreateVisitStep.SELECT_CLINIC -> "Wybierz gabinet"
-                                CreateVisitStep.SELECT_VET -> "Wybierz weterynarza"
-                                CreateVisitStep.SELECT_SLOT -> "Wybierz termin"
-                                CreateVisitStep.SELECT_ANIMAL -> "Wybierz zwierzÄ™"
-                                CreateVisitStep.CONFIRM -> "Potwierdź wizytę"
-                            },
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        if (state.step == CreateVisitStep.SELECT_CLINIC) {
-                            onBack()
-                        } else {
-                            viewModel.goBack()
-                        }
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Wróć",
-                        )
-                    }
-                },
+            CreateVisitTopBar(
+                step = state.step,
+                onBack = onBack,
+                onPreviousStep = viewModel::goBack,
             )
         },
     ) { innerPadding ->
@@ -107,69 +85,137 @@ fun CreateVisitScreen(
                     .fillMaxSize()
                     .padding(innerPadding),
         ) {
-            when (state.step) {
-                CreateVisitStep.SELECT_ANIMAL,
-                CreateVisitStep.SELECT_CLINIC,
-                -> {
-                    if (state.isLoading) {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                    } else {
-                        ClinicListStep(
-                            clinics = state.clinics,
-                            onSelect = viewModel::selectClinic,
-                        )
-                    }
-                }
+            CreateVisitContent(
+                animalId = animalId,
+                state = state,
+                viewModel = viewModel,
+            )
 
-                CreateVisitStep.SELECT_VET -> {
-                    if (state.isLoading) {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                    } else {
-                        VetListStep(
-                            vets = state.vets,
-                            onSelect = viewModel::selectVet,
-                        )
-                    }
-                }
-
-                CreateVisitStep.SELECT_SLOT ->
-                    SlotStep(
-                        selectedDate = state.selectedDate,
-                        slots = state.availableSlots,
-                        isLoading = state.isLoading,
-                        onDateSelected = viewModel::selectDate,
-                        onSlotSelected = viewModel::selectSlot,
-                    )
-
-                CreateVisitStep.CONFIRM ->
-                    ConfirmStep(
-                        state = state,
-                        description = state.description,
-                        onDescriptionChange = viewModel::updateDescription,
-                        onConfirm = { viewModel.confirm(animalId) },
-                        isLoading = state.isLoading,
-                    )
-            }
-
-            // Snackbar błędu
-            state.error?.let { err ->
-                Snackbar(
-                    modifier =
-                        Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(16.dp),
-                    dismissAction = {
-                        TextButton(onClick = { viewModel.clearError() }) {
-                            Text("OK")
-                        }
-                    },
-                ) {
-                    Text(err)
-                }
-            }
+            ErrorSnackbar(
+                error = state.error,
+                onDismiss = viewModel::clearError,
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CreateVisitTopBar(
+    step: CreateVisitStep,
+    onBack: () -> Unit,
+    onPreviousStep: () -> Unit,
+) {
+    TopAppBar(
+        title = { Text(text = step.title) },
+        navigationIcon = {
+            IconButton(
+                onClick = {
+                    if (step == CreateVisitStep.SELECT_CLINIC) {
+                        onBack()
+                    } else {
+                        onPreviousStep()
+                    }
+                },
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Wroc",
+                )
+            }
+        },
+    )
+}
+
+@Composable
+private fun CreateVisitContent(
+    animalId: Long,
+    state: CreateVisitUiState,
+    viewModel: CreateVisitViewModel,
+) {
+    when (state.step) {
+        CreateVisitStep.SELECT_ANIMAL,
+        CreateVisitStep.SELECT_CLINIC,
+        ->
+            LoadingOrContent(isLoading = state.isLoading) {
+                ClinicListStep(
+                    clinics = state.clinics,
+                    onSelect = viewModel::selectClinic,
+                )
+            }
+
+        CreateVisitStep.SELECT_VET ->
+            LoadingOrContent(isLoading = state.isLoading) {
+                VetListStep(
+                    vets = state.vets,
+                    onSelect = viewModel::selectVet,
+                )
+            }
+
+        CreateVisitStep.SELECT_SLOT ->
+            SlotStep(
+                selectedDate = state.selectedDate,
+                slots = state.availableSlots,
+                isLoading = state.isLoading,
+                onDateSelected = viewModel::selectDate,
+                onSlotSelected = viewModel::selectSlot,
+            )
+
+        CreateVisitStep.CONFIRM ->
+            ConfirmStep(
+                state = state,
+                description = state.description,
+                onDescriptionChange = viewModel::updateDescription,
+                onConfirm = { viewModel.confirm(animalId) },
+                isLoading = state.isLoading,
+            )
+    }
+}
+
+@Composable
+private fun LoadingOrContent(
+    isLoading: Boolean,
+    content: @Composable () -> Unit,
+) {
+    if (isLoading) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+    } else {
+        content()
+    }
+}
+
+@Composable
+private fun ErrorSnackbar(
+    error: String?,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    error?.let { err ->
+        Snackbar(
+            modifier = modifier.padding(16.dp),
+            dismissAction = {
+                TextButton(onClick = onDismiss) {
+                    Text("OK")
+                }
+            },
+        ) {
+            Text(err)
+        }
+    }
+}
+
+private val CreateVisitStep.title: String
+    get() =
+        when (this) {
+            CreateVisitStep.SELECT_CLINIC -> "Wybierz gabinet"
+            CreateVisitStep.SELECT_VET -> "Wybierz weterynarza"
+            CreateVisitStep.SELECT_SLOT -> "Wybierz termin"
+            CreateVisitStep.SELECT_ANIMAL -> "Wybierz zwierze"
+            CreateVisitStep.CONFIRM -> "Potwierdz wizyte"
+        }
 
 @Composable
 private fun ClinicListStep(
@@ -179,10 +225,10 @@ private fun ClinicListStep(
     if (clinics.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("🏥", fontSize = 48.sp)
+                Text("đźŹĄ", fontSize = 48.sp)
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "Brak dostępnych gabinetów",
+                    text = "Brak dostÄ™pnych gabinetĂłw",
                     fontWeight = FontWeight.Bold,
                     color = PokieBlueDark,
                 )
@@ -218,7 +264,7 @@ private fun ClinicListStep(
                     )
                     clinic.phone?.let {
                         Text(
-                            text = "📞 $it",
+                            text = "đź“ž $it",
                             style = MaterialTheme.typography.bodySmall,
                         )
                     }
@@ -236,7 +282,7 @@ private fun VetListStep(
     if (vets.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("👨‍⚕️", fontSize = 48.sp)
+                Text("đź‘¨â€Ťâš•ď¸Ź", fontSize = 48.sp)
                 Spacer(Modifier.height(8.dp))
                 Text(
                     text = "Brak weterynarzy w tym gabinecie",
@@ -274,7 +320,7 @@ private fun VetListStep(
                                 .padding(12.dp),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text("👨‍⚕️", fontSize = 24.sp)
+                        Text("đź‘¨â€Ťâš•ď¸Ź", fontSize = 24.sp)
                     }
                     Spacer(Modifier.width(12.dp))
                     Column {
@@ -316,7 +362,7 @@ private fun SlotStep(
         var dateInput by remember { mutableStateOf(selectedDate ?: "") }
 
         Text(
-            text = "Wybierz datę wizyty",
+            text = "Wybierz datÄ™ wizyty",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             color = PokieBlueDark,
@@ -336,7 +382,7 @@ private fun SlotStep(
             modifier = Modifier.fillMaxWidth(),
             enabled = dateInput.matches(Regex("\\d{4}-\\d{2}-\\d{2}")),
         ) {
-            Text("Sprawdź dostępne terminy")
+            Text("SprawdĹş dostÄ™pne terminy")
         }
 
         if (isLoading) {
@@ -349,13 +395,13 @@ private fun SlotStep(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "Brak wolnych terminów w tym dniu",
+                    text = "Brak wolnych terminĂłw w tym dniu",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         } else if (slots.isNotEmpty()) {
             Text(
-                text = "Dostępne godziny:",
+                text = "DostÄ™pne godziny:",
                 style = MaterialTheme.typography.titleSmall,
                 color = PokieBlueDark,
             )
@@ -370,7 +416,7 @@ private fun SlotStep(
                         shape = RoundedCornerShape(12.dp),
                     ) {
                         Text(
-                            text = "🕐 $time",
+                            text = "đź• $time",
                             modifier = Modifier.padding(16.dp),
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Medium,
@@ -413,25 +459,25 @@ private fun ConfirmStep(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 SummaryRow(
-                    label = "🏥 Gabinet",
+                    label = "đźŹĄ Gabinet",
                     value = state.selectedClinic?.clinicName ?: "",
                 )
                 SummaryRow(
-                    label = "📍 Adres",
+                    label = "đź“Ť Adres",
                     value =
                         state.selectedClinic?.let {
                             "${it.street} ${it.houseNumber}, ${it.city}"
                         } ?: "",
                 )
                 SummaryRow(
-                    label = "👨‍⚕️ Weterynarz",
+                    label = "đź‘¨â€Ťâš•ď¸Ź Weterynarz",
                     value =
                         state.selectedVet?.let {
                             "${it.firstName} ${it.lastName}"
                         } ?: "",
                 )
                 SummaryRow(
-                    label = "📅 Termin",
+                    label = "đź“… Termin",
                     value =
                         state.selectedSlot
                             ?.replace("T", " ")
@@ -444,7 +490,7 @@ private fun ConfirmStep(
             value = description,
             onValueChange = onDescriptionChange,
             label = { Text("Opis wizyty (opcjonalnie)") },
-            placeholder = { Text("Powód wizyty, objawy...") },
+            placeholder = { Text("PowĂłd wizyty, objawy...") },
             modifier = Modifier.fillMaxWidth(),
             minLines = 3,
             maxLines = 5,
@@ -465,7 +511,7 @@ private fun ConfirmStep(
                     strokeWidth = 2.dp,
                 )
             } else {
-                Text("Umów wizytę")
+                Text("UmĂłw wizytÄ™")
             }
         }
     }

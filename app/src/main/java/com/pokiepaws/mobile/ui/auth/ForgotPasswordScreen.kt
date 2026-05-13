@@ -45,6 +45,7 @@ import com.pokiepaws.mobile.ui.theme.PokieBlue
 fun ForgotPasswordScreen(
     onNavigateBack: () -> Unit,
     onEmailSent: (String) -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: AuthViewModel = hiltViewModel(),
 ) {
     var email by remember { mutableStateOf("") }
@@ -58,7 +59,7 @@ fun ForgotPasswordScreen(
 
     Box(
         modifier =
-            Modifier
+            modifier
                 .fillMaxSize()
                 .background(PokieBlue),
     ) {

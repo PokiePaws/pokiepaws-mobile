@@ -21,8 +21,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
@@ -81,7 +81,10 @@ data class ProfileMenuItem(
 )
 
 @Composable
-fun ProfileScreen(onLogout: () -> Unit) {
+fun ProfileScreen(
+    onLogout: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val menuItems =
         remember {
             listOf(
@@ -114,7 +117,7 @@ fun ProfileScreen(onLogout: () -> Unit) {
 
     Box(
         modifier =
-            Modifier
+            modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background),
     ) {
@@ -222,7 +225,7 @@ private fun LogoutButton(onLogout: () -> Unit) {
         modifier = Modifier.fillMaxWidth(),
     ) {
         Icon(
-            imageVector = Icons.Default.ExitToApp,
+            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
             contentDescription = null,
             tint = Color(LOGOUT_COLOR),
         )

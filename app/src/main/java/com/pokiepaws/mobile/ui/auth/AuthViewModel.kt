@@ -1,20 +1,14 @@
 package com.pokiepaws.mobile.ui.auth
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pokiepaws.mobile.data.local.TokenManager
-import com.pokiepaws.mobile.data.remote.dto.auth.ForgotPasswordRequest
-import com.pokiepaws.mobile.data.remote.dto.auth.LoginRequest
-import com.pokiepaws.mobile.data.remote.dto.auth.RegisterRequest
-import com.pokiepaws.mobile.data.remote.service.AuthApiService
+import com.pokiepaws.mobile.domain.model.RegistrationDraft
+import com.pokiepaws.mobile.domain.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
-import java.io.IOException
 import javax.inject.Inject
 
 sealed class AuthUiState {
@@ -33,8 +27,7 @@ sealed class AuthUiState {
 class AuthViewModel
     @Inject
     constructor(
-        private val authApiService: AuthApiService,
-        private val tokenManager: TokenManager,
+        private val authRepository: AuthRepository,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
         val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
@@ -45,17 +38,13 @@ class AuthViewModel
         ) {
             viewModelScope.launch {
                 _uiState.value = AuthUiState.Loading
-                try {
-                    val response = authApiService.login(LoginRequest(email, password))
-                    tokenManager.saveToken(response.token)
-                    _uiState.value = AuthUiState.LoginSuccess(response.token, response.role)
-                } catch (e: HttpException) {
-                    Log.e("AuthViewModel", "Błąd HTTP przy logowaniu", e)
-                    _uiState.value = AuthUiState.Error(e.message ?: "Błąd logowania")
-                } catch (e: IOException) {
-                    Log.e("AuthViewModel", "Błąd połączenia przy logowaniu", e)
-                    _uiState.value = AuthUiState.Error(e.message ?: "Błąd połączenia z serwerem")
-                }
+                runCatching { authRepository.login(email, password) }
+                    .onSuccess { session ->
+                        _uiState.value = AuthUiState.LoginSuccess(session.token, session.role)
+                    }
+                    .onFailure { error ->
+                        _uiState.value = AuthUiState.Error(error.message ?: "Blad logowania")
+                    }
             }
         }
 
@@ -74,26 +63,26 @@ class AuthViewModel
         ) {
             viewModelScope.launch {
                 _uiState.value = AuthUiState.Loading
-                try {
-                    val response =
-                        authApiService.register(
-                            RegisterRequest(
-                                email, password, firstName, lastName, phoneNumber,
-                                street, houseNumber, apartmentNumber, city, postalCode, country,
-                            ),
-                        )
-                    if (response.isSuccessful) {
-                        _uiState.value = AuthUiState.RegisterSuccess
-                    } else {
-                        _uiState.value = AuthUiState.Error("Błąd: ${response.code()}")
+                val registration =
+                    RegistrationDraft(
+                        email = email,
+                        password = password,
+                        firstName = firstName,
+                        lastName = lastName,
+                        phoneNumber = phoneNumber,
+                        street = street,
+                        houseNumber = houseNumber,
+                        apartmentNumber = apartmentNumber,
+                        city = city,
+                        postalCode = postalCode,
+                        country = country,
+                    )
+
+                runCatching { authRepository.register(registration) }
+                    .onSuccess { _uiState.value = AuthUiState.RegisterSuccess }
+                    .onFailure { error ->
+                        _uiState.value = AuthUiState.Error(error.message ?: "Blad polaczenia z serwerem")
                     }
-                } catch (e: HttpException) {
-                    Log.e("AuthViewModel", "Błąd HTTP przy rejestracji", e)
-                    _uiState.value = AuthUiState.Error(e.message ?: "Błąd połączenia z serwerem")
-                } catch (e: IOException) {
-                    Log.e("AuthViewModel", "Błąd połączenia przy rejestracji", e)
-                    _uiState.value = AuthUiState.Error(e.message ?: "Błąd połączenia z serwerem")
-                }
             }
         }
 
@@ -105,20 +94,11 @@ class AuthViewModel
 
             viewModelScope.launch {
                 _uiState.value = AuthUiState.Loading
-                try {
-                    val response = authApiService.forgotPassword(ForgotPasswordRequest(email))
-                    if (response.isSuccessful) {
-                        _uiState.value = AuthUiState.Idle
-                    } else {
-                        _uiState.value = AuthUiState.Error("Nie udało się wysłać linku. Sprawdź email.")
+                runCatching { authRepository.forgotPassword(email) }
+                    .onSuccess { _uiState.value = AuthUiState.Idle }
+                    .onFailure {
+                        _uiState.value = AuthUiState.Error("Nie udalo sie wyslac linku. Sprawdz email.")
                     }
-                } catch (e: HttpException) {
-                    Log.e("AuthViewModel", "Błąd HTTP przy resetowaniu hasła", e)
-                    _uiState.value = AuthUiState.Error(e.message ?: "Błąd serwera")
-                } catch (e: IOException) {
-                    Log.e("AuthViewModel", "Błąd połączenia przy resetowaniu hasła", e)
-                    _uiState.value = AuthUiState.Error("Błąd połączenia z serwerem.")
-                }
             }
         }
 

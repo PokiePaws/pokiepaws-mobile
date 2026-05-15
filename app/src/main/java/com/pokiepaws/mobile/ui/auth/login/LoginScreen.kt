@@ -1,4 +1,4 @@
-package com.pokiepaws.mobile.ui.auth
+package com.pokiepaws.mobile.ui.auth.login
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,13 +28,13 @@ fun LoginScreen(
     onRegisterClick: () -> Unit,
     onForgotPasswordClick: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: AuthViewModel = hiltViewModel(),
+    viewModel: LoginViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.loginUiState.collectAsState()
+    val state by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
-        viewModel.loginEffects.collectLatest { effect ->
+        viewModel.effects.collectLatest { effect ->
             when (effect) {
                 is LoginEffect.NavigateAfterLogin -> onLoginSuccess(effect.token, effect.role)
                 is LoginEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
@@ -67,7 +67,7 @@ fun LoginScreen(
                         when (event) {
                             LoginEvent.RegisterClicked -> onRegisterClick()
                             LoginEvent.ForgotPasswordClicked -> onForgotPasswordClick()
-                            else -> viewModel.onLoginEvent(event)
+                            else -> viewModel.onEvent(event)
                         }
                     },
                 )

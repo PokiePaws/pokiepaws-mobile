@@ -1,4 +1,4 @@
-package com.pokiepaws.mobile.ui.auth
+package com.pokiepaws.mobile.ui.auth.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement

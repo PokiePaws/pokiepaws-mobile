@@ -41,10 +41,10 @@ import com.pokiepaws.mobile.domain.repository.AuthRepository
 import com.pokiepaws.mobile.ui.animals.AddAnimalScreen
 import com.pokiepaws.mobile.ui.animals.AnimalListScreen
 import com.pokiepaws.mobile.ui.animals.AnimalScreen
-import com.pokiepaws.mobile.ui.auth.EmailVerificationScreen
-import com.pokiepaws.mobile.ui.auth.ForgotPasswordScreen
-import com.pokiepaws.mobile.ui.auth.LoginScreen
-import com.pokiepaws.mobile.ui.auth.RegisterScreen
+import com.pokiepaws.mobile.ui.auth.emailverification.EmailVerificationScreen
+import com.pokiepaws.mobile.ui.auth.forgotpassword.ForgotPasswordScreen
+import com.pokiepaws.mobile.ui.auth.login.LoginScreen
+import com.pokiepaws.mobile.ui.auth.register.RegisterScreen
 import com.pokiepaws.mobile.ui.clinics.ClinicsScreen
 import com.pokiepaws.mobile.ui.clinics.VetListScreen
 import com.pokiepaws.mobile.ui.notifications.NotificationScreen

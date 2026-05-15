@@ -1,4 +1,4 @@
-package com.pokiepaws.mobile.ui.auth
+package com.pokiepaws.mobile.ui.auth.register
 
 import com.pokiepaws.mobile.domain.model.RegistrationDraft
 import com.pokiepaws.mobile.util.Countries
@@ -20,6 +20,8 @@ data class RegisterUiState(
     val apartmentNumber: String = "",
     val city: String = "",
     val postalCode: String = "",
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null,
 ) {
     val passwordsMatch: Boolean get() = password == confirmPassword || confirmPassword.isEmpty()
     val emailValidationError: EmailValidationError? get() = validateEmail(email)

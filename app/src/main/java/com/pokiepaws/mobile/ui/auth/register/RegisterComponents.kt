@@ -1,8 +1,9 @@
-package com.pokiepaws.mobile.ui.auth
+package com.pokiepaws.mobile.ui.auth.register
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -392,7 +393,7 @@ private fun BoxBackground(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    androidx.compose.foundation.layout.Box(
+    Box(
         modifier =
             modifier
                 .fillMaxSize()

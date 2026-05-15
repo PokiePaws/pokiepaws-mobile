@@ -1,4 +1,4 @@
-package com.pokiepaws.mobile.ui.auth
+package com.pokiepaws.mobile.ui.auth.emailverification
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer

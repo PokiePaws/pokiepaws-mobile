@@ -1,4 +1,4 @@
-package com.pokiepaws.mobile.ui.auth
+package com.pokiepaws.mobile.ui.auth.emailverification
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -12,17 +12,35 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun EmailVerificationScreen(
     email: String,
     onBackToLogin: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: EmailVerificationViewModel = hiltViewModel(),
 ) {
-    val state = EmailVerificationUiState(email = email)
+    val state by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(email) {
+        viewModel.setEmail(email)
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.effects.collectLatest { effect ->
+            when (effect) {
+                EmailVerificationEffect.NavigateBackToLogin -> onBackToLogin()
+            }
+        }
+    }
 
     Box(
         modifier =
@@ -47,11 +65,7 @@ fun EmailVerificationScreen(
 
             EmailVerificationCard(
                 state = state,
-                onEvent = { event ->
-                    when (event) {
-                        EmailVerificationEvent.BackToLoginClicked -> onBackToLogin()
-                    }
-                },
+                onEvent = viewModel::onEvent,
             )
 
             Spacer(modifier = Modifier.height(48.dp))

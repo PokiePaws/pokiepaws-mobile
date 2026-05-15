@@ -1,4 +1,4 @@
-package com.pokiepaws.mobile.ui.auth
+package com.pokiepaws.mobile.ui.auth.emailverification
 
 data class EmailVerificationUiState(
     val email: String,

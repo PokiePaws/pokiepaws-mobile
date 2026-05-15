@@ -1,4 +1,4 @@
-package com.pokiepaws.mobile.ui.auth
+package com.pokiepaws.mobile.ui.auth.forgotpassword
 
 data class ForgotPasswordUiState(
     val email: String = "",

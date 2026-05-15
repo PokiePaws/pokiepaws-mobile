@@ -22,8 +22,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.model.Vet
 
 @Composable
@@ -52,7 +54,7 @@ private fun VetsContent(
 ) {
     when (state) {
         VetsUiState.Loading -> LoadingView()
-        is VetsUiState.Error -> MessageView(text = "Blad: ${state.message}")
+        is VetsUiState.Error -> MessageView(text = stringResource(R.string.error_with_message, state.message))
         is VetsUiState.Success -> VetsResult(state = state, onVetClick = onVetClick)
     }
 }
@@ -63,7 +65,7 @@ private fun VetsResult(
     onVetClick: (Long) -> Unit,
 ) {
     if (state.vets.isEmpty()) {
-        MessageView(text = "Brak weterynarzy w tym gabinecie")
+        MessageView(text = stringResource(R.string.vets_empty))
     } else {
         LazyColumn(
             contentPadding = PaddingValues(16.dp),

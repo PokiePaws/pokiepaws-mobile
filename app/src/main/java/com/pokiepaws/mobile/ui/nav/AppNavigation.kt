@@ -1,5 +1,6 @@
 package com.pokiepaws.mobile.ui.nav
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -23,6 +24,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -34,19 +36,21 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.repository.AuthRepository
 import com.pokiepaws.mobile.ui.animals.AddAnimalScreen
 import com.pokiepaws.mobile.ui.animals.AnimalListScreen
 import com.pokiepaws.mobile.ui.animals.AnimalScreen
-import com.pokiepaws.mobile.ui.auth.EmailVerificationScreen
-import com.pokiepaws.mobile.ui.auth.ForgotPasswordScreen
-import com.pokiepaws.mobile.ui.auth.LoginScreen
-import com.pokiepaws.mobile.ui.auth.RegisterScreen
+import com.pokiepaws.mobile.ui.auth.emailverification.EmailVerificationScreen
+import com.pokiepaws.mobile.ui.auth.forgotpassword.ForgotPasswordScreen
+import com.pokiepaws.mobile.ui.auth.login.LoginScreen
+import com.pokiepaws.mobile.ui.auth.register.RegisterScreen
 import com.pokiepaws.mobile.ui.clinics.ClinicsScreen
 import com.pokiepaws.mobile.ui.clinics.VetListScreen
 import com.pokiepaws.mobile.ui.notifications.NotificationScreen
 import com.pokiepaws.mobile.ui.profile.HomeScreen
 import com.pokiepaws.mobile.ui.profile.ProfileScreen
+import com.pokiepaws.mobile.ui.settings.SettingsScreen
 import com.pokiepaws.mobile.ui.theme.PokieBlue
 import com.pokiepaws.mobile.ui.theme.PokieBlueLight
 import com.pokiepaws.mobile.ui.theme.PokieWhite
@@ -101,10 +105,15 @@ fun AppNavigation(
                                     restoreState = true
                                 }
                             },
-                            icon = { Icon(imageVector = item.icon, contentDescription = item.label) },
+                            icon = {
+                                Icon(
+                                    imageVector = item.icon,
+                                    contentDescription = stringResource(item.labelRes),
+                                )
+                            },
                             label = {
                                 Text(
-                                    text = item.label,
+                                    text = stringResource(item.labelRes),
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                 )
                             },
@@ -270,6 +279,7 @@ fun AppNavigation(
 
             composable(Screen.Profile.route) {
                 ProfileScreen(
+                    onSettingsClick = { navController.navigate(Screen.Settings.route) },
                     onLogout = {
                         scope.launch {
                             authRepository.logout()
@@ -280,23 +290,27 @@ fun AppNavigation(
                     },
                 )
             }
+
+            composable(Screen.Settings.route) {
+                SettingsScreen(onBack = { navController.popBackStack() })
+            }
         }
     }
 }
 
 private data class BottomNavItem(
     val screen: Screen,
-    val label: String,
+    @StringRes val labelRes: Int,
     val icon: ImageVector,
 )
 
 private val bottomNavItems =
     listOf(
-        BottomNavItem(Screen.Home, "Home", Icons.Default.Home),
-        BottomNavItem(Screen.AnimalList, "Zwierzęta", Icons.Default.Pets),
-        BottomNavItem(Screen.AppointmentList, "Wizyty", Icons.Default.CalendarMonth),
-        BottomNavItem(Screen.ClinicList, "Gabinety", Icons.Default.LocalHospital),
-        BottomNavItem(Screen.Profile, "Profil", Icons.Default.Person),
+        BottomNavItem(Screen.Home, R.string.nav_home, Icons.Default.Home),
+        BottomNavItem(Screen.AnimalList, R.string.nav_animals, Icons.Default.Pets),
+        BottomNavItem(Screen.AppointmentList, R.string.nav_visits, Icons.Default.CalendarMonth),
+        BottomNavItem(Screen.ClinicList, R.string.nav_clinics, Icons.Default.LocalHospital),
+        BottomNavItem(Screen.Profile, R.string.nav_profile, Icons.Default.Person),
     )
 
 private val bottomNavRoutes = bottomNavItems.map { it.screen.route }.toSet()

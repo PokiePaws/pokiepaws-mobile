@@ -9,7 +9,6 @@ plugins {
     alias(libs.plugins.ktlint) apply false
     alias(libs.plugins.detekt) apply false
     alias(libs.plugins.sonarqube) apply false
-    // id("com.google.gms.google-services") version "4.4.4" apply false  Z tutorialu firebase
 }
 
 tasks.register("qualityCheck") {
@@ -29,4 +28,32 @@ tasks.register("qualityFormat") {
     description = "Formats Kotlin code with ktlint."
 
     dependsOn(":app:ktlintFormat")
+}
+
+tasks.register("registerTest") {
+    group = "verification"
+    description = "Runs debug unit tests for registration validation."
+
+    dependsOn(":app:testDebugUnitTest")
+}
+
+tasks.register("UnitTests") {
+    group = "verification"
+    description = "Runs all unit tests."
+
+    dependsOn(":app:test")
+}
+
+tasks.register("UiTests") {
+    group = "verification"
+    description = "Runs Compose UI instrumentation tests on a connected device or emulator."
+
+    dependsOn(":app:connectedDebugAndroidTest")
+}
+
+tasks.register("Tests") {
+    group = "verification"
+    description = "Runs unit tests and Compose UI instrumentation tests."
+
+    dependsOn("UnitTests", "UiTests")
 }

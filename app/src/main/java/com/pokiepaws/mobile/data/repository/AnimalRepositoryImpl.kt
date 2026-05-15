@@ -1,7 +1,7 @@
 package com.pokiepaws.mobile.data.repository
 
 import com.pokiepaws.mobile.data.remote.dto.animal.AnimalRequest
-import com.pokiepaws.mobile.data.remote.dto.animal.AnimalResponse
+import com.pokiepaws.mobile.data.remote.dto.animal.toDomain
 import com.pokiepaws.mobile.data.remote.service.AnimalApiService
 import com.pokiepaws.mobile.domain.model.Animal
 import com.pokiepaws.mobile.domain.model.AnimalDraft
@@ -14,8 +14,7 @@ class AnimalRepositoryImpl
         private val apiService: AnimalApiService,
     ) : AnimalRepository {
         override suspend fun getAnimals(): List<Animal> {
-            val response = apiService.getMyAnimals()
-            return response.map { responseItem -> responseItem.toDomain() }
+            return apiService.getMyAnimals().map { it.toDomain() }
         }
 
         override suspend fun addAnimal(animal: AnimalDraft) {
@@ -26,17 +25,6 @@ class AnimalRepositoryImpl
             apiService.deleteAnimal(id)
         }
     }
-
-private fun AnimalResponse.toDomain(): Animal =
-    Animal(
-        id = id,
-        name = name,
-        species = species,
-        breed = breed,
-        weight = weight,
-        birthDate = birthDate,
-        notes = notes,
-    )
 
 private fun AnimalDraft.toRequest(): AnimalRequest =
     AnimalRequest(

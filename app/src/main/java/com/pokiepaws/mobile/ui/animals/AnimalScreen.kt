@@ -31,10 +31,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.model.Animal
 import com.pokiepaws.mobile.ui.theme.PokieBlue
 import com.pokiepaws.mobile.ui.theme.PokieWhite
@@ -43,27 +46,33 @@ import java.time.Period
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
-private val DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+private val DateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
-private fun formatGender(gender: String?): String =
+@Composable
+private fun genderLabel(gender: String?): String =
     when (gender) {
-        "MALE" -> "Samiec"
-        "FEMALE" -> "Samica"
-        "HERMAPHRODITE" -> "Obojnak"
-        else -> "Brak danych"
+        "MALE" -> stringResource(R.string.animal_gender_male)
+        "FEMALE" -> stringResource(R.string.animal_gender_female)
+        "HERMAPHRODITE" -> stringResource(R.string.animal_gender_hermaphrodite)
+        else -> stringResource(R.string.no_data)
     }
 
-private fun formatBirthDate(birthDate: String?): String =
-    birthDate?.let {
+@Composable
+private fun birthDateLabel(birthDate: String?): String {
+    val noData = stringResource(R.string.no_data)
+    return birthDate?.let {
         try {
-            LocalDate.parse(it).format(DATE_FORMATTER)
+            LocalDate.parse(it).format(DateFormatter)
         } catch (e: DateTimeParseException) {
             Log.w("AnimalScreen", "Cannot parse birth date: $it", e)
-            "Brak danych"
+            noData
         }
-    } ?: "Brak danych"
+    } ?: noData
+}
 
-private fun formatWeight(weight: Double?): String = weight?.let { "%.1f kg".format(it) } ?: "Nie podano"
+@Composable
+private fun weightLabel(weight: Double?): String =
+    weight?.let { "%.1f kg".format(it) } ?: stringResource(R.string.animal_weight_not_provided)
 
 @Composable
 fun AnimalScreen(
@@ -86,7 +95,7 @@ fun AnimalScreen(
                     AnimalDetailsContent(animal = animal, onBack = onBack)
                 } else {
                     Text(
-                        text = "Nie znaleziono zwierzaka o ID: $animalId",
+                        text = stringResource(R.string.animal_not_found, animalId),
                         modifier = Modifier.align(Alignment.Center),
                     )
                 }
@@ -127,15 +136,30 @@ fun AnimalDetailsContent(
                     .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            DataCard(label = "Gatunek", value = animal.species)
-            DataCard(label = "Rasa", value = animal.breed ?: "Nieznana rasa")
-            DataCard(label = "Płeć", value = formatGender(animal.gender))
-            DataCard(label = "Umaszczenie", value = animal.color ?: "Brak danych")
-            DataCard(label = "Wiek", value = animal.birthDate?.let { calculateAge(it) } ?: "Brak danych")
-            DataCard(label = "Data urodzenia", value = formatBirthDate(animal.birthDate))
-            DataCard(label = "Waga", value = formatWeight(animal.weight))
-            DataCard(label = "Mikrochip", value = animal.microchipNumber ?: "Brak")
-            DataCard(label = "Notatki", value = animal.notes.takeUnless { it.isNullOrBlank() } ?: "Brak notatek")
+            DataCard(label = stringResource(R.string.animal_species_label), value = animal.species)
+            DataCard(
+                label = stringResource(R.string.animal_breed_label),
+                value = animal.breed ?: stringResource(R.string.animal_unknown_breed),
+            )
+            DataCard(label = stringResource(R.string.animal_gender_label), value = genderLabel(animal.gender))
+            DataCard(
+                label = stringResource(R.string.animal_color_label),
+                value = animal.color ?: stringResource(R.string.no_data),
+            )
+            DataCard(
+                label = stringResource(R.string.animal_age_label),
+                value = animal.birthDate?.let { calculateAgeLabel(it) } ?: stringResource(R.string.no_data),
+            )
+            DataCard(label = stringResource(R.string.animal_birth_date_label), value = birthDateLabel(animal.birthDate))
+            DataCard(label = stringResource(R.string.animal_weight_label), value = weightLabel(animal.weight))
+            DataCard(
+                label = stringResource(R.string.animal_microchip_label),
+                value = animal.microchipNumber ?: stringResource(R.string.none_value),
+            )
+            DataCard(
+                label = stringResource(R.string.animal_notes_label),
+                value = animal.notes.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.animal_no_notes),
+            )
         }
     }
 }
@@ -169,7 +193,7 @@ private fun AnimalHeader(
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Powrót",
+                contentDescription = stringResource(R.string.back_content_description),
                 tint = PokieWhite,
             )
         }
@@ -222,19 +246,24 @@ fun DataCard(
     }
 }
 
-fun calculateAge(birthDate: String): String {
+@Composable
+fun calculateAgeLabel(birthDate: String): String {
+    val context = LocalContext.current
+    val noData = stringResource(R.string.no_data)
+    val newborn = stringResource(R.string.animal_age_newborn)
+
     return try {
         val date = LocalDate.parse(birthDate)
         val now = LocalDate.now()
         val period = Period.between(date, now)
 
         when {
-            period.years > 0 -> "${period.years} lat"
-            period.months > 0 -> "${period.months} mies."
-            else -> "Noworodek"
+            period.years > 0 -> context.getString(R.string.animal_age_years, period.years)
+            period.months > 0 -> context.getString(R.string.animal_age_months, period.months)
+            else -> newborn
         }
     } catch (e: DateTimeParseException) {
         Log.w("AnimalScreen", "Cannot parse age from: $birthDate", e)
-        "Brak danych"
+        noData
     }
 }

@@ -33,16 +33,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.model.Animal
 import com.pokiepaws.mobile.ui.theme.PokieBlueDark
 import com.pokiepaws.mobile.ui.theme.PokieWhite
 
-private val ANIMAL_AVATAR_BG = Color(0xFFF0F8FA)
+private val AnimalAvatarBackground = Color(0xFFF0F8FA)
 private const val HEADER_ROUNDING = 32
 private const val CARD_ROUNDING = 24
 private const val AVATAR_ROUNDING = 16
@@ -99,6 +101,7 @@ fun AnimalListScreen(
                     )
                 }
             }
+
             else -> {}
         }
     }
@@ -127,7 +130,7 @@ private fun AnimalListHeader(onAddAnimal: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "Moje zwierzęta",
+                text = stringResource(R.string.animals_title),
                 fontSize = FONT_SIZE_TITLE.sp,
                 fontWeight = FontWeight.Bold,
                 color = PokieWhite,
@@ -143,7 +146,7 @@ private fun AnimalListHeader(onAddAnimal: () -> Unit) {
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Dodaj zwierzę",
+                    contentDescription = stringResource(R.string.animal_add_content_description),
                     tint = PokieWhite,
                 )
             }
@@ -194,7 +197,7 @@ fun AnimalCard(
                     Modifier
                         .size(AVATAR_SIZE.dp)
                         .clip(RoundedCornerShape(AVATAR_ROUNDING.dp))
-                        .background(ANIMAL_AVATAR_BG),
+                        .background(AnimalAvatarBackground),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(text = "🐾", fontSize = FONT_SIZE_EMOJI.sp)
@@ -210,14 +213,14 @@ fun AnimalCard(
                     color = PokieBlueDark,
                 )
                 Text(
-                    text = "${animal.species}${animal.breed?.let { " • $it" } ?: ""}",
+                    text = "${animal.species}${animal.breed?.let { " - $it" } ?: ""}",
                     fontSize = 13.sp,
                     color = Color.Gray,
                 )
 
                 animal.birthDate?.let { date ->
                     Text(
-                        text = "Ur. $date",
+                        text = stringResource(R.string.animal_birth_date_prefix, date),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(top = 4.dp),
@@ -238,7 +241,7 @@ fun EmptyAnimalsView(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = "🐾", fontSize = EMPTY_STATE_EMOJI_SIZE.sp)
             Text(
-                text = "Nie masz jeszcze żadnych zwierzaków",
+                text = stringResource(R.string.animals_empty_title),
                 fontWeight = FontWeight.Bold,
                 color = PokieBlueDark,
             )
@@ -247,7 +250,7 @@ fun EmptyAnimalsView(
                 modifier = Modifier.padding(top = 16.dp),
                 shape = RoundedCornerShape(BUTTON_ROUNDING.dp),
             ) {
-                Text("Dodaj pierwszego towarzysza")
+                Text(stringResource(R.string.animals_empty_button))
             }
         }
     }
@@ -261,14 +264,14 @@ fun ErrorView(
 ) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Wystąpił błąd", color = Color.Red, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.error_title), color = Color.Red, fontWeight = FontWeight.Bold)
             Text(
                 text = message,
                 fontSize = 13.sp,
                 modifier = Modifier.padding(vertical = 8.dp),
                 color = Color.Gray,
             )
-            Button(onClick = onRetry) { Text("Spróbuj ponownie") }
+            Button(onClick = onRetry) { Text(stringResource(R.string.retry_button)) }
         }
     }
 }

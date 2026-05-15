@@ -9,7 +9,12 @@ val env =
         }
     }
 
-fun getEnv(key: String): String = System.getenv(key) ?: env.getProperty(key) ?: ""
+fun getEnv(key: String): String =
+    (System.getenv(key) ?: env.getProperty(key) ?: "")
+        .trim()
+        .removeSurrounding("\"")
+
+fun String.toBuildConfigString(): String = "\"${replace("\\", "\\\\").replace("\"", "\\\"")}\""
 
 plugins {
     alias(libs.plugins.android.application)
@@ -28,19 +33,17 @@ plugins {
 
 android {
     namespace = "com.pokiepaws.mobile"
-    //noinspection GradleDependency
     compileSdk = 35
 
     defaultConfig {
         applicationId = "com.pokiepaws.mobile"
         minSdk = 26
-        //noinspection OldTargetApi
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "BASE_URL", "\"${getEnv("BASE_URL")}\"")
+        buildConfigField("String", "BASE_URL", getEnv("BASE_URL").toBuildConfigString())
     }
 
     buildTypes {
@@ -126,6 +129,7 @@ ktlint {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)
@@ -166,9 +170,14 @@ dependencies {
     implementation(libs.firebase.analytics)
 
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.turbine)
     testImplementation(libs.konsist)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
     lintChecks(libs.compose.lint.checks)
     detektPlugins(libs.compose.rules.detekt)
 }

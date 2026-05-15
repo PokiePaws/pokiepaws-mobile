@@ -1,4 +1,4 @@
-package com.pokiepaws.mobile.ui.auth
+package com.pokiepaws.mobile.ui.auth.register
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -37,8 +37,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,17 +44,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.ui.theme.PokieWhite
+import com.pokiepaws.mobile.util.Countries
 import com.pokiepaws.mobile.util.Country
-import com.pokiepaws.mobile.util.popularCountries
 
 private const val WEIGHT_POSTAL_CODE = 0.45f
 private const val WEIGHT_CITY = 0.55f
@@ -75,53 +73,18 @@ private const val FONT_SIZE_ERROR = 12
 private const val FONT_SIZE_FLAG = 18
 
 @Composable
-fun RegisterScreen(
-    onNavigateToVerification: (String) -> Unit,
-    onNavigateToLogin: () -> Unit,
+internal fun RegisterContent(
+    state: RegisterUiState,
+    isLoading: Boolean,
+    errorMessage: String?,
+    onEvent: (RegisterEvent) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: AuthViewModel = hiltViewModel(),
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-    var firstName by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
-    var confirmPasswordVisible by remember { mutableStateOf(false) }
-    var phoneNumber by remember { mutableStateOf("") }
-
-    var phoneCountry by remember { mutableStateOf(popularCountries.first()) }
-    var residenceCountry by remember {
-        mutableStateOf(popularCountries.find { it.name == "Polska" } ?: popularCountries.first())
-    }
-
-    var street by remember { mutableStateOf("") }
-    var houseNumber by remember { mutableStateOf("") }
-    var apartmentNumber by remember { mutableStateOf("") }
-    var city by remember { mutableStateOf("") }
-    var postalCode by remember { mutableStateOf("") }
-
-    val passwordsMatch = password == confirmPassword || confirmPassword.isEmpty()
-
-    LaunchedEffect(uiState) {
-        if (uiState is AuthUiState.RegisterSuccess) {
-            onNavigateToVerification(email)
-            viewModel.resetState()
-        }
-    }
-
-    Box(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
-    ) {
+    BoxBackground(modifier) {
         Column(
             modifier =
                 Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
                     .padding(horizontal = 24.dp)
                     .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Top,
@@ -131,7 +94,7 @@ fun RegisterScreen(
 
             Image(
                 painter = painterResource(id = R.drawable.logo),
-                contentDescription = "PokiePaws Logo",
+                contentDescription = stringResource(R.string.logo_content_description),
                 modifier = Modifier.size(LOGO_SIZE.dp),
             )
 
@@ -148,26 +111,35 @@ fun RegisterScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
-                        text = "Utwórz konto",
+                        text = stringResource(R.string.register_title),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary,
                     )
                     Text(
-                        text = "Wypełnij dane, aby dołączyć do nas",
+                        text = stringResource(R.string.register_description),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
 
                     Spacer(modifier = Modifier.height(SPACING_MEDIUM.dp))
 
-                    SectionLabel("Dane konta")
+                    SectionLabel(stringResource(R.string.register_account_data))
                     Spacer(modifier = Modifier.height(12.dp))
 
                     OutlinedTextField(
-                        value = email,
-                        onValueChange = { email = it },
-                        label = { Text("Email") },
+                        value = state.email,
+                        onValueChange = { onEvent(RegisterEvent.EmailChanged(it)) },
+                        label = { Text(stringResource(R.string.email_label)) },
+                        isError = state.emailValidationError != null,
+                        supportingText = {
+                            if (state.emailValidationError != null) {
+                                Text(
+                                    text = stringResource(R.string.register_email_invalid),
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            }
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -176,19 +148,19 @@ fun RegisterScreen(
                     Spacer(modifier = Modifier.height(SPACING_SMALL.dp))
 
                     OutlinedTextField(
-                        value = password,
-                        onValueChange = { password = it },
-                        label = { Text("Hasło") },
+                        value = state.password,
+                        onValueChange = { onEvent(RegisterEvent.PasswordChanged(it)) },
+                        label = { Text(stringResource(R.string.password_label)) },
                         visualTransformation =
-                            if (passwordVisible) {
+                            if (state.passwordVisible) {
                                 VisualTransformation.None
                             } else {
                                 PasswordVisualTransformation()
                             },
                         trailingIcon = {
-                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            IconButton(onClick = { onEvent(RegisterEvent.TogglePasswordVisibility) }) {
                                 Icon(
-                                    if (passwordVisible) {
+                                    if (state.passwordVisible) {
                                         Icons.Default.VisibilityOff
                                     } else {
                                         Icons.Default.Visibility
@@ -197,6 +169,10 @@ fun RegisterScreen(
                                 )
                             }
                         },
+                        isError = state.passwordValidationErrors.isNotEmpty(),
+                        supportingText = {
+                            PasswordValidationMessage(errors = state.passwordValidationErrors)
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                     )
@@ -204,25 +180,28 @@ fun RegisterScreen(
                     Spacer(modifier = Modifier.height(SPACING_SMALL.dp))
 
                     OutlinedTextField(
-                        value = confirmPassword,
-                        onValueChange = { confirmPassword = it },
-                        label = { Text("Powtórz hasło") },
-                        isError = !passwordsMatch,
+                        value = state.confirmPassword,
+                        onValueChange = { onEvent(RegisterEvent.ConfirmPasswordChanged(it)) },
+                        label = { Text(stringResource(R.string.repeat_password_label)) },
+                        isError = !state.passwordsMatch,
                         supportingText = {
-                            if (!passwordsMatch) {
-                                Text("Hasła nie są identyczne", color = MaterialTheme.colorScheme.error)
+                            if (!state.passwordsMatch) {
+                                Text(
+                                    stringResource(R.string.passwords_do_not_match),
+                                    color = MaterialTheme.colorScheme.error,
+                                )
                             }
                         },
                         visualTransformation =
-                            if (confirmPasswordVisible) {
+                            if (state.confirmPasswordVisible) {
                                 VisualTransformation.None
                             } else {
                                 PasswordVisualTransformation()
                             },
                         trailingIcon = {
-                            IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                            IconButton(onClick = { onEvent(RegisterEvent.ToggleConfirmPasswordVisibility) }) {
                                 Icon(
-                                    if (confirmPasswordVisible) {
+                                    if (state.confirmPasswordVisible) {
                                         Icons.Default.VisibilityOff
                                     } else {
                                         Icons.Default.Visibility
@@ -237,7 +216,7 @@ fun RegisterScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    SectionLabel("Dane osobowe")
+                    SectionLabel(stringResource(R.string.register_personal_data))
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Row(
@@ -245,16 +224,16 @@ fun RegisterScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         OutlinedTextField(
-                            value = firstName,
-                            onValueChange = { firstName = it },
-                            label = { Text("Imię") },
+                            value = state.firstName,
+                            onValueChange = { onEvent(RegisterEvent.FirstNameChanged(it)) },
+                            label = { Text(stringResource(R.string.first_name_label)) },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                         )
                         OutlinedTextField(
-                            value = lastName,
-                            onValueChange = { lastName = it },
-                            label = { Text("Nazwisko") },
+                            value = state.lastName,
+                            onValueChange = { onEvent(RegisterEvent.LastNameChanged(it)) },
+                            label = { Text(stringResource(R.string.last_name_label)) },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                         )
@@ -263,31 +242,31 @@ fun RegisterScreen(
                     Spacer(modifier = Modifier.height(SPACING_SMALL.dp))
 
                     OutlinedTextField(
-                        value = phoneNumber,
-                        onValueChange = { phoneNumber = it },
-                        label = { Text("Numer telefonu") },
+                        value = state.phoneNumber,
+                        onValueChange = { onEvent(RegisterEvent.PhoneNumberChanged(it)) },
+                        label = { Text(stringResource(R.string.phone_number_label)) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                        prefix = { Text("${phoneCountry.dialCode} ") },
+                        prefix = { Text("${state.phoneCountry.dialCode} ") },
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    SectionLabel("Adres zamieszkania")
+                    SectionLabel(stringResource(R.string.register_address_data))
                     Spacer(modifier = Modifier.height(12.dp))
 
                     CountryDropdownField(
-                        selectedCountry = residenceCountry,
-                        onCountrySelected = { residenceCountry = it },
+                        selectedCountry = state.residenceCountry,
+                        onCountrySelected = { onEvent(RegisterEvent.ResidenceCountryChanged(it)) },
                     )
 
                     Spacer(modifier = Modifier.height(SPACING_SMALL.dp))
 
                     OutlinedTextField(
-                        value = street,
-                        onValueChange = { street = it },
-                        label = { Text("Ulica") },
+                        value = state.street,
+                        onValueChange = { onEvent(RegisterEvent.StreetChanged(it)) },
+                        label = { Text(stringResource(R.string.street_label)) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                     )
@@ -299,17 +278,17 @@ fun RegisterScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         OutlinedTextField(
-                            value = houseNumber,
-                            onValueChange = { houseNumber = it },
-                            label = { Text("Nr domu") },
+                            value = state.houseNumber,
+                            onValueChange = { onEvent(RegisterEvent.HouseNumberChanged(it)) },
+                            label = { Text(stringResource(R.string.house_number_label)) },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                         )
                         OutlinedTextField(
-                            value = apartmentNumber,
-                            onValueChange = { apartmentNumber = it },
-                            label = { Text("Lokal") },
-                            placeholder = { Text("opcjonalnie") },
+                            value = state.apartmentNumber,
+                            onValueChange = { onEvent(RegisterEvent.ApartmentNumberChanged(it)) },
+                            label = { Text(stringResource(R.string.apartment_label)) },
+                            placeholder = { Text(stringResource(R.string.optional_placeholder)) },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                         )
@@ -322,26 +301,26 @@ fun RegisterScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         OutlinedTextField(
-                            value = postalCode,
-                            onValueChange = { postalCode = it },
-                            label = { Text("Kod") },
+                            value = state.postalCode,
+                            onValueChange = { onEvent(RegisterEvent.PostalCodeChanged(it)) },
+                            label = { Text(stringResource(R.string.postal_code_label)) },
                             modifier = Modifier.weight(WEIGHT_POSTAL_CODE),
                             shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         )
                         OutlinedTextField(
-                            value = city,
-                            onValueChange = { city = it },
-                            label = { Text("Miasto") },
+                            value = state.city,
+                            onValueChange = { onEvent(RegisterEvent.CityChanged(it)) },
+                            label = { Text(stringResource(R.string.city_label)) },
                             modifier = Modifier.weight(WEIGHT_CITY),
                             shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                         )
                     }
 
-                    if (uiState is AuthUiState.Error) {
+                    if (errorMessage != null) {
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = (uiState as AuthUiState.Error).message,
+                            text = errorMessage,
                             color = MaterialTheme.colorScheme.error,
                             fontSize = FONT_SIZE_ERROR.sp,
                         )
@@ -350,46 +329,76 @@ fun RegisterScreen(
                     Spacer(modifier = Modifier.height(SPACING_MEDIUM.dp))
 
                     Button(
-                        onClick = {
-                            viewModel.register(
-                                email = email,
-                                password = password,
-                                firstName = firstName,
-                                lastName = lastName,
-                                phoneNumber = "${phoneCountry.dialCode}$phoneNumber",
-                                street = street,
-                                houseNumber = houseNumber,
-                                apartmentNumber = apartmentNumber.ifBlank { null },
-                                city = city,
-                                postalCode = postalCode,
-                                country = residenceCountry.name,
-                            )
-                        },
+                        onClick = { onEvent(RegisterEvent.Submit) },
                         modifier =
                             Modifier
                                 .fillMaxWidth()
                                 .height(BUTTON_HEIGHT.dp),
                         shape = RoundedCornerShape(BUTTON_ROUNDING.dp),
-                        enabled = (uiState !is AuthUiState.Loading) && passwordsMatch && email.isNotEmpty(),
+                        enabled = !isLoading && state.canSubmitLocal,
                     ) {
-                        if (uiState is AuthUiState.Loading) {
+                        if (isLoading) {
                             CircularProgressIndicator(modifier = Modifier.size(24.dp), color = PokieWhite)
                         } else {
-                            Text("Zarejestruj się", fontSize = FONT_SIZE_BUTTON.sp, fontWeight = FontWeight.Bold)
+                            Text(
+                                text = stringResource(R.string.register_button),
+                                fontSize = FONT_SIZE_BUTTON.sp,
+                                fontWeight = FontWeight.Bold,
+                            )
                         }
                     }
 
                     TextButton(
-                        onClick = onNavigateToLogin,
+                        onClick = { onEvent(RegisterEvent.NavigateToLogin) },
                         modifier = Modifier.padding(top = 8.dp),
                     ) {
-                        Text("Masz już konto? Zaloguj się")
+                        Text(stringResource(R.string.register_login_prompt))
                     }
                 }
             }
             Spacer(modifier = Modifier.height(SPACING_LARGE.dp))
         }
     }
+}
+
+@Composable
+private fun PasswordValidationMessage(errors: List<PasswordValidationError>) {
+    if (errors.isEmpty()) return
+
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        errors.forEach { error ->
+            Text(
+                text = stringResource(error.messageRes),
+                color = MaterialTheme.colorScheme.error,
+                fontSize = FONT_SIZE_ERROR.sp,
+            )
+        }
+    }
+}
+
+private val PasswordValidationError.messageRes: Int
+    get() =
+        when (this) {
+            PasswordValidationError.TooShort -> R.string.register_password_too_short
+            PasswordValidationError.MissingUppercase -> R.string.register_password_missing_uppercase
+            PasswordValidationError.MissingSpecialCharacter -> R.string.register_password_missing_special
+            PasswordValidationError.ContainsUserName -> R.string.register_password_contains_user_name
+            PasswordValidationError.ContainsSequence -> R.string.register_password_contains_sequence
+            PasswordValidationError.ContainsRepeatedCharacters -> R.string.register_password_repeated_characters
+            PasswordValidationError.TooCommon -> R.string.register_password_too_common
+        }
+
+@Composable
+private fun BoxBackground(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    Box(
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+    ) { content() }
 }
 
 @Composable
@@ -414,7 +423,7 @@ private fun SectionLabel(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CountryDropdownField(
+internal fun CountryDropdownField(
     selectedCountry: Country,
     onCountrySelected: (Country) -> Unit,
     modifier: Modifier = Modifier,
@@ -430,7 +439,7 @@ fun CountryDropdownField(
             value = "${selectedCountry.flag} ${selectedCountry.name}",
             onValueChange = {},
             readOnly = true,
-            label = { Text("Kraj zamieszkania") },
+            label = { Text(stringResource(R.string.country_of_residence_label)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
             modifier =
@@ -444,7 +453,7 @@ fun CountryDropdownField(
             expanded = expanded,
             onDismissRequest = { expanded = false },
         ) {
-            popularCountries.forEach { country ->
+            Countries.forEach { country ->
                 DropdownMenuItem(
                     text = {
                         Row(verticalAlignment = Alignment.CenterVertically) {

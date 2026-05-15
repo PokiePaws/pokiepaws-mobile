@@ -20,28 +20,29 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class RepositoryModule {
+@Suppress("unused")
+interface RepositoryModule {
     @Binds
     @Singleton
-    abstract fun bindAnimalRepository(animalRepositoryImpl: AnimalRepositoryImpl): AnimalRepository
+    fun bindAnimalRepository(animalRepositoryImpl: AnimalRepositoryImpl): AnimalRepository
 
     @Binds
     @Singleton
-    abstract fun bindAuthRepository(authRepositoryImpl: AuthRepositoryImpl): AuthRepository
+    fun bindAuthRepository(authRepositoryImpl: AuthRepositoryImpl): AuthRepository
 
     @Binds
     @Singleton
-    abstract fun bindVisitRepository(visitRepositoryImpl: VisitRepositoryImpl): VisitRepository
+    fun bindVisitRepository(visitRepositoryImpl: VisitRepositoryImpl): VisitRepository
 
     @Binds
     @Singleton
-    abstract fun bindClinicRepository(clinicRepositoryImpl: ClinicRepositoryImpl): ClinicRepository
+    fun bindClinicRepository(clinicRepositoryImpl: ClinicRepositoryImpl): ClinicRepository
 
     @Binds
     @Singleton
-    abstract fun bindVetRepository(vetRepositoryImpl: VetRepositoryImpl): VetRepository
+    fun bindVetRepository(vetRepositoryImpl: VetRepositoryImpl): VetRepository
 
     @Binds
     @Singleton
-    abstract fun bindNotificationRepository(notificationRepositoryImpl: NotificationRepositoryImpl): NotificationRepository
+    fun bindNotificationRepository(notificationRepositoryImpl: NotificationRepositoryImpl): NotificationRepository
 }

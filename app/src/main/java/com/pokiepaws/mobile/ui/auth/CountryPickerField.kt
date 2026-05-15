@@ -32,13 +32,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.pokiepaws.mobile.R
+import com.pokiepaws.mobile.util.Countries
 import com.pokiepaws.mobile.util.Country
-import com.pokiepaws.mobile.util.popularCountries
 
 @Composable
 fun PhoneNumberField(
@@ -77,7 +79,7 @@ fun PhoneNumberField(
         OutlinedTextField(
             value = phoneNumber,
             onValueChange = { onPhoneNumberChange(it.filter { c -> c.isDigit() }) },
-            label = { Text("Numer telefonu") },
+            label = { Text(stringResource(R.string.phone_number_label)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
             modifier = Modifier.weight(1f),
@@ -106,7 +108,7 @@ fun CountryPickerDialog(
     var searchQuery by remember { mutableStateOf("") }
 
     val filteredCountries =
-        popularCountries.filter {
+        Countries.filter {
             it.name.contains(searchQuery, ignoreCase = true) ||
                 it.dialCode.contains(searchQuery)
         }
@@ -123,7 +125,7 @@ fun CountryPickerDialog(
                 modifier = Modifier.padding(16.dp),
             ) {
                 Text(
-                    text = "Wybierz kraj",
+                    text = stringResource(R.string.country_picker_title),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,
@@ -134,7 +136,7 @@ fun CountryPickerDialog(
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    label = { Text("Szukaj kraju...") },
+                    label = { Text(stringResource(R.string.country_search_label)) },
                     leadingIcon = {
                         Icon(Icons.Default.Search, contentDescription = null)
                     },

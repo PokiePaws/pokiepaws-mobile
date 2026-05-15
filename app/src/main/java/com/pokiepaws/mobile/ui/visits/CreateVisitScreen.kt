@@ -43,10 +43,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.model.Clinic
 import com.pokiepaws.mobile.domain.model.Vet
 import com.pokiepaws.mobile.ui.theme.PokieBlueDark
@@ -108,7 +110,7 @@ private fun CreateVisitTopBar(
     onPreviousStep: () -> Unit,
 ) {
     TopAppBar(
-        title = { Text(text = step.title) },
+        title = { Text(text = stringResource(step.titleRes)) },
         navigationIcon = {
             IconButton(
                 onClick = {
@@ -121,7 +123,7 @@ private fun CreateVisitTopBar(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Wroc",
+                    contentDescription = stringResource(R.string.back_content_description),
                 )
             }
         },
@@ -207,14 +209,14 @@ private fun ErrorSnackbar(
     }
 }
 
-private val CreateVisitStep.title: String
+private val CreateVisitStep.titleRes: Int
     get() =
         when (this) {
-            CreateVisitStep.SELECT_CLINIC -> "Wybierz gabinet"
-            CreateVisitStep.SELECT_VET -> "Wybierz weterynarza"
-            CreateVisitStep.SELECT_SLOT -> "Wybierz termin"
-            CreateVisitStep.SELECT_ANIMAL -> "Wybierz zwierze"
-            CreateVisitStep.CONFIRM -> "Potwierdz wizyte"
+            CreateVisitStep.SELECT_CLINIC -> R.string.create_visit_select_clinic
+            CreateVisitStep.SELECT_VET -> R.string.create_visit_select_vet
+            CreateVisitStep.SELECT_SLOT -> R.string.create_visit_select_slot
+            CreateVisitStep.SELECT_ANIMAL -> R.string.create_visit_select_animal
+            CreateVisitStep.CONFIRM -> R.string.create_visit_confirm
         }
 
 @Composable

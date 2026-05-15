@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -32,7 +31,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -47,11 +45,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.model.AppNotification
+import com.pokiepaws.mobile.ui.theme.PokieBlueDark
+import com.pokiepaws.mobile.ui.theme.PokieWhite
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -65,9 +67,10 @@ private const val CARD_ROUNDING = 16
 private const val ICON_BG_SIZE = 48
 private const val ICON_SIZE = 24
 private const val INDICATOR_WIDTH = 4
-private const val LIST_SPACING = 12
-private const val CARD_ELEVATION = 2
-private val PRIMARY_TEAL = Color(0xFF7FCEDF)
+private const val HEADER_ROUNDING = 32
+private const val HEADER_TOP_PADDING = 48
+private const val HEADER_BOTTOM_PADDING = 48
+
 private val ReminderIconTint = Color(0xFF3B82F6)
 private val ReminderIconBg = Color(0xFFDBEAFE)
 private val VaccineIconTint = Color(0xFFF97316)
@@ -75,6 +78,7 @@ private val VaccineIconBg = Color(0xFFFFEDD5)
 private val SuccessIconTint = Color(0xFF22C55E)
 private val SuccessIconBg = Color(0xFFDCFCE7)
 private val DefaultIconBg = Color(0xFFE3F6FC)
+private val DefaultIconTint = Color(0xFF7FCEDF)
 
 private data class NotifStyle(
     val iconVector: ImageVector,
@@ -109,9 +113,9 @@ private fun styleFor(type: String?): NotifStyle =
         else ->
             NotifStyle(
                 iconVector = Icons.Default.Notifications,
-                iconTint = PRIMARY_TEAL,
+                iconTint = DefaultIconTint,
                 iconBg = DefaultIconBg,
-                borderColor = PRIMARY_TEAL,
+                borderColor = DefaultIconTint,
             )
     }
 
@@ -127,43 +131,50 @@ fun NotificationScreen(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
+                .background(MaterialTheme.colorScheme.surface),
     ) {
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shadowElevation = 4.dp,
-            color = Color.White,
-        ) {
-            Row(
-                modifier =
-                    Modifier
-                        .statusBarsPadding()
-                        .padding(horizontal = 8.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Wstecz",
-                            tint = Color.Black,
-                        )
-                    }
-                    Text(
-                        text = "Powiadomienia",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black,
-                    )
-                }
-                TextButton(onClick = { viewModel.markAllAsRead() }) {
-                    Text(
-                        text = "Odczytaj wszystkie",
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(
                         color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold,
+                        shape =
+                            RoundedCornerShape(
+                                bottomStart = HEADER_ROUNDING.dp,
+                                bottomEnd = HEADER_ROUNDING.dp,
+                            ),
                     )
-                }
+                    .padding(top = HEADER_TOP_PADDING.dp, bottom = HEADER_BOTTOM_PADDING.dp)
+                    .padding(horizontal = 8.dp),
+        ) {
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier.align(Alignment.CenterStart),
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back_content_description),
+                    tint = PokieWhite,
+                )
+            }
+            Text(
+                text = stringResource(R.string.notifications_title),
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = PokieWhite,
+                modifier = Modifier.align(Alignment.Center),
+            )
+            TextButton(
+                onClick = { viewModel.markAllAsRead() },
+                modifier = Modifier.align(Alignment.CenterEnd),
+            ) {
+                Text(
+                    text = stringResource(R.string.notifications_mark_all_read),
+                    color = PokieWhite,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp,
+                )
             }
         }
 
@@ -172,13 +183,35 @@ fun NotificationScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(text = "Brak nowych powiadomień 🐾", color = Color.Gray)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .size(72.dp)
+                                .clip(CircleShape)
+                                .background(DefaultIconBg),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Notifications,
+                            contentDescription = null,
+                            tint = DefaultIconTint,
+                            modifier = Modifier.size(36.dp),
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = stringResource(R.string.notifications_empty),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(LIST_SPACING.dp),
+                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 itemsIndexed(
                     items = notifications,
@@ -207,12 +240,8 @@ private fun AnimatedNotificationItem(
     LaunchedEffect(notification.id) {
         scope.launch {
             delay(animationDelay.toLong())
-            launch {
-                alpha.animateTo(1f, tween(durationMillis = ITEM_ANIMATION_DURATION))
-            }
-            launch {
-                offsetX.animateTo(0f, tween(durationMillis = ITEM_ANIMATION_DURATION))
-            }
+            launch { alpha.animateTo(1f, tween(durationMillis = ITEM_ANIMATION_DURATION)) }
+            launch { offsetX.animateTo(0f, tween(durationMillis = ITEM_ANIMATION_DURATION)) }
         }
     }
 
@@ -232,91 +261,104 @@ fun NotificationItem(
     modifier: Modifier = Modifier,
 ) {
     val style = styleFor(notification.type)
+    val isUnread = !notification.isRead
 
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(CARD_ROUNDING.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION.dp),
+        colors = CardDefaults.cardColors(containerColor = PokieWhite),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
-            if (!notification.isRead) {
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxHeight()
-                            .width(INDICATOR_WIDTH.dp)
-                            .background(
-                                color = style.borderColor,
-                                shape =
-                                    RoundedCornerShape(
-                                        topStart = CARD_ROUNDING.dp,
-                                        bottomStart = CARD_ROUNDING.dp,
-                                    ),
-                            ),
+            UnreadIndicator(isUnread = isUnread, borderColor = style.borderColor)
+            NotificationBody(notification = notification, style = style, isUnread = isUnread)
+        }
+    }
+}
+
+@Composable
+private fun UnreadIndicator(
+    isUnread: Boolean,
+    borderColor: Color,
+    modifier: Modifier = Modifier,
+) {
+    if (!isUnread) return
+    Box(
+        modifier =
+            modifier
+                .fillMaxHeight()
+                .width(INDICATOR_WIDTH.dp)
+                .background(
+                    color = borderColor,
+                    shape =
+                        RoundedCornerShape(
+                            topStart = CARD_ROUNDING.dp,
+                            bottomStart = CARD_ROUNDING.dp,
+                        ),
+                ),
+    )
+}
+
+@Composable
+private fun NotificationBody(
+    notification: AppNotification,
+    style: NotifStyle,
+    isUnread: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier =
+            modifier.padding(
+                start = if (isUnread) 12.dp else 16.dp,
+                end = 16.dp,
+                top = 16.dp,
+                bottom = 16.dp,
+            ),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .size(ICON_BG_SIZE.dp)
+                    .clip(CircleShape)
+                    .background(style.iconBg),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = style.iconVector,
+                contentDescription = null,
+                tint = style.iconTint,
+                modifier = Modifier.size(ICON_SIZE.dp),
+            )
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = notification.title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isUnread) PokieBlueDark else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = formatTimestamp(notification.timestamp),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-
-            Row(
-                modifier =
-                    Modifier
-                        .padding(
-                            start = if (notification.isRead) 16.dp else 12.dp,
-                            end = 16.dp,
-                            top = 16.dp,
-                            bottom = 16.dp,
-                        ),
-                verticalAlignment = Alignment.Top,
-            ) {
-                Box(
-                    modifier =
-                        Modifier
-                            .size(ICON_BG_SIZE.dp)
-                            .clip(CircleShape)
-                            .background(style.iconBg),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = style.iconVector,
-                        contentDescription = null,
-                        tint = style.iconTint,
-                        modifier = Modifier.size(ICON_SIZE.dp),
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = notification.title,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = if (!notification.isRead) Color.Black else Color.Gray,
-                            modifier = Modifier.weight(1f),
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = formatTimestamp(notification.timestamp),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.Gray,
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Text(
-                        text = notification.content,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (!notification.isRead) Color.DarkGray else Color.Gray,
-                        lineHeight = 18.sp,
-                    )
-                }
-            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = notification.content,
+                style = MaterialTheme.typography.bodySmall,
+                color = if (isUnread) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                lineHeight = 18.sp,
+            )
         }
     }
 }

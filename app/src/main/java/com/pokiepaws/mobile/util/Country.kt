@@ -7,7 +7,7 @@ data class Country(
     val flag: String,
 )
 
-val popularCountries =
+val Countries =
     listOf(
         Country("Polska", "PL", "+48", "🇵🇱"),
         Country("Niemcy", "DE", "+49", "🇩🇪"),

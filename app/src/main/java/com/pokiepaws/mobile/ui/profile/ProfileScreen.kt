@@ -1,5 +1,6 @@
 package com.pokiepaws.mobile.ui.profile
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -32,7 +33,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,196 +45,221 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.ui.theme.PokieBlue
+import com.pokiepaws.mobile.ui.theme.PokieBlueDark
 import com.pokiepaws.mobile.ui.theme.PokieCream
 import com.pokiepaws.mobile.ui.theme.PokieWhite
 
-// ── Stałe ────────────────────────────────────────────────────────────────────
-
-private const val AVATAR_OUTER_SIZE = 96
-private const val AVATAR_INNER_SIZE = 88
-private const val AVATAR_OFFSET = -40
+private const val HEADER_ROUNDING = 32
+private const val HEADER_TOP_PADDING = 48
+private const val HEADER_BOTTOM_PADDING = 48
+private const val AVATAR_OFFSET = -48
 private const val CONTENT_OFFSET = -32
 private const val MENU_ANIMATION_DELAY = 100
-private const val CARD_ROUNDING = 16
+private const val CARD_ROUNDING = 24
 private const val ICON_BG_ROUNDING = 12
 private const val LOGOUT_COLOR = 0xFFEF4444
 
-// Kolory pozycji menu
 private val PersonIconTint = Color(0xFF3B82F6)
 private val PersonIconBg = Color(0xFFDBEAFE)
-private val NotifIconTint = Color(0xFFF97316)
-private val NotifIconBg = Color(0xFFFFEDD5)
+private val NotificationIconTint = Color(0xFFF97316)
+private val NotificationIconBg = Color(0xFFFFEDD5)
 private val SettingsIconTint = Color(0xFF6B7280)
 private val SettingsIconBg = Color(0xFFE5E7EB)
 
-// ─────────────────────────────────────────────────────────────────────────────
-
 data class ProfileMenuItem(
     val icon: ImageVector,
-    val label: String,
+    @StringRes val labelRes: Int,
     val iconColor: Color,
     val bgColor: Color,
+    val onClick: () -> Unit = {},
 )
 
 @Composable
 fun ProfileScreen(
     onLogout: () -> Unit,
+    onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val menuItems =
-        remember {
+        remember(onSettingsClick) {
             listOf(
                 ProfileMenuItem(
                     icon = Icons.Default.Person,
-                    label = "Dane użytkownika",
+                    labelRes = R.string.profile_user_data,
                     iconColor = PersonIconTint,
                     bgColor = PersonIconBg,
                 ),
                 ProfileMenuItem(
                     icon = Icons.Default.Language,
-                    label = "Język (Polski)",
+                    labelRes = R.string.profile_language,
                     iconColor = PokieBlue,
                     bgColor = PokieCream,
+                    onClick = onSettingsClick,
                 ),
                 ProfileMenuItem(
                     icon = Icons.Default.Notifications,
-                    label = "Ustawienia powiadomień",
-                    iconColor = NotifIconTint,
-                    bgColor = NotifIconBg,
+                    labelRes = R.string.profile_notification_settings,
+                    iconColor = NotificationIconTint,
+                    bgColor = NotificationIconBg,
                 ),
                 ProfileMenuItem(
                     icon = Icons.Default.Settings,
-                    label = "Ustawienia aplikacji",
+                    labelRes = R.string.profile_app_settings,
                     iconColor = SettingsIconTint,
                     bgColor = SettingsIconBg,
+                    onClick = onSettingsClick,
                 ),
             )
         }
 
-    Box(
+    Column(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            ProfileHeader()
-
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .offset(y = AVATAR_OFFSET.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                AvatarDisplay()
-            }
-
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .offset(y = CONTENT_OFFSET.dp)
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = "Admin PokiePaws",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "admin@pokiepaws.pl",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                menuItems.forEachIndexed { index, item ->
-                    AnimatedMenuItem(item = item, delayMs = index * MENU_ANIMATION_DELAY)
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                LogoutButton(onLogout)
-
-                Spacer(modifier = Modifier.height(24.dp))
-            }
-        }
-    }
-}
-
-@Composable
-private fun ProfileHeader() {
-    Box(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .background(
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(bottomStart = 40.dp, bottomEnd = 40.dp),
-                )
-                .padding(top = 48.dp, bottom = 56.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = "Mój Profil",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = PokieWhite,
-        )
-    }
-}
-
-@Composable
-private fun AvatarDisplay() {
-    Box(
-        modifier =
-            Modifier
-                .size(AVATAR_OUTER_SIZE.dp)
-                .clip(CircleShape)
-                .background(PokieWhite),
-        contentAlignment = Alignment.Center,
+                .background(MaterialTheme.colorScheme.surface),
     ) {
         Box(
             modifier =
                 Modifier
-                    .size(AVATAR_INNER_SIZE.dp)
-                    .clip(CircleShape)
-                    .background(PokieCream),
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape =
+                            RoundedCornerShape(
+                                bottomStart = HEADER_ROUNDING.dp,
+                                bottomEnd = HEADER_ROUNDING.dp,
+                            ),
+                    )
+                    .padding(top = HEADER_TOP_PADDING.dp, bottom = HEADER_BOTTOM_PADDING.dp)
+                    .padding(horizontal = 24.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Text(text = "👩", fontSize = 36.sp)
+            Text(
+                text = stringResource(R.string.profile_title),
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = PokieWhite,
+            )
+        }
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .offset(y = AVATAR_OFFSET.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Box(
+                modifier =
+                    Modifier
+                        .size(96.dp)
+                        .clip(CircleShape)
+                        .background(PokieWhite),
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(
+                    modifier =
+                        Modifier
+                            .size(88.dp)
+                            .clip(CircleShape)
+                            .background(PokieCream),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(text = "A", fontSize = 36.sp)
+                }
+            }
+        }
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .offset(y = CONTENT_OFFSET.dp)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = stringResource(R.string.profile_user_name),
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = PokieBlueDark,
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.profile_user_email),
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            menuItems.forEachIndexed { index, item ->
+                AnimatedMenuItem(item = item, delayMs = index * MENU_ANIMATION_DELAY)
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            LogoutButton(onLogout)
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
 
 @Composable
 private fun LogoutButton(onLogout: () -> Unit) {
-    TextButton(
-        onClick = onLogout,
-        modifier = Modifier.fillMaxWidth(),
+    Card(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onLogout),
+        shape = RoundedCornerShape(CARD_ROUNDING.dp),
+        colors = CardDefaults.cardColors(containerColor = PokieWhite),
+        elevation = CardDefaults.cardElevation(4.dp),
     ) {
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-            contentDescription = null,
-            tint = Color(LOGOUT_COLOR),
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = "Wyloguj się",
-            color = Color(LOGOUT_COLOR),
-            fontWeight = FontWeight.Bold,
-        )
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier =
+                        Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(ICON_BG_ROUNDING.dp))
+                            .background(Color(0xFFFFE4E4)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                        contentDescription = null,
+                        tint = Color(LOGOUT_COLOR),
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = stringResource(R.string.profile_logout),
+                    fontWeight = FontWeight.Bold,
+                    color = Color(LOGOUT_COLOR),
+                )
+            }
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = Color(LOGOUT_COLOR).copy(alpha = 0.5f),
+            )
+        }
     }
 }
 
@@ -257,7 +282,7 @@ private fun AnimatedMenuItem(
             Modifier
                 .fillMaxWidth()
                 .alpha(alpha)
-                .clickable { },
+                .clickable(onClick = item.onClick),
         shape = RoundedCornerShape(CARD_ROUNDING.dp),
         colors = CardDefaults.cardColors(containerColor = PokieWhite),
         elevation = CardDefaults.cardElevation(4.dp),
@@ -288,7 +313,7 @@ private fun AnimatedMenuItem(
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = item.label,
+                    text = stringResource(item.labelRes),
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
                 )

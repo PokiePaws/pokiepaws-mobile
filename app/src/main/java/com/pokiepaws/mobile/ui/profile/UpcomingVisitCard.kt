@@ -22,9 +22,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.model.Visit
 import com.pokiepaws.mobile.ui.theme.PokieBlueDark
 import com.pokiepaws.mobile.ui.theme.PokieRed
@@ -70,8 +72,8 @@ fun UpcomingVisitCard(
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Loading...", fontWeight = FontWeight.Bold, color = PokieBlueDark)
-                        Text("Fetching your upcoming visit", color = Color.Gray, fontSize = 14.sp)
+                        Text(stringResource(R.string.upcoming_visit_loading), fontWeight = FontWeight.Bold, color = PokieBlueDark)
+                        Text(stringResource(R.string.upcoming_visit_loading_description), color = Color.Gray, fontSize = 14.sp)
                     }
                     CircularProgressIndicator(modifier = Modifier.size(22.dp))
                 }
@@ -94,14 +96,14 @@ fun UpcomingVisitCard(
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Loading error", fontWeight = FontWeight.Bold, color = PokieRed)
+                        Text(stringResource(R.string.upcoming_visit_loading_error), fontWeight = FontWeight.Bold, color = PokieRed)
                         Text(visitState.message, color = Color.Gray, fontSize = 14.sp)
                     }
                 }
             }
 
             is VisitUiState.Success -> {
-                val next = visitState.visits.minByOrNull { it.startsAt } // ISO => działa
+                val next = visitState.visits.minByOrNull { it.startsAt }
                 if (next == null) {
                     Row(
                         modifier = Modifier.padding(16.dp),
@@ -119,8 +121,8 @@ fun UpcomingVisitCard(
                         }
                         Spacer(modifier = Modifier.width(16.dp))
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("No upcoming visits", fontWeight = FontWeight.Bold, color = PokieBlueDark)
-                            Text("Schedule a visit in Clinics tab", color = Color.Gray, fontSize = 14.sp)
+                            Text(stringResource(R.string.upcoming_visit_empty), fontWeight = FontWeight.Bold, color = PokieBlueDark)
+                            Text(stringResource(R.string.upcoming_visit_empty_description), color = Color.Gray, fontSize = 14.sp)
                         }
                     }
                 } else {
@@ -134,7 +136,7 @@ fun UpcomingVisitCard(
 @Composable
 private fun UpcomingVisitContent(visit: Visit) {
     val dateTime = parseIsoLocalDateTimeOrNull(visit.startsAt)
-    val dayLabel = dateTime?.let { formatDayLabel(it.toLocalDate()) } ?: "Upcoming"
+    val dayLabel = dateTime?.let { formatDayLabel(it.toLocalDate()) } ?: stringResource(R.string.upcoming_visit_fallback_day)
     val timeLabel = dateTime?.format(DateTimeFormatter.ofPattern("HH:mm")) ?: "--:--"
 
     Row(
@@ -155,14 +157,13 @@ private fun UpcomingVisitContent(visit: Visit) {
         Spacer(modifier = Modifier.width(16.dp))
 
         Column(modifier = Modifier.weight(1f)) {
-            // Nie masz jeszcze nazw (animalName/vetName), więc pokazujemy status + opis
             Text(
                 text = visit.status.replace('_', ' '),
                 fontWeight = FontWeight.Bold,
                 color = PokieBlueDark,
             )
             Text(
-                text = visit.description?.takeIf { it.isNotBlank() } ?: "Tap to see details",
+                text = visit.description?.takeIf { it.isNotBlank() } ?: stringResource(R.string.upcoming_visit_details_hint),
                 color = Color.Gray,
                 fontSize = 14.sp,
                 maxLines = 1,
@@ -191,18 +192,18 @@ private fun UpcomingVisitContent(visit: Visit) {
 
 private fun parseIsoLocalDateTimeOrNull(value: String): LocalDateTime? {
     return try {
-        // backend: "2026-05-10T14:30:00"
         LocalDateTime.parse(value)
     } catch (_: Exception) {
         null
     }
 }
 
+@Composable
 private fun formatDayLabel(date: LocalDate): String {
     val today = LocalDate.now()
     return when (date) {
-        today -> "Today"
-        today.plusDays(1) -> "Tomorrow"
+        today -> stringResource(R.string.today_label)
+        today.plusDays(1) -> stringResource(R.string.tomorrow_label)
         else -> date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
     }
 }

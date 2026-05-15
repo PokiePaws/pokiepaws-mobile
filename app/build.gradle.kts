@@ -28,13 +28,11 @@ plugins {
 
 android {
     namespace = "com.pokiepaws.mobile"
-    //noinspection GradleDependency
     compileSdk = 35
 
     defaultConfig {
         applicationId = "com.pokiepaws.mobile"
         minSdk = 26
-        //noinspection OldTargetApi
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -126,6 +124,7 @@ ktlint {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)

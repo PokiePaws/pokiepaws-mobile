@@ -46,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -54,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pokiepaws.mobile.R
+import com.pokiepaws.mobile.domain.model.RegistrationDraft
 import com.pokiepaws.mobile.ui.theme.PokieWhite
 import com.pokiepaws.mobile.util.Country
 import com.pokiepaws.mobile.util.popularCountries
@@ -131,7 +133,7 @@ fun RegisterScreen(
 
             Image(
                 painter = painterResource(id = R.drawable.logo),
-                contentDescription = "PokiePaws Logo",
+                contentDescription = stringResource(R.string.logo_content_description),
                 modifier = Modifier.size(LOGO_SIZE.dp),
             )
 
@@ -148,26 +150,26 @@ fun RegisterScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
-                        text = "Utwórz konto",
+                        text = stringResource(R.string.register_title),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary,
                     )
                     Text(
-                        text = "Wypełnij dane, aby dołączyć do nas",
+                        text = stringResource(R.string.register_description),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
 
                     Spacer(modifier = Modifier.height(SPACING_MEDIUM.dp))
 
-                    SectionLabel("Dane konta")
+                    SectionLabel(stringResource(R.string.register_account_data))
                     Spacer(modifier = Modifier.height(12.dp))
 
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
-                        label = { Text("Email") },
+                        label = { Text(stringResource(R.string.email_label)) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -178,7 +180,7 @@ fun RegisterScreen(
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
-                        label = { Text("Hasło") },
+                        label = { Text(stringResource(R.string.password_label)) },
                         visualTransformation =
                             if (passwordVisible) {
                                 VisualTransformation.None
@@ -206,11 +208,14 @@ fun RegisterScreen(
                     OutlinedTextField(
                         value = confirmPassword,
                         onValueChange = { confirmPassword = it },
-                        label = { Text("Powtórz hasło") },
+                        label = { Text(stringResource(R.string.repeat_password_label)) },
                         isError = !passwordsMatch,
                         supportingText = {
                             if (!passwordsMatch) {
-                                Text("Hasła nie są identyczne", color = MaterialTheme.colorScheme.error)
+                                Text(
+                                    stringResource(R.string.passwords_do_not_match),
+                                    color = MaterialTheme.colorScheme.error,
+                                )
                             }
                         },
                         visualTransformation =
@@ -237,7 +242,7 @@ fun RegisterScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    SectionLabel("Dane osobowe")
+                    SectionLabel(stringResource(R.string.register_personal_data))
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Row(
@@ -247,14 +252,14 @@ fun RegisterScreen(
                         OutlinedTextField(
                             value = firstName,
                             onValueChange = { firstName = it },
-                            label = { Text("Imię") },
+                            label = { Text(stringResource(R.string.first_name_label)) },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                         )
                         OutlinedTextField(
                             value = lastName,
                             onValueChange = { lastName = it },
-                            label = { Text("Nazwisko") },
+                            label = { Text(stringResource(R.string.last_name_label)) },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                         )
@@ -265,7 +270,7 @@ fun RegisterScreen(
                     OutlinedTextField(
                         value = phoneNumber,
                         onValueChange = { phoneNumber = it },
-                        label = { Text("Numer telefonu") },
+                        label = { Text(stringResource(R.string.phone_number_label)) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
@@ -274,7 +279,7 @@ fun RegisterScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    SectionLabel("Adres zamieszkania")
+                    SectionLabel(stringResource(R.string.register_address_data))
                     Spacer(modifier = Modifier.height(12.dp))
 
                     CountryDropdownField(
@@ -287,7 +292,7 @@ fun RegisterScreen(
                     OutlinedTextField(
                         value = street,
                         onValueChange = { street = it },
-                        label = { Text("Ulica") },
+                        label = { Text(stringResource(R.string.street_label)) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                     )
@@ -301,15 +306,15 @@ fun RegisterScreen(
                         OutlinedTextField(
                             value = houseNumber,
                             onValueChange = { houseNumber = it },
-                            label = { Text("Nr domu") },
+                            label = { Text(stringResource(R.string.house_number_label)) },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                         )
                         OutlinedTextField(
                             value = apartmentNumber,
                             onValueChange = { apartmentNumber = it },
-                            label = { Text("Lokal") },
-                            placeholder = { Text("opcjonalnie") },
+                            label = { Text(stringResource(R.string.apartment_label)) },
+                            placeholder = { Text(stringResource(R.string.optional_placeholder)) },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                         )
@@ -324,7 +329,7 @@ fun RegisterScreen(
                         OutlinedTextField(
                             value = postalCode,
                             onValueChange = { postalCode = it },
-                            label = { Text("Kod") },
+                            label = { Text(stringResource(R.string.postal_code_label)) },
                             modifier = Modifier.weight(WEIGHT_POSTAL_CODE),
                             shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -332,7 +337,7 @@ fun RegisterScreen(
                         OutlinedTextField(
                             value = city,
                             onValueChange = { city = it },
-                            label = { Text("Miasto") },
+                            label = { Text(stringResource(R.string.city_label)) },
                             modifier = Modifier.weight(WEIGHT_CITY),
                             shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                         )
@@ -351,19 +356,22 @@ fun RegisterScreen(
 
                     Button(
                         onClick = {
-                            viewModel.register(
-                                email = email,
-                                password = password,
-                                firstName = firstName,
-                                lastName = lastName,
-                                phoneNumber = "${phoneCountry.dialCode}$phoneNumber",
-                                street = street,
-                                houseNumber = houseNumber,
-                                apartmentNumber = apartmentNumber.ifBlank { null },
-                                city = city,
-                                postalCode = postalCode,
-                                country = residenceCountry.name,
-                            )
+                            val registration =
+                                RegistrationDraft(
+                                    email = email,
+                                    password = password,
+                                    firstName = firstName,
+                                    lastName = lastName,
+                                    phoneNumber = "${phoneCountry.dialCode}$phoneNumber",
+                                    street = street,
+                                    houseNumber = houseNumber,
+                                    apartmentNumber = apartmentNumber.ifBlank { null },
+                                    city = city,
+                                    postalCode = postalCode,
+                                    country = residenceCountry.name,
+                                )
+
+                            viewModel.register(registration)
                         },
                         modifier =
                             Modifier
@@ -375,7 +383,11 @@ fun RegisterScreen(
                         if (uiState is AuthUiState.Loading) {
                             CircularProgressIndicator(modifier = Modifier.size(24.dp), color = PokieWhite)
                         } else {
-                            Text("Zarejestruj się", fontSize = FONT_SIZE_BUTTON.sp, fontWeight = FontWeight.Bold)
+                            Text(
+                                text = stringResource(R.string.register_button),
+                                fontSize = FONT_SIZE_BUTTON.sp,
+                                fontWeight = FontWeight.Bold,
+                            )
                         }
                     }
 
@@ -383,7 +395,7 @@ fun RegisterScreen(
                         onClick = onNavigateToLogin,
                         modifier = Modifier.padding(top = 8.dp),
                     ) {
-                        Text("Masz już konto? Zaloguj się")
+                        Text(stringResource(R.string.register_login_prompt))
                     }
                 }
             }
@@ -430,7 +442,7 @@ fun CountryDropdownField(
             value = "${selectedCountry.flag} ${selectedCountry.name}",
             onValueChange = {},
             readOnly = true,
-            label = { Text("Kraj zamieszkania") },
+            label = { Text(stringResource(R.string.country_of_residence_label)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
             modifier =

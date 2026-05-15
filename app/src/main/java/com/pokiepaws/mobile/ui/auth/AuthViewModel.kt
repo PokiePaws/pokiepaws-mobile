@@ -48,35 +48,9 @@ class AuthViewModel
             }
         }
 
-        fun register(
-            email: String,
-            password: String,
-            firstName: String,
-            lastName: String,
-            phoneNumber: String,
-            street: String,
-            houseNumber: String,
-            apartmentNumber: String?,
-            city: String,
-            postalCode: String,
-            country: String,
-        ) {
+        fun register(registration: RegistrationDraft) {
             viewModelScope.launch {
                 _uiState.value = AuthUiState.Loading
-                val registration =
-                    RegistrationDraft(
-                        email = email,
-                        password = password,
-                        firstName = firstName,
-                        lastName = lastName,
-                        phoneNumber = phoneNumber,
-                        street = street,
-                        houseNumber = houseNumber,
-                        apartmentNumber = apartmentNumber,
-                        city = city,
-                        postalCode = postalCode,
-                        country = country,
-                    )
 
                 runCatching { authRepository.register(registration) }
                     .onSuccess { _uiState.value = AuthUiState.RegisterSuccess }

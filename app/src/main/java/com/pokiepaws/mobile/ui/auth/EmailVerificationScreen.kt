@@ -22,10 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.ui.theme.PokieWhite
 
 @Composable
@@ -52,7 +54,7 @@ fun EmailVerificationScreen(
             Spacer(modifier = Modifier.height(100.dp))
 
             Text(
-                text = "Sprawdź swoją pocztę",
+                text = stringResource(R.string.email_verification_title),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -72,7 +74,7 @@ fun EmailVerificationScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
-                        text = "Wysłaliśmy link aktywacyjny na adres:",
+                        text = stringResource(R.string.email_verification_sent_to),
                         fontSize = 15.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
@@ -91,9 +93,7 @@ fun EmailVerificationScreen(
                     Spacer(modifier = Modifier.height(32.dp))
 
                     Text(
-                        text =
-                            "Aby korzystać z PokiePaws, musisz potwierdzić swój profil." +
-                                "Kliknij w przycisk w otrzymanej wiadomości e-mail.",
+                        text = stringResource(R.string.email_verification_instruction),
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
@@ -103,7 +103,7 @@ fun EmailVerificationScreen(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Text(
-                        text = "Jeśli nie widzisz wiadomości, sprawdź folder Spam lub spróbuj wysłać ją ponownie.",
+                        text = stringResource(R.string.email_verification_spam_hint),
                         fontSize = 13.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         textAlign = TextAlign.Center,
@@ -125,7 +125,7 @@ fun EmailVerificationScreen(
                             ),
                     ) {
                         Text(
-                            text = "Wróć do logowania",
+                            text = stringResource(R.string.back_to_login),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,

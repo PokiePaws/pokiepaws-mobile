@@ -44,11 +44,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.model.AnimalDraft
 import com.pokiepaws.mobile.ui.theme.PokieBlue
 import com.pokiepaws.mobile.ui.theme.PokieWhite
@@ -71,27 +73,17 @@ fun AddAnimalScreen(
     var microchipNumber by remember { mutableStateOf("") }
     var weight by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
-
     var showDatePicker by remember { mutableStateOf(false) }
 
     val selectableDates =
         remember {
             object : SelectableDates {
-                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                    return utcTimeMillis <= System.currentTimeMillis()
-                }
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean = utcTimeMillis <= System.currentTimeMillis()
 
-                override fun isSelectableYear(year: Int): Boolean {
-                    return year <= java.time.LocalDate.now().year
-                }
+                override fun isSelectableYear(year: Int): Boolean = year <= java.time.LocalDate.now().year
             }
         }
-
-    val datePickerState =
-        rememberDatePickerState(
-            selectableDates = selectableDates,
-        )
-
+    val datePickerState = rememberDatePickerState(selectableDates = selectableDates)
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     val scrollState = rememberScrollState()
 
@@ -99,19 +91,25 @@ fun AddAnimalScreen(
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        val date =
-                            Instant.ofEpochMilli(millis)
-                                .atZone(ZoneId.systemDefault())
-                                .toLocalDate()
-                        birthDate = date.format(formatter)
-                    }
-                    showDatePicker = false
-                }) { Text("OK") }
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            val date =
+                                Instant.ofEpochMilli(millis)
+                                    .atZone(ZoneId.systemDefault())
+                                    .toLocalDate()
+                            birthDate = date.format(formatter)
+                        }
+                        showDatePicker = false
+                    },
+                ) {
+                    Text(stringResource(R.string.ok_button))
+                }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text("Anuluj") }
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text(stringResource(R.string.cancel_button))
+                }
             },
         ) {
             DatePicker(state = datePickerState)
@@ -122,10 +120,13 @@ fun AddAnimalScreen(
         modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Dodaj zwierzaka", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.add_animal_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Wróć")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back_content_description),
+                        )
                     }
                 },
                 colors =
@@ -166,7 +167,7 @@ fun AddAnimalScreen(
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Imię pupila") },
+                label = { Text(stringResource(R.string.animal_name_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 singleLine = true,
@@ -175,7 +176,7 @@ fun AddAnimalScreen(
             OutlinedTextField(
                 value = species,
                 onValueChange = { species = it },
-                label = { Text("Gatunek (np. Pies, Kot)") },
+                label = { Text(stringResource(R.string.animal_species_placeholder_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 singleLine = true,
@@ -184,7 +185,7 @@ fun AddAnimalScreen(
             OutlinedTextField(
                 value = breed,
                 onValueChange = { breed = it },
-                label = { Text("Rasa") },
+                label = { Text(stringResource(R.string.animal_breed_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 singleLine = true,
@@ -197,7 +198,7 @@ fun AddAnimalScreen(
                 OutlinedTextField(
                     value = weight,
                     onValueChange = { weight = it },
-                    label = { Text("Waga (kg)") },
+                    label = { Text(stringResource(R.string.animal_weight_kg_label)) },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     shape = RoundedCornerShape(12.dp),
@@ -208,8 +209,8 @@ fun AddAnimalScreen(
                     OutlinedTextField(
                         value = birthDate,
                         onValueChange = { },
-                        label = { Text("Data ur.") },
-                        placeholder = { Text("RRRR-MM-DD") },
+                        label = { Text(stringResource(R.string.animal_birth_short_label)) },
+                        placeholder = { Text(stringResource(R.string.date_placeholder)) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         readOnly = true,
@@ -233,7 +234,7 @@ fun AddAnimalScreen(
             OutlinedTextField(
                 value = microchipNumber,
                 onValueChange = { microchipNumber = it },
-                label = { Text("Numer chipa") },
+                label = { Text(stringResource(R.string.animal_chip_number_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 singleLine = true,
@@ -242,7 +243,7 @@ fun AddAnimalScreen(
             OutlinedTextField(
                 value = notes,
                 onValueChange = { notes = it },
-                label = { Text("Dodatkowe uwagi") },
+                label = { Text(stringResource(R.string.animal_notes_input_label)) },
                 modifier =
                     Modifier
                         .fillMaxWidth()
@@ -279,7 +280,7 @@ fun AddAnimalScreen(
                 enabled = name.isNotBlank() && species.isNotBlank(),
             ) {
                 Text(
-                    text = "Zapisz w systemie",
+                    text = stringResource(R.string.animal_save_button),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = PokieWhite,

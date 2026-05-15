@@ -16,7 +16,7 @@ private val Context.dataStore by preferencesDataStore(name = "auth_token_prefs")
 class TokenManager
     @Inject
     constructor(
-        @ApplicationContext private val context: Context,
+        @param:ApplicationContext private val context: Context,
     ) {
         private val tokenKey = stringPreferencesKey("jwt_token")
         val token: Flow<String?> =

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,6 +21,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -74,7 +75,6 @@ fun VisitListScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surface),
     ) {
-        // Header wzorowany na AnimalListScreen
         Box(
             modifier =
                 Modifier
@@ -101,8 +101,6 @@ fun VisitListScreen(
                     fontWeight = FontWeight.Bold,
                     color = PokieWhite,
                 )
-
-                // FAB — taki sam jak "+" w AnimalListScreen
                 IconButton(
                     onClick = { showAnimalPicker = true },
                     modifier =
@@ -119,8 +117,6 @@ fun VisitListScreen(
                 }
             }
         }
-
-        // Lista wizyt
         when (val s = state) {
             is VisitUiState.Loading ->
                 Box(
@@ -185,8 +181,6 @@ fun VisitListScreen(
             }
         }
     }
-
-    // Dialog wyboru zwierzęcia przed umawianiem wizyty
     if (showAnimalPicker) {
         AnimalPickerDialog(
             animalState = animalState,
@@ -283,35 +277,65 @@ private fun VisitCard(
     Card(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = PokieWhite),
+        elevation = CardDefaults.cardElevation(4.dp),
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = "Wizyta #${visit.id}",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = PokieBlueDark,
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "📅 ${visit.startsAt.replace("T", " ").take(16)}",
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Text(
-                text = "Status: ${visit.status}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier =
+                    Modifier
+                        .size(72.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color(0xFFF0F8FA)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = if (visit.status == "SCHEDULED") "📅" else "✅",
+                    fontSize = 36.sp,
+                )
+            }
 
-            if (visit.status == "SCHEDULED") {
-                TextButton(
-                    onClick = { onCancel(visit.id) },
-                    colors =
-                        ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error,
-                        ),
-                ) {
-                    Text("Anuluj wizytę")
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Wizyta #${visit.id}",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = PokieBlueDark,
+                )
+                Text(
+                    text = visit.startsAt.replace("T", " ").take(16),
+                    fontSize = 13.sp,
+                    color = Color.Gray,
+                )
+                Text(
+                    text = visit.status,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(top = 4.dp),
+                    color =
+                        if (visit.status == "SCHEDULED") {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                )
+                if (visit.status == "SCHEDULED") {
+                    TextButton(
+                        onClick = { onCancel(visit.id) },
+                        contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
+                        colors =
+                            ButtonDefaults.textButtonColors(
+                                contentColor = MaterialTheme.colorScheme.error,
+                            ),
+                    ) {
+                        Text("Anuluj wizytę", fontSize = 12.sp)
+                    }
                 }
             }
         }

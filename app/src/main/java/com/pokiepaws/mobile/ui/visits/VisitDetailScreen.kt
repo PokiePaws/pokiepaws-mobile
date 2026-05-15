@@ -1,5 +1,6 @@
 package com.pokiepaws.mobile.ui.visits
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,21 +10,24 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -33,11 +37,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pokiepaws.mobile.domain.model.Visit
+import com.pokiepaws.mobile.ui.theme.PokieBlueDark
+import com.pokiepaws.mobile.ui.theme.PokieWhite
 
-@OptIn(ExperimentalMaterial3Api::class)
+private const val HEADER_ROUNDING = 32
+private const val HEADER_TOP_PADDING = 48
+private const val HEADER_BOTTOM_PADDING = 32
+private val AvatarBg = Color(0xFFF0F8FA)
+
 @Composable
 fun VisitDetailScreen(
     visitId: Long,
@@ -50,45 +64,73 @@ fun VisitDetailScreen(
 
     LaunchedEffect(visitId) { viewModel.load(visitId) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Szczegóły wizyty") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Wróć",
-                        )
-                    }
-                },
-            )
-        },
-    ) { innerPadding ->
+    Column(
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface),
+    ) {
         Box(
             modifier =
-                modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-        ) {
-            when (val s = state) {
-                is VisitDetailUiState.Loading ->
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
+                Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape =
+                            RoundedCornerShape(
+                                bottomStart = HEADER_ROUNDING.dp,
+                                bottomEnd = HEADER_ROUNDING.dp,
+                            ),
                     )
+                    .padding(top = HEADER_TOP_PADDING.dp, bottom = HEADER_BOTTOM_PADDING.dp)
+                    .padding(horizontal = 24.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                IconButton(
+                    onClick = onBack,
+                    modifier =
+                        Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(PokieWhite.copy(alpha = 0.2f)),
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Wróć",
+                        tint = PokieWhite,
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = "Szczegóły wizyty",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = PokieWhite,
+                )
+            }
+        }
+        when (val s = state) {
+            is VisitDetailUiState.Loading ->
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
 
-                is VisitDetailUiState.Error ->
+            is VisitDetailUiState.Error ->
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
                         text = "Błąd: ${s.message}",
-                        modifier = Modifier.align(Alignment.Center),
+                        color = MaterialTheme.colorScheme.error,
                     )
+                }
 
-                is VisitDetailUiState.Success ->
-                    VisitDetailContent(
-                        visit = s.visit,
-                        onCancelClick = { showCancelDialog = true },
-                    )
-            }
+            is VisitDetailUiState.Success ->
+                VisitDetailContent(
+                    visit = s.visit,
+                    onCancelClick = { showCancelDialog = true },
+                )
         }
     }
 
@@ -130,117 +172,145 @@ private fun VisitDetailContent(
         modifier =
             modifier
                 .fillMaxSize()
-                .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        // --- Podstawowe informacje ---
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "Wizyta #${visit.id}",
-                    style = MaterialTheme.typography.titleLarge,
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                DetailRow(label = "Status", value = visit.status)
-                DetailRow(label = "Start", value = visit.startsAt)
-                DetailRow(label = "Koniec", value = visit.endsAt)
-                if (!visit.description.isNullOrBlank()) {
-                    DetailRow(label = "Opis", value = visit.description)
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = PokieWhite),
+            elevation = CardDefaults.cardElevation(4.dp),
+        ) {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.Top,
+            ) {
+                Box(
+                    modifier =
+                        Modifier
+                            .size(72.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(AvatarBg),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = if (visit.status == "SCHEDULED") "📅" else "✅",
+                        fontSize = 36.sp,
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Wizyta #${visit.id}",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = PokieBlueDark,
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    InfoRow(label = "📋", text = visit.status)
+                    InfoRow(label = "🕐", text = visit.startsAt.replace("T", " ").take(16))
+                    InfoRow(label = "🕑", text = visit.endsAt.replace("T", " ").take(16))
+                    visit.description?.takeIf { it.isNotBlank() }?.let {
+                        InfoRow(label = "📝", text = it)
+                    }
                 }
             }
         }
-
-        // --- Dane medyczne (PP-14) — widoczne po wizycie ---
         val hasMedicalData =
             !visit.disease.isNullOrBlank() ||
                 !visit.diagnosis.isNullOrBlank() ||
                 !visit.recommendations.isNullOrBlank()
 
         if (hasMedicalData) {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Dane medyczne",
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    if (!visit.disease.isNullOrBlank()) {
-                        DetailRow(label = "Choroba", value = visit.disease)
+            Text(
+                text = "Dane medyczne",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = PokieBlueDark,
+                modifier = Modifier.padding(horizontal = 4.dp),
+            )
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = PokieWhite),
+                elevation = CardDefaults.cardElevation(4.dp),
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    visit.disease?.takeIf { it.isNotBlank() }?.let {
+                        MedicalSection(emoji = "🦠", label = "Choroba", value = it)
                     }
-                    if (!visit.diagnosis.isNullOrBlank()) {
-                        DetailSection(label = "Diagnoza", value = visit.diagnosis)
+                    visit.diagnosis?.takeIf { it.isNotBlank() }?.let {
+                        MedicalSection(emoji = "🔬", label = "Diagnoza", value = it)
                     }
-                    if (!visit.recommendations.isNullOrBlank()) {
-                        DetailSection(label = "Zalecenia", value = visit.recommendations)
+                    visit.recommendations?.takeIf { it.isNotBlank() }?.let {
+                        MedicalSection(emoji = "💊", label = "Zalecenia", value = it)
                     }
                 }
             }
         }
-
         if (visit.status == "SCHEDULED") {
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(4.dp))
             Button(
                 onClick = onCancelClick,
                 modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
                 colors =
                     ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.error,
                     ),
             ) {
-                Text("Anuluj wizytę")
+                Text("Anuluj wizytę", fontWeight = FontWeight.Bold)
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
-// DetailRow dla krótkich wartości (jedna linia)
 @Composable
-private fun DetailRow(
+private fun InfoRow(
     label: String,
-    value: String,
-    modifier: Modifier = Modifier,
+    text: String,
 ) {
     Row(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.padding(top = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-        )
+        Text(text = label, fontSize = 13.sp)
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(text = text, fontSize = 13.sp, color = Color.Gray)
     }
 }
 
-// DetailSection dla długich tekstów (diagnoza, zalecenia)
 @Composable
-private fun DetailSection(
+private fun MedicalSection(
+    emoji: String,
     label: String,
     value: String,
-    modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(modifier = Modifier.height(4.dp))
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = emoji, fontSize = 14.sp)
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = label,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = PokieBlueDark,
+            )
+        }
         Text(
             text = value,
-            style = MaterialTheme.typography.bodyMedium,
+            fontSize = 13.sp,
+            color = Color.Gray,
+            modifier = Modifier.padding(start = 20.dp, top = 2.dp),
         )
     }
 }

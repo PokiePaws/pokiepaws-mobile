@@ -62,13 +62,10 @@ import com.pokiepaws.mobile.ui.theme.PokieWhite
 import com.pokiepaws.mobile.ui.visits.VisitUiState
 import com.pokiepaws.mobile.ui.visits.VisitViewModel
 
-// Poprawione nazewnictwo stałych (UPPER_SNAKE_CASE)
 private val PET_AVATAR_BG = Color(0xFFF0F8FA)
 private val APPOINTMENT_ICON_BG = Color(0xFFE3F6FC)
 private val APPOINTMENT_CARD_BG = Color(0xFFF0F8FA)
 private const val ADD_PET_BORDER_ALPHA = 0.5f
-
-// Stałe UI zapobiegające błędom MagicNumber
 private const val CORNER_RADIUS_HEADER = 18
 private const val CORNER_RADIUS_CARD = 16
 private const val CORNER_RADIUS_PET_CARD = 24
@@ -358,10 +355,6 @@ fun PetCard(
     }
 }
 
-/**
- * Zostawiasz swoje AppointmentCard jeśli chcesz,
- * ale teraz HomeScreen używa UpcomingVisitCard().
- */
 @Composable
 fun AppointmentCard(
     onClick: () -> Unit,

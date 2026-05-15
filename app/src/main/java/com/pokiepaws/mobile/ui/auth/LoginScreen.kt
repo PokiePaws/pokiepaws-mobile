@@ -1,7 +1,6 @@
 package com.pokiepaws.mobile.ui.auth
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -64,16 +64,16 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(uiState) {
-        if (uiState is AuthUiState.LoginSuccess) {
-            val success = uiState as AuthUiState.LoginSuccess
-            onLoginSuccess(success.token, success.role)
-            viewModel.resetState()
-        }
-    }
+    val isLoading = uiState is AuthUiState.Loading
+    val errorMessage = (uiState as? AuthUiState.Error)?.message
+
+    HandleLoginSuccess(
+        uiState = uiState,
+        onLoginSuccess = onLoginSuccess,
+        resetState = viewModel::resetState,
+    )
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -93,140 +93,248 @@ fun LoginScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.logo),
-                    contentDescription = "PokiePaws Logo",
-                    modifier = Modifier.size(250.dp),
-                )
+                Logo()
 
                 Spacer(modifier = Modifier.height(40.dp))
 
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(24.dp),
-                    colors = CardDefaults.cardColors(containerColor = PokieWhite),
-                    elevation = CardDefaults.cardElevation(8.dp),
-                ) {
-                    Column(
-                        modifier = Modifier.padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Text(
-                            text = "Zaloguj się",
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-
-                        Spacer(modifier = Modifier.height(20.dp))
-
-                        OutlinedTextField(
-                            value = email,
-                            onValueChange = { email = it },
-                            label = { Text("Email") },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            isError = uiState is AuthUiState.Error,
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        OutlinedTextField(
-                            value = password,
-                            onValueChange = { password = it },
-                            label = { Text("Hasło") },
-                            singleLine = true,
-                            visualTransformation =
-                                if (passwordVisible) {
-                                    VisualTransformation.None
-                                } else {
-                                    PasswordVisualTransformation()
-                                },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                            trailingIcon = {
-                                IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                    Icon(
-                                        imageVector =
-                                            if (passwordVisible) {
-                                                Icons.Default.VisibilityOff
-                                            } else {
-                                                Icons.Default.Visibility
-                                            },
-                                        contentDescription = null,
-                                    )
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            isError = uiState is AuthUiState.Error,
-                        )
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End,
-                        ) {
-                            TextButton(
-                                onClick = onForgotPasswordClick,
-                                contentPadding = PaddingValues(0.dp),
-                            ) {
-                                Text(
-                                    text = "Zapomniałeś hasła?",
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.primary,
-                                )
-                            }
-                        }
-
-                        if (uiState is AuthUiState.Error) {
-                            Text(
-                                text = (uiState as AuthUiState.Error).message,
-                                color = MaterialTheme.colorScheme.error,
-                                fontSize = 12.sp,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(top = 8.dp),
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Button(
-                            onClick = { viewModel.login(email, password) },
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(52.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            enabled = uiState !is AuthUiState.Loading,
-                        ) {
-                            if (uiState is AuthUiState.Loading) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(20.dp),
-                                    color = PokieWhite,
-                                    strokeWidth = 2.dp,
-                                )
-                            } else {
-                                Text(
-                                    text = "Zaloguj się",
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        TextButton(onClick = onRegisterClick) {
-                            Text(
-                                text = "Nie masz konta? Zarejestruj się",
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Medium,
-                            )
-                        }
-                    }
-                }
+                LoginCard(
+                    email = email,
+                    onEmailChange = { email = it },
+                    password = password,
+                    onPasswordChange = { password = it },
+                    passwordVisible = passwordVisible,
+                    onTogglePasswordVisibility = { passwordVisible = !passwordVisible },
+                    onForgotPasswordClick = onForgotPasswordClick,
+                    errorMessage = errorMessage,
+                    isLoading = isLoading,
+                    onLoginClick = { viewModel.login(email, password) },
+                    onRegisterClick = onRegisterClick,
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun HandleLoginSuccess(
+    uiState: AuthUiState,
+    onLoginSuccess: (String, String) -> Unit,
+    resetState: () -> Unit,
+) {
+    LaunchedEffect(uiState) {
+        val success = uiState as? AuthUiState.LoginSuccess ?: return@LaunchedEffect
+        onLoginSuccess(success.token, success.role)
+        resetState()
+    }
+}
+
+@Composable
+private fun Logo() {
+    Image(
+        painter = painterResource(id = R.drawable.logo),
+        contentDescription = stringResource(R.string.logo_content_description),
+        modifier = Modifier.size(250.dp),
+    )
+}
+
+@Composable
+private fun LoginCard(
+    email: String,
+    onEmailChange: (String) -> Unit,
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    passwordVisible: Boolean,
+    onTogglePasswordVisibility: () -> Unit,
+    onForgotPasswordClick: () -> Unit,
+    errorMessage: String?,
+    isLoading: Boolean,
+    onLoginClick: () -> Unit,
+    onRegisterClick: () -> Unit,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = PokieWhite),
+        elevation = CardDefaults.cardElevation(8.dp),
+    ) {
+        Column(
+            modifier = Modifier.padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            LoginTitle()
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            EmailField(
+                email = email,
+                onEmailChange = onEmailChange,
+                isError = errorMessage != null,
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            PasswordField(
+                password = password,
+                onPasswordChange = onPasswordChange,
+                passwordVisible = passwordVisible,
+                onTogglePasswordVisibility = onTogglePasswordVisibility,
+                isError = errorMessage != null,
+            )
+
+            ForgotPasswordLink(onForgotPasswordClick)
+
+            ErrorText(message = errorMessage)
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            LoginButton(
+                isLoading = isLoading,
+                onClick = onLoginClick,
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            RegisterLink(onRegisterClick)
+        }
+    }
+}
+
+@Composable
+private fun LoginTitle() {
+    Text(
+        text = stringResource(R.string.login_title),
+        fontSize = 22.sp,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.primary,
+    )
+}
+
+@Composable
+private fun EmailField(
+    email: String,
+    onEmailChange: (String) -> Unit,
+    isError: Boolean,
+) {
+    OutlinedTextField(
+        value = email,
+        onValueChange = onEmailChange,
+        label = { Text(stringResource(R.string.email_label)) },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        isError = isError,
+    )
+}
+
+@Composable
+private fun PasswordField(
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    passwordVisible: Boolean,
+    onTogglePasswordVisibility: () -> Unit,
+    isError: Boolean,
+) {
+    OutlinedTextField(
+        value = password,
+        onValueChange = onPasswordChange,
+        label = { Text(stringResource(R.string.password_label)) },
+        singleLine = true,
+        visualTransformation =
+            if (passwordVisible) {
+                VisualTransformation.None
+            } else {
+                PasswordVisualTransformation()
+            },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        trailingIcon = {
+            IconButton(onClick = onTogglePasswordVisibility) {
+                Icon(
+                    imageVector =
+                        if (passwordVisible) {
+                            Icons.Default.VisibilityOff
+                        } else {
+                            Icons.Default.Visibility
+                        },
+                    contentDescription = null,
+                )
+            }
+        },
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        isError = isError,
+    )
+}
+
+@Composable
+private fun ForgotPasswordLink(onForgotPasswordClick: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End,
+    ) {
+        TextButton(
+            onClick = onForgotPasswordClick,
+            contentPadding = PaddingValues(0.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.login_forgot_password),
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ErrorText(message: String?) {
+    if (message == null) return
+
+    Text(
+        text = message,
+        color = MaterialTheme.colorScheme.error,
+        fontSize = 12.sp,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.padding(top = 8.dp),
+    )
+}
+
+@Composable
+private fun LoginButton(
+    isLoading: Boolean,
+    onClick: () -> Unit,
+) {
+    Button(
+        onClick = onClick,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(52.dp),
+        shape = RoundedCornerShape(12.dp),
+        enabled = !isLoading,
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                color = PokieWhite,
+                strokeWidth = 2.dp,
+            )
+        } else {
+            Text(
+                text = stringResource(R.string.login_title),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+    }
+}
+
+@Composable
+private fun RegisterLink(onRegisterClick: () -> Unit) {
+    TextButton(onClick = onRegisterClick) {
+        Text(
+            text = stringResource(R.string.login_register_prompt),
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Medium,
+        )
     }
 }

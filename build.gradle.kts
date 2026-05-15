@@ -29,3 +29,31 @@ tasks.register("qualityFormat") {
 
     dependsOn(":app:ktlintFormat")
 }
+
+tasks.register("registerTest") {
+    group = "verification"
+    description = "Runs debug unit tests for registration validation."
+
+    dependsOn(":app:testDebugUnitTest")
+}
+
+tasks.register("UnitTests") {
+    group = "verification"
+    description = "Runs all unit tests."
+
+    dependsOn(":app:test")
+}
+
+tasks.register("UiTests") {
+    group = "verification"
+    description = "Runs Compose UI instrumentation tests on a connected device or emulator."
+
+    dependsOn(":app:connectedDebugAndroidTest")
+}
+
+tasks.register("Tests") {
+    group = "verification"
+    description = "Runs unit tests and Compose UI instrumentation tests."
+
+    dependsOn("UnitTests", "UiTests")
+}

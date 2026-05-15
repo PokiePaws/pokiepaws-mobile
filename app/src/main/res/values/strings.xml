@@ -107,6 +107,14 @@
     <string name="register_address_data">Address</string>
     <string name="repeat_password_label">Repeat password</string>
     <string name="passwords_do_not_match">Passwords do not match</string>
+    <string name="register_email_invalid">Enter a valid email address with @ and a domain.</string>
+    <string name="register_password_too_short">Password must have at least 12 characters.</string>
+    <string name="register_password_missing_uppercase">Password must include at least one uppercase letter.</string>
+    <string name="register_password_missing_special">Password must include at least one special character.</string>
+    <string name="register_password_contains_user_name">Password cannot contain your email, first name, or last name.</string>
+    <string name="register_password_contains_sequence">Password cannot contain keyboard or character sequences like abc, 123, or qwerty.</string>
+    <string name="register_password_repeated_characters">Password cannot contain three or more repeated characters in a row.</string>
+    <string name="register_password_too_common">Password is too common and unsafe.</string>
     <string name="first_name_label">First name</string>
     <string name="last_name_label">Last name</string>
     <string name="street_label">Street</string>

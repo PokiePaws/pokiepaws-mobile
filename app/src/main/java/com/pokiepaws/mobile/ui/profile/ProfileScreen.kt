@@ -237,7 +237,7 @@ private fun LogoutButton(onLogout: () -> Unit) {
                         Modifier
                             .size(40.dp)
                             .clip(RoundedCornerShape(ICON_BG_ROUNDING.dp))
-                            .background(Color(0xFFFFE4E4)),
+                            .background(PokieWhite),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(

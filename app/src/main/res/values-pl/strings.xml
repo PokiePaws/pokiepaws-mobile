@@ -107,6 +107,14 @@
     <string name="register_address_data">Adres zamieszkania</string>
     <string name="repeat_password_label">Powtórz hasło</string>
     <string name="passwords_do_not_match">Hasła nie są identyczne</string>
+    <string name="register_email_invalid">Podaj poprawny adres email ze znakiem @ i domeną.</string>
+    <string name="register_password_too_short">Hasło musi mieć co najmniej 12 znaków.</string>
+    <string name="register_password_missing_uppercase">Hasło musi zawierać co najmniej jedną wielką literę.</string>
+    <string name="register_password_missing_special">Hasło musi zawierać co najmniej jeden znak specjalny.</string>
+    <string name="register_password_contains_user_name">Hasło nie może zawierać emaila, imienia ani nazwiska.</string>
+    <string name="register_password_contains_sequence">Hasło nie może zawierać sekwencji znaków, takich jak abc, 123 lub qwerty.</string>
+    <string name="register_password_repeated_characters">Hasło nie może zawierać trzech lub więcej takich samych znaków pod rząd.</string>
+    <string name="register_password_too_common">Hasło jest zbyt popularne i niebezpieczne.</string>
     <string name="first_name_label">Imię</string>
     <string name="last_name_label">Nazwisko</string>
     <string name="street_label">Ulica</string>

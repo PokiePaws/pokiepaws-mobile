@@ -39,8 +39,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.pokiepaws.mobile.R
+import com.pokiepaws.mobile.util.Countries
 import com.pokiepaws.mobile.util.Country
-import com.pokiepaws.mobile.util.popularCountries
 
 @Composable
 fun PhoneNumberField(
@@ -108,7 +108,7 @@ fun CountryPickerDialog(
     var searchQuery by remember { mutableStateOf("") }
 
     val filteredCountries =
-        popularCountries.filter {
+        Countries.filter {
             it.name.contains(searchQuery, ignoreCase = true) ||
                 it.dialCode.contains(searchQuery)
         }

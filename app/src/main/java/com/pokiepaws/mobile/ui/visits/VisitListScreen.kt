@@ -290,7 +290,7 @@ private fun VisitCard(
                     Modifier
                         .size(72.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFFF0F8FA)),
+                        .background(PokieWhite),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(

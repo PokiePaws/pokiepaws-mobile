@@ -78,7 +78,7 @@ fun SettingsScreen(
             AppCompatDelegate.getApplicationLocales()
                 .get(0)
                 ?.language
-                ?: ""
+                ?: "",
         )
     }
 

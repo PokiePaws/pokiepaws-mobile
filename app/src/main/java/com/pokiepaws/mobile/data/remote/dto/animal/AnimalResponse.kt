@@ -1,6 +1,7 @@
 package com.pokiepaws.mobile.data.remote.dto.animal
 
 import com.pokiepaws.mobile.domain.model.Animal
+import com.pokiepaws.mobile.domain.model.AnimalSpecies
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -14,6 +15,9 @@ data class AnimalResponse(
     val microchipNumber: String? = null,
     val weight: Double? = null,
     val birthDate: String? = null,
+    val nextRabiesVaccinationDate: String? = null,
+    val rabiesVaccinationNextDueDate: String? = null,
+    val rabiesNextDueDate: String? = null,
     val notes: String? = null,
 )
 
@@ -21,13 +25,17 @@ fun AnimalResponse.toDomain(): Animal {
     return Animal(
         id = this.id,
         name = this.name,
-        species = this.species,
+        species = AnimalSpecies.fromApiValue(this.species),
         breed = this.breed,
         gender = this.gender,
         color = this.color,
         microchipNumber = this.microchipNumber,
         weight = this.weight,
         birthDate = this.birthDate,
+        nextRabiesVaccinationDate =
+            nextRabiesVaccinationDate
+                ?: rabiesVaccinationNextDueDate
+                ?: rabiesNextDueDate,
         notes = this.notes,
     )
 }

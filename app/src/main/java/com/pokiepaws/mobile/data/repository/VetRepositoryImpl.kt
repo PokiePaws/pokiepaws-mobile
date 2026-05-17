@@ -16,7 +16,7 @@ class VetRepositoryImpl
 
 private fun VetListResponse.toDomain(): Vet =
     Vet(
-        userId = userId,
+        userId = resolvedUserId,
         firstName = firstName,
         lastName = lastName,
         specialization = specialization,

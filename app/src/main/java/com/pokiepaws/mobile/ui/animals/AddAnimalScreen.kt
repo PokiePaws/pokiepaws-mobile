@@ -19,12 +19,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,6 +54,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.model.AnimalDraft
+import com.pokiepaws.mobile.domain.model.AnimalSpecies
+import com.pokiepaws.mobile.domain.model.AnimalSpeciesCategory
 import com.pokiepaws.mobile.ui.theme.PokieBlue
 import com.pokiepaws.mobile.ui.theme.PokieWhite
 import java.time.Instant
@@ -62,11 +66,12 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun AddAnimalScreen(
     onBack: () -> Unit,
+    onAnimalAdded: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AnimalViewModel = hiltViewModel(),
 ) {
     var name by remember { mutableStateOf("") }
-    var species by remember { mutableStateOf("") }
+    var species by remember { mutableStateOf(AnimalSpecies.DOG) }
     var breed by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("MALE") }
     var birthDate by remember { mutableStateOf("") }
@@ -74,6 +79,8 @@ fun AddAnimalScreen(
     var weight by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
     var showDatePicker by remember { mutableStateOf(false) }
+    var showSpeciesPicker by remember { mutableStateOf(false) }
+    var speciesCategory by remember { mutableStateOf(species.category) }
 
     val selectableDates =
         remember {
@@ -114,6 +121,19 @@ fun AddAnimalScreen(
         ) {
             DatePicker(state = datePickerState)
         }
+    }
+
+    if (showSpeciesPicker) {
+        SpeciesPickerDialog(
+            selectedSpecies = species,
+            selectedCategory = speciesCategory,
+            onCategorySelected = { speciesCategory = it },
+            onSpeciesSelected = {
+                species = it
+                showSpeciesPicker = false
+            },
+            onDismiss = { showSpeciesPicker = false },
+        )
     }
 
     Scaffold(
@@ -173,13 +193,12 @@ fun AddAnimalScreen(
                 singleLine = true,
             )
 
-            OutlinedTextField(
-                value = species,
-                onValueChange = { species = it },
-                label = { Text(stringResource(R.string.animal_species_placeholder_label)) },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                singleLine = true,
+            SpeciesSelector(
+                selectedSpecies = species,
+                onClick = {
+                    speciesCategory = species.category
+                    showSpeciesPicker = true
+                },
             )
 
             OutlinedTextField(
@@ -255,9 +274,10 @@ fun AddAnimalScreen(
 
             Button(
                 onClick = {
+                    val animalName = name.trim()
                     val animal =
                         AnimalDraft(
-                            name = name,
+                            name = animalName,
                             species = species,
                             breed = breed.ifBlank { null },
                             gender = gender,
@@ -268,7 +288,7 @@ fun AddAnimalScreen(
                             notes = notes.ifBlank { null },
                         )
                     viewModel.addAnimal(animal) {
-                        onBack()
+                        onAnimalAdded(animalName)
                     }
                 },
                 modifier =
@@ -277,7 +297,7 @@ fun AddAnimalScreen(
                         .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = PokieBlue),
-                enabled = name.isNotBlank() && species.isNotBlank(),
+                enabled = name.isNotBlank(),
             ) {
                 Text(
                     text = stringResource(R.string.animal_save_button),
@@ -288,4 +308,78 @@ fun AddAnimalScreen(
             }
         }
     }
+}
+
+@Composable
+private fun SpeciesSelector(
+    selectedSpecies: AnimalSpecies,
+    onClick: () -> Unit,
+) {
+    Box(modifier = Modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            value = animalSpeciesLabel(selectedSpecies),
+            onValueChange = { },
+            label = { Text(stringResource(R.string.animal_species_label)) },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            readOnly = true,
+            enabled = false,
+            colors =
+                OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
+        )
+        Box(
+            modifier =
+                Modifier
+                    .matchParentSize()
+                    .clickable(onClick = onClick),
+        )
+    }
+}
+
+@Composable
+private fun SpeciesPickerDialog(
+    selectedSpecies: AnimalSpecies,
+    selectedCategory: AnimalSpeciesCategory,
+    onCategorySelected: (AnimalSpeciesCategory) -> Unit,
+    onSpeciesSelected: (AnimalSpecies) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.animal_species_picker_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    AnimalSpeciesCategory.entries.forEach { category ->
+                        FilterChip(
+                            selected = selectedCategory == category,
+                            onClick = { onCategorySelected(category) },
+                            label = { Text(animalSpeciesCategoryLabel(category)) },
+                        )
+                    }
+                }
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    AnimalSpecies.entries
+                        .filter { it.category == selectedCategory }
+                        .forEach { species ->
+                            FilterChip(
+                                selected = selectedSpecies == species,
+                                onClick = { onSpeciesSelected(species) },
+                                label = { Text(animalSpeciesLabel(species)) },
+                            )
+                        }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel_button))
+            }
+        },
+    )
 }

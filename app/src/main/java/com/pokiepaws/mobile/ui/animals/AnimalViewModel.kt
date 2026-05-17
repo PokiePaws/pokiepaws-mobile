@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.pokiepaws.mobile.domain.model.Animal
 import com.pokiepaws.mobile.domain.model.AnimalDraft
 import com.pokiepaws.mobile.domain.repository.AnimalRepository
+import com.pokiepaws.mobile.domain.repository.AppSettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +20,10 @@ sealed class AnimalUiState {
 
     object Loading : AnimalUiState()
 
-    data class Success(val animals: List<Animal>) : AnimalUiState()
+    data class Success(
+        val animals: List<Animal>,
+        val foreignTravelPlanned: Boolean,
+    ) : AnimalUiState()
 
     data class Error(val message: String) : AnimalUiState()
 }
@@ -29,11 +33,16 @@ class AnimalViewModel
     @Inject
     constructor(
         private val repository: AnimalRepository,
+        private val appSettingsRepository: AppSettingsRepository,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow<AnimalUiState>(AnimalUiState.Idle)
         val uiState: StateFlow<AnimalUiState> = _uiState.asStateFlow()
 
+        private var animalsCache: List<Animal> = emptyList()
+        private var foreignTravelPlanned: Boolean = false
+
         init {
+            observeForeignTravelSetting()
             loadAnimals()
         }
 
@@ -41,8 +50,17 @@ class AnimalViewModel
             viewModelScope.launch {
                 _uiState.value = AnimalUiState.Loading
                 runCatching { repository.getAnimals() }
-                    .onSuccess { animals -> _uiState.value = AnimalUiState.Success(animals) }
+                    .onSuccess { animals ->
+                        animalsCache = animals
+                        publishSuccess()
+                    }
                     .onFailure { error -> _uiState.value = AnimalUiState.Error(error.toLoadMessage()) }
+            }
+        }
+
+        fun setForeignTravelPlanned(value: Boolean) {
+            viewModelScope.launch {
+                appSettingsRepository.setForeignTravelPlanned(value)
             }
         }
 
@@ -70,6 +88,25 @@ class AnimalViewModel
                         _uiState.value = AnimalUiState.Error(error.message ?: "Nie udalo sie usunac wpisu")
                     }
             }
+        }
+
+        private fun observeForeignTravelSetting() {
+            viewModelScope.launch {
+                appSettingsRepository.foreignTravelPlanned.collect { value ->
+                    foreignTravelPlanned = value
+                    if (animalsCache.isNotEmpty()) {
+                        publishSuccess()
+                    }
+                }
+            }
+        }
+
+        private fun publishSuccess() {
+            _uiState.value =
+                AnimalUiState.Success(
+                    animals = animalsCache,
+                    foreignTravelPlanned = foreignTravelPlanned,
+                )
         }
     }
 

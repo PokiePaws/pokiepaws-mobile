@@ -118,7 +118,7 @@ private fun validateEmail(email: String): EmailValidationError? {
     return if (emailRegex.matches(email.trim())) null else EmailValidationError.InvalidFormat
 }
 
-private fun validatePassword(
+fun validatePassword(
     password: String,
     email: String,
     firstName: String,

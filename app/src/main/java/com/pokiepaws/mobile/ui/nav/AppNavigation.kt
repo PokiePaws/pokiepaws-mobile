@@ -28,7 +28,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -50,6 +49,7 @@ import com.pokiepaws.mobile.ui.clinics.VetListScreen
 import com.pokiepaws.mobile.ui.notifications.NotificationScreen
 import com.pokiepaws.mobile.ui.profile.HomeScreen
 import com.pokiepaws.mobile.ui.profile.ProfileScreen
+import com.pokiepaws.mobile.ui.settings.LanguageScreen
 import com.pokiepaws.mobile.ui.settings.SettingsScreen
 import com.pokiepaws.mobile.ui.theme.PokieBlue
 import com.pokiepaws.mobile.ui.theme.PokieBlueLight
@@ -58,6 +58,8 @@ import com.pokiepaws.mobile.ui.visits.CreateVisitScreen
 import com.pokiepaws.mobile.ui.visits.VisitDetailScreen
 import com.pokiepaws.mobile.ui.visits.VisitListScreen
 import kotlinx.coroutines.launch
+
+private const val ADDED_ANIMAL_NAME_KEY = "added_animal_name"
 
 @Composable
 fun AppNavigation(
@@ -100,7 +102,7 @@ fun AppNavigation(
                             selected = isSelected,
                             onClick = {
                                 navController.navigate(item.screen.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                    popUpTo(Screen.Home.route) { saveState = true }
                                     launchSingleTop = true
                                     restoreState = true
                                 }
@@ -194,15 +196,32 @@ fun AppNavigation(
                 NotificationScreen(onBack = { navController.popBackStack() })
             }
 
-            composable(Screen.AnimalList.route) {
+            composable(Screen.AnimalList.route) { backStackEntry ->
+                val addedAnimalName by
+                    backStackEntry.savedStateHandle
+                        .getStateFlow<String?>(ADDED_ANIMAL_NAME_KEY, null)
+                        .collectAsState()
+
                 AnimalListScreen(
                     onAddAnimal = { navController.navigate(Screen.AddAnimal.route) },
                     onAnimalClick = { id -> navController.navigate(Screen.AnimalDetail.createRoute(id)) },
+                    addedAnimalName = addedAnimalName,
+                    onAddedAnimalMessageShown = {
+                        backStackEntry.savedStateHandle[ADDED_ANIMAL_NAME_KEY] = null
+                    },
                 )
             }
 
             composable(Screen.AddAnimal.route) {
-                AddAnimalScreen(onBack = { navController.popBackStack() })
+                AddAnimalScreen(
+                    onBack = { navController.popBackStack() },
+                    onAnimalAdded = { animalName ->
+                        navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(ADDED_ANIMAL_NAME_KEY, animalName)
+                        navController.popBackStack()
+                    },
+                )
             }
 
             composable(
@@ -231,6 +250,7 @@ fun AppNavigation(
                 val clinicId = backStackEntry.arguments?.getLong("clinicId") ?: 0L
                 VetListScreen(
                     clinicId = clinicId,
+                    onBack = { navController.popBackStack() },
                     onVetClick = {},
                 )
             }
@@ -280,6 +300,7 @@ fun AppNavigation(
             composable(Screen.Profile.route) {
                 ProfileScreen(
                     onSettingsClick = { navController.navigate(Screen.Settings.route) },
+                    onLanguageClick = { navController.navigate(Screen.Language.route) },
                     onLogout = {
                         scope.launch {
                             authRepository.logout()
@@ -293,6 +314,10 @@ fun AppNavigation(
 
             composable(Screen.Settings.route) {
                 SettingsScreen(onBack = { navController.popBackStack() })
+            }
+
+            composable(Screen.Language.route) {
+                LanguageScreen(onBack = { navController.popBackStack() })
             }
         }
     }

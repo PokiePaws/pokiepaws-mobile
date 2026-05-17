@@ -12,18 +12,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.FlightTakeoff
+import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -39,7 +43,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.model.Animal
+import com.pokiepaws.mobile.domain.model.AnimalSpecies
 import com.pokiepaws.mobile.ui.theme.PokieBlue
+import com.pokiepaws.mobile.ui.theme.PokieBlueDark
 import com.pokiepaws.mobile.ui.theme.PokieWhite
 import java.time.LocalDate
 import java.time.Period
@@ -47,6 +53,11 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
 private val DateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+
+private enum class RabiesRequirement {
+    REQUIRED_BY_LAW,
+    RECOMMENDED_OPTIONAL,
+}
 
 @Composable
 private fun genderLabel(gender: String?): String =
@@ -92,7 +103,12 @@ fun AnimalScreen(
             is AnimalUiState.Success -> {
                 val animal = state.animals.find { it.id == animalId }
                 if (animal != null) {
-                    AnimalDetailsContent(animal = animal, onBack = onBack)
+                    AnimalDetailsContent(
+                        animal = animal,
+                        foreignTravelPlanned = state.foreignTravelPlanned,
+                        onForeignTravelChanged = viewModel::setForeignTravelPlanned,
+                        onBack = onBack,
+                    )
                 } else {
                     Text(
                         text = stringResource(R.string.animal_not_found, animalId),
@@ -117,6 +133,8 @@ fun AnimalScreen(
 @Composable
 fun AnimalDetailsContent(
     animal: Animal,
+    foreignTravelPlanned: Boolean,
+    onForeignTravelChanged: (Boolean) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -136,7 +154,7 @@ fun AnimalDetailsContent(
                     .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            DataCard(label = stringResource(R.string.animal_species_label), value = animal.species)
+            DataCard(label = stringResource(R.string.animal_species_label), value = animalSpeciesLabel(animal.species))
             DataCard(
                 label = stringResource(R.string.animal_breed_label),
                 value = animal.breed ?: stringResource(R.string.animal_unknown_breed),
@@ -156,6 +174,11 @@ fun AnimalDetailsContent(
                 label = stringResource(R.string.animal_microchip_label),
                 value = animal.microchipNumber ?: stringResource(R.string.none_value),
             )
+            RabiesProphylaxisCard(
+                animal = animal,
+                foreignTravelPlanned = foreignTravelPlanned,
+                onForeignTravelChanged = onForeignTravelChanged,
+            )
             DataCard(
                 label = stringResource(R.string.animal_notes_label),
                 value = animal.notes.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.animal_no_notes),
@@ -163,6 +186,141 @@ fun AnimalDetailsContent(
         }
     }
 }
+
+@Composable
+private fun RabiesProphylaxisCard(
+    animal: Animal,
+    foreignTravelPlanned: Boolean,
+    onForeignTravelChanged: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val requirement = rabiesRequirementFor(animal.species, foreignTravelPlanned)
+    val status =
+        when (requirement) {
+            RabiesRequirement.REQUIRED_BY_LAW -> stringResource(R.string.animal_rabies_required_by_law)
+            RabiesRequirement.RECOMMENDED_OPTIONAL -> stringResource(R.string.animal_rabies_recommended_optional)
+        }
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier =
+                        Modifier
+                            .size(42.dp)
+                            .clip(CircleShape)
+                            .background(PokieBlue.copy(alpha = 0.12f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MedicalServices,
+                        contentDescription = null,
+                        tint = PokieBlue,
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.animal_prophylaxis_title),
+                        fontWeight = FontWeight.Bold,
+                        color = PokieBlueDark,
+                    )
+                    Text(
+                        text = stringResource(R.string.animal_rabies_vaccination_label),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(14.dp))
+            ProphylaxisRow(
+                label = stringResource(R.string.animal_rabies_next_due_label),
+                value = vaccinationDateLabel(animal.nextRabiesVaccinationDate),
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            ProphylaxisRow(
+                label = stringResource(R.string.animal_rabies_status_label),
+                value = status,
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.FlightTakeoff,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp),
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = stringResource(R.string.animal_foreign_travel_planned),
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Switch(
+                    checked = foreignTravelPlanned,
+                    onCheckedChange = onForeignTravelChanged,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProphylaxisRow(
+    label: String,
+    value: String,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+    }
+}
+
+@Composable
+private fun vaccinationDateLabel(value: String?): String {
+    val noData = stringResource(R.string.no_data)
+    return value?.let {
+        try {
+            LocalDate.parse(it).format(DateFormatter)
+        } catch (e: DateTimeParseException) {
+            Log.w("AnimalScreen", "Cannot parse rabies vaccination date: $it", e)
+            noData
+        }
+    } ?: noData
+}
+
+private fun rabiesRequirementFor(
+    species: AnimalSpecies,
+    foreignTravelPlanned: Boolean,
+): RabiesRequirement =
+    when {
+        species == AnimalSpecies.DOG -> RabiesRequirement.REQUIRED_BY_LAW
+        foreignTravelPlanned && species in setOf(AnimalSpecies.CAT, AnimalSpecies.FERRET) ->
+            RabiesRequirement.REQUIRED_BY_LAW
+        else -> RabiesRequirement.RECOMMENDED_OPTIONAL
+    }
 
 @Composable
 private fun AnimalHeader(

@@ -47,6 +47,7 @@ import com.pokiepaws.mobile.domain.model.Animal
 import com.pokiepaws.mobile.domain.model.Visit
 import com.pokiepaws.mobile.ui.animals.AnimalUiState
 import com.pokiepaws.mobile.ui.animals.AnimalViewModel
+import com.pokiepaws.mobile.ui.animals.animalSpeciesLabel
 import com.pokiepaws.mobile.ui.theme.PokieBlueDark
 import com.pokiepaws.mobile.ui.theme.PokieWhite
 
@@ -243,7 +244,7 @@ private fun AnimalPickerDialog(
                                                 color = PokieBlueDark,
                                             )
                                             Text(
-                                                text = animal.species,
+                                                text = animalSpeciesLabel(animal.species),
                                                 fontSize = 12.sp,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             )

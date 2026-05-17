@@ -29,7 +29,7 @@ class AnimalRepositoryImpl
 private fun AnimalDraft.toRequest(): AnimalRequest =
     AnimalRequest(
         name = name,
-        species = species,
+        species = species.apiValue,
         breed = breed,
         gender = gender,
         color = color,

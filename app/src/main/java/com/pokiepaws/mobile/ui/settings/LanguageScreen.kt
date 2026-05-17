@@ -69,7 +69,7 @@ data class LanguageOption(
 )
 
 @Composable
-fun SettingsScreen(
+fun LanguageScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -97,7 +97,6 @@ fun SettingsScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surface),
     ) {
-        // ── Header ──────────────────────────────────────────────────────────
         Box(
             modifier =
                 Modifier
@@ -124,15 +123,13 @@ fun SettingsScreen(
                 )
             }
             Text(
-                text = stringResource(R.string.settings_title),
+                text = stringResource(R.string.settings_language_title),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = PokieWhite,
                 modifier = Modifier.align(Alignment.Center),
             )
         }
-
-        // ── Content ─────────────────────────────────────────────────────────
         Column(
             modifier =
                 Modifier
@@ -141,7 +138,6 @@ fun SettingsScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 24.dp),
         ) {
-            // Section header card
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(CARD_ROUNDING.dp),
@@ -190,7 +186,6 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Language option cards
             languageOptions.forEachIndexed { index, option ->
                 AnimatedLanguageCard(
                     labelRes = option.labelRes,

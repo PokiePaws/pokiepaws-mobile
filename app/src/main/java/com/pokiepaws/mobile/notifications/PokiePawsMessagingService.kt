@@ -24,22 +24,27 @@ import javax.inject.Inject
 class PokiePawsMessagingService : FirebaseMessagingService() {
     @Inject
     lateinit var notificationDao: NotificationDao
+
+    @Inject
+    lateinit var deviceTokenRegistrar: DeviceTokenRegistrar
+
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: "PokiePaws"
         val message = remoteMessage.notification?.body ?: remoteMessage.data["message"] ?: "Nowa wiadomość"
+        val type = remoteMessage.data["type"]
 
-        Log.d("FCM_TEST", "Wiadomość przyszła! Title: $title")
+        Log.d("FCM_TEST", "Push: title=$title, type=$type, data=${remoteMessage.data}")
 
         showNotification(title, message)
-
-        saveToDatabase(title, message)
+        saveToDatabase(title, message, type)
     }
 
     private fun saveToDatabase(
         title: String,
         message: String,
+        type: String?,
     ) {
         serviceScope.launch {
             try {
@@ -49,6 +54,7 @@ class PokiePawsMessagingService : FirebaseMessagingService() {
                         content = message,
                         timestamp = System.currentTimeMillis(),
                         isRead = false,
+                        type = type,
                     )
                 notificationDao.insertNotification(entity)
                 Log.d("FCM_DATABASE", "Powiadomienie zapisane lokalnie w Room")
@@ -63,6 +69,7 @@ class PokiePawsMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         Log.d("FCM_TOKEN", "Nowy token urządzenia: $token")
+        deviceTokenRegistrar.registerToken(token)
     }
 
     private fun showNotification(

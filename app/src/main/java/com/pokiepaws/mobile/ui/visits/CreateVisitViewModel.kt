@@ -85,6 +85,8 @@ class CreateVisitViewModel
 
             if (parsedDate == null) {
                 _uiState.update { state -> state.copy(error = "Podaj date w formacie YYYY-MM-DD") }
+            } else if (parsedDate.isBefore(LocalDate.now())) {
+                _uiState.update { state -> state.copy(error = "Nie mozna wybrac daty z przeszlosci") }
             } else {
                 _uiState.update {
                     it.copy(

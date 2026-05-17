@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pokiepaws.mobile.ui.animals.AnimalUiState
 import com.pokiepaws.mobile.ui.animals.AnimalViewModel
+import com.pokiepaws.mobile.ui.animals.animalSpeciesLabel
 import com.pokiepaws.mobile.ui.theme.PokieBlue
 import com.pokiepaws.mobile.ui.theme.PokieBlueDark
 import com.pokiepaws.mobile.ui.theme.PokieBlueLight
@@ -197,7 +198,7 @@ fun HomeScreenContent(
                             items(state.animals) { animal ->
                                 PetCard(
                                     name = animal.name,
-                                    type = animal.species,
+                                    type = animalSpeciesLabel(animal.species),
                                     emoji = "🐾",
                                     onClick = onNavigateToAnimals,
                                 )

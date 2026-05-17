@@ -88,22 +88,31 @@ private data class NotifStyle(
 )
 
 private fun styleFor(type: String?): NotifStyle =
-    when (type?.lowercase()) {
-        "reminder" ->
+    when (type?.uppercase()) {
+        "VISIT_REMINDER_24H",
+        "VISIT_REMINDER_1H",
+        "REMINDER",
+        ->
             NotifStyle(
                 iconVector = Icons.Default.CalendarToday,
                 iconTint = ReminderIconTint,
                 iconBg = ReminderIconBg,
                 borderColor = ReminderIconTint,
             )
-        "vaccine" ->
+        "VACCINATION_REMINDER",
+        "VACCINE",
+        ->
             NotifStyle(
                 iconVector = Icons.Default.MedicalServices,
                 iconTint = VaccineIconTint,
                 iconBg = VaccineIconBg,
                 borderColor = VaccineIconTint,
             )
-        "success" ->
+        "VISIT_CONFIRMED",
+        "PRESCRIPTION_CREATED",
+        "VISIT_MEDICAL_DATA_UPDATED",
+        "SUCCESS",
+        ->
             NotifStyle(
                 iconVector = Icons.Default.CheckCircle,
                 iconTint = SuccessIconTint,

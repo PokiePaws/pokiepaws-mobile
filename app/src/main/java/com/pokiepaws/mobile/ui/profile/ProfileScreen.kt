@@ -84,10 +84,11 @@ data class ProfileMenuItem(
 fun ProfileScreen(
     onLogout: () -> Unit,
     onSettingsClick: () -> Unit,
+    onLanguageClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val menuItems =
-        remember(onSettingsClick) {
+        remember(onLanguageClick, onSettingsClick) {
             listOf(
                 ProfileMenuItem(
                     icon = Icons.Default.Person,
@@ -100,7 +101,7 @@ fun ProfileScreen(
                     labelRes = R.string.profile_language,
                     iconColor = PokieBlue,
                     bgColor = PokieCream,
-                    onClick = onSettingsClick,
+                    onClick = onLanguageClick,
                 ),
                 ProfileMenuItem(
                     icon = Icons.Default.Notifications,

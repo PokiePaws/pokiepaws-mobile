@@ -26,9 +26,14 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,45 +69,62 @@ private const val EMPTY_STATE_EMOJI_SIZE = 64
 fun AnimalListScreen(
     onAddAnimal: () -> Unit,
     onAnimalClick: (Long) -> Unit,
+    addedAnimalName: String? = null,
+    onAddedAnimalMessageShown: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: AnimalViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val animalAddedMessage = stringResource(R.string.animal_added_success)
 
-    Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface),
-    ) {
-        AnimalListHeader(onAddAnimal)
+    LaunchedEffect(addedAnimalName) {
+        val animalName = addedAnimalName ?: return@LaunchedEffect
+        viewModel.loadAnimals()
+        snackbarHostState.showSnackbar(String.format(animalAddedMessage, animalName))
+        onAddedAnimalMessageShown()
+    }
 
-        when (val state = uiState) {
-            is AnimalUiState.Loading -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+    Scaffold(
+        modifier = modifier,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+    ) { paddingValues ->
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(MaterialTheme.colorScheme.surface),
+        ) {
+            AnimalListHeader(onAddAnimal)
+
+            when (val state = uiState) {
+                is AnimalUiState.Loading -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    }
                 }
-            }
 
-            is AnimalUiState.Error -> {
-                ErrorView(
-                    message = state.message,
-                    onRetry = { viewModel.loadAnimals() },
-                )
-            }
-
-            is AnimalUiState.Success -> {
-                if (state.animals.isEmpty()) {
-                    EmptyAnimalsView(onAddAnimal)
-                } else {
-                    AnimalLazyList(
-                        animals = state.animals,
-                        onAnimalClick = onAnimalClick,
+                is AnimalUiState.Error -> {
+                    ErrorView(
+                        message = state.message,
+                        onRetry = { viewModel.loadAnimals() },
                     )
                 }
-            }
 
-            else -> {}
+                is AnimalUiState.Success -> {
+                    if (state.animals.isEmpty()) {
+                        EmptyAnimalsView(onAddAnimal)
+                    } else {
+                        AnimalLazyList(
+                            animals = state.animals,
+                            onAnimalClick = onAnimalClick,
+                        )
+                    }
+                }
+
+                else -> {}
+            }
         }
     }
 }
@@ -213,7 +235,7 @@ fun AnimalCard(
                     color = PokieBlueDark,
                 )
                 Text(
-                    text = "${animal.species}${animal.breed?.let { " - $it" } ?: ""}",
+                    text = "${animalSpeciesLabel(animal.species)}${animal.breed?.let { " - $it" } ?: ""}",
                     fontSize = 13.sp,
                     color = Color.Gray,
                 )

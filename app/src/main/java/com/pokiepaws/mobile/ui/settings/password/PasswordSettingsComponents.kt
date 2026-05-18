@@ -12,6 +12,7 @@ import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.ui.settings.OwnerSettingsEvent
 import com.pokiepaws.mobile.ui.settings.OwnerSettingsUiState
 import com.pokiepaws.mobile.ui.settings.PasswordField
+import com.pokiepaws.mobile.ui.settings.PasswordValidationErrors
 import com.pokiepaws.mobile.ui.settings.PasswordValidationMessages
 import com.pokiepaws.mobile.ui.settings.SaveButton
 import com.pokiepaws.mobile.ui.settings.SettingsSectionCard
@@ -44,7 +45,7 @@ internal fun PasswordSettingsSection(
             onToggleVisibility = { onEvent(OwnerSettingsEvent.ToggleNewPasswordVisibility) },
             onValueChange = { onEvent(OwnerSettingsEvent.NewPasswordChanged(it)) },
         )
-        PasswordValidationMessages(sectionState.validationErrors)
+        PasswordValidationMessages(PasswordValidationErrors(sectionState.validationErrors))
         Spacer(modifier = Modifier.height(12.dp))
         PasswordField(
             value = sectionState.confirmNewPassword,

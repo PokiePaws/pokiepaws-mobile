@@ -37,9 +37,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.model.Visit
 import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieWhite
@@ -93,13 +95,13 @@ fun VisitDetailContent(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Wróć",
+                        contentDescription = stringResource(R.string.back_content_description),
                         tint = PokieWhite,
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = "Szczegóły wizyty",
+                    text = stringResource(R.string.visit_details_title),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = PokieWhite,
@@ -115,7 +117,7 @@ fun VisitDetailContent(
             is VisitDetailUiState.Error ->
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = "Błąd: ${s.message}",
+                        text = stringResource(R.string.visit_error, s.message),
                         color = MaterialTheme.colorScheme.error,
                     )
                 }
@@ -131,8 +133,8 @@ fun VisitDetailContent(
     if (showCancelDialog) {
         AlertDialog(
             onDismissRequest = { showCancelDialog = false },
-            title = { Text("Anuluj wizytę") },
-            text = { Text("Czy na pewno chcesz anulować tę wizytę?") },
+            title = { Text(stringResource(R.string.visit_cancel_dialog_title)) },
+            text = { Text(stringResource(R.string.visit_cancel_dialog_message)) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -144,12 +146,12 @@ fun VisitDetailContent(
                             containerColor = MaterialTheme.colorScheme.error,
                         ),
                 ) {
-                    Text("Anuluj wizytę")
+                    Text(stringResource(R.string.visit_cancel_button))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showCancelDialog = false }) {
-                    Text("Zamknij")
+                    Text(stringResource(R.string.close_button))
                 }
             },
         )
@@ -198,7 +200,7 @@ private fun VisitDetailsBody(
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Wizyta #${visit.id}",
+                        text = stringResource(R.string.visit_card_title, visit.id),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = PokieBlueDark,
@@ -220,7 +222,7 @@ private fun VisitDetailsBody(
 
         if (hasMedicalData) {
             Text(
-                text = "Dane medyczne",
+                text = stringResource(R.string.visit_medical_data_title),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = PokieBlueDark,
@@ -238,13 +240,13 @@ private fun VisitDetailsBody(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     visit.disease?.takeIf { it.isNotBlank() }?.let {
-                        MedicalSection(emoji = "🦠", label = "Choroba", value = it)
+                        MedicalSection(emoji = "🦠", label = stringResource(R.string.visit_disease_label), value = it)
                     }
                     visit.diagnosis?.takeIf { it.isNotBlank() }?.let {
-                        MedicalSection(emoji = "🔬", label = "Diagnoza", value = it)
+                        MedicalSection(emoji = "🔬", label = stringResource(R.string.visit_diagnosis_label), value = it)
                     }
                     visit.recommendations?.takeIf { it.isNotBlank() }?.let {
-                        MedicalSection(emoji = "💊", label = "Zalecenia", value = it)
+                        MedicalSection(emoji = "💊", label = stringResource(R.string.visit_recommendations_label), value = it)
                     }
                 }
             }
@@ -260,7 +262,7 @@ private fun VisitDetailsBody(
                         containerColor = MaterialTheme.colorScheme.error,
                     ),
             ) {
-                Text("Anuluj wizytę", fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.visit_cancel_button), fontWeight = FontWeight.Bold)
             }
         }
 

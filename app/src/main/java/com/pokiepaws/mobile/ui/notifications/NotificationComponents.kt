@@ -127,7 +127,7 @@ private fun styleFor(type: String?): NotifStyle =
 
 @Composable
 fun NotificationContent(
-    notifications: List<AppNotification>,
+    notifications: NotificationItems,
     onBack: () -> Unit,
     onMarkAllAsRead: () -> Unit,
     modifier: Modifier = Modifier,
@@ -183,7 +183,7 @@ fun NotificationContent(
             }
         }
 
-        if (notifications.isEmpty()) {
+        if (notifications.items.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
@@ -219,7 +219,7 @@ fun NotificationContent(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 itemsIndexed(
-                    items = notifications,
+                    items = notifications.items,
                     key = { _, n -> n.id },
                 ) { index, notification ->
                     AnimatedNotificationItem(

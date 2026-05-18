@@ -24,7 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
@@ -65,8 +64,6 @@ private const val LOGOUT_COLOR = 0xFFEF4444
 
 private val PersonIconTint = Color(0xFF3B82F6)
 private val PersonIconBg = Color(0xFFDBEAFE)
-private val NotificationIconTint = Color(0xFFF97316)
-private val NotificationIconBg = Color(0xFFFFEDD5)
 private val SettingsIconTint = Color(0xFF6B7280)
 private val SettingsIconBg = Color(0xFFE5E7EB)
 
@@ -92,12 +89,6 @@ fun ProfileContent(
                     iconColor = PokieBlue,
                     bgColor = PokieCream,
                     onClick = onLanguageClick,
-                ),
-                ProfileMenuItem(
-                    icon = Icons.Default.Notifications,
-                    labelRes = R.string.profile_notification_settings,
-                    iconColor = NotificationIconTint,
-                    bgColor = NotificationIconBg,
                 ),
                 ProfileMenuItem(
                     icon = Icons.Default.Settings,

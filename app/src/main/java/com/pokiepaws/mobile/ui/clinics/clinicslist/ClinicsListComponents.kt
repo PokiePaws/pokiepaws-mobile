@@ -56,8 +56,14 @@ fun ClinicSearchBar(
         TextField(
             value = query,
             onValueChange = onQueryChange,
-            placeholder = { Text("Szukaj kliniki...", color = Color.Gray) },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Szukaj", tint = PokieBlue) },
+            placeholder = { Text(stringResource(R.string.clinic_search_placeholder), color = Color.Gray) },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = stringResource(R.string.search_content_description),
+                    tint = PokieBlue,
+                )
+            },
             colors =
                 TextFieldDefaults.colors(
                     unfocusedContainerColor = Color.Transparent,
@@ -131,7 +137,7 @@ fun ClinicsResult(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(text = "🔍", fontSize = 64.sp)
                     Text(
-                        text = "Brak wyników dla \"$searchQuery\"",
+                        text = stringResource(R.string.clinics_no_results, searchQuery),
                         fontWeight = FontWeight.Bold,
                         color = PokieBlueDark,
                     )

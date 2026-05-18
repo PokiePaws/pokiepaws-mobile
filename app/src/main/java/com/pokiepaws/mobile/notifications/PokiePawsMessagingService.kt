@@ -5,7 +5,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -22,6 +21,11 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class PokiePawsMessagingService : FirebaseMessagingService() {
+    private companion object {
+        const val FCM_LOG_TAG = "FCM_MESSAGE"
+        const val DATABASE_LOG_TAG = "FCM_DATABASE"
+    }
+
     @Inject
     lateinit var notificationDao: NotificationDao
 
@@ -35,7 +39,7 @@ class PokiePawsMessagingService : FirebaseMessagingService() {
         val message = remoteMessage.notification?.body ?: remoteMessage.data["message"] ?: "Nowa wiadomość"
         val type = remoteMessage.data["type"]
 
-        Log.d("FCM_TEST", "Push: title=$title, type=$type, data=${remoteMessage.data}")
+        Log.d(FCM_LOG_TAG, "Push notification received")
 
         showNotification(title, message)
         saveToDatabase(title, message, type)
@@ -57,18 +61,18 @@ class PokiePawsMessagingService : FirebaseMessagingService() {
                         type = type,
                     )
                 notificationDao.insertNotification(entity)
-                Log.d("FCM_DATABASE", "Powiadomienie zapisane lokalnie w Room")
+                Log.d(DATABASE_LOG_TAG, "Notification saved locally in Room")
             } catch (e: android.database.sqlite.SQLiteException) {
-                Log.e("FCM_DATABASE", "Błąd SQLite przy zapisie powiadomienia", e)
+                Log.e(DATABASE_LOG_TAG, "SQLite error while saving notification", e)
             } catch (e: IllegalStateException) {
-                Log.e("FCM_DATABASE", "Baza danych niedostępna", e)
+                Log.e(DATABASE_LOG_TAG, "Notification database unavailable", e)
             }
         }
     }
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        Log.d("FCM_TOKEN", "Nowy token urządzenia: $token")
+        Log.d(FCM_LOG_TAG, "New device FCM registration value received")
         deviceTokenRegistrar.registerToken(token)
     }
 
@@ -81,17 +85,15 @@ class PokiePawsMessagingService : FirebaseMessagingService() {
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel =
-                NotificationChannel(
-                    channelId,
-                    "Przypomnienia o wizytach",
-                    NotificationManager.IMPORTANCE_HIGH,
-                ).apply {
-                    description = "Powiadomienia o zbliżających się wizytach u weterynarza"
-                }
-            notificationManager.createNotificationChannel(channel)
-        }
+        val channel =
+            NotificationChannel(
+                channelId,
+                "Przypomnienia o wizytach",
+                NotificationManager.IMPORTANCE_HIGH,
+            ).apply {
+                description = "Powiadomienia o zbliżających się wizytach u weterynarza"
+            }
+        notificationManager.createNotificationChannel(channel)
 
         val intent =
             Intent(this, MainActivity::class.java).apply {

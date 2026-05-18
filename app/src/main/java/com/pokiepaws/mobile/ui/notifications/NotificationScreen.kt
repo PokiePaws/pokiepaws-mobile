@@ -15,7 +15,7 @@ fun NotificationScreen(
     val notifications by viewModel.notifications.collectAsState(initial = emptyList())
 
     NotificationContent(
-        notifications = notifications,
+        notifications = NotificationItems(notifications),
         onBack = onBack,
         onMarkAllAsRead = viewModel::markAllAsRead,
         modifier = modifier,

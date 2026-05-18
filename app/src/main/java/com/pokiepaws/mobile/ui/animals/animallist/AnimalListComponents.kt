@@ -42,17 +42,12 @@ import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieWhite
 
 private val AnimalAvatarBackground = Color(0xFFF0F8FA)
-private const val HEADER_ROUNDING = 32
 private const val CARD_ROUNDING = 24
 private const val AVATAR_ROUNDING = 16
 private const val BUTTON_ROUNDING = 12
 private const val AVATAR_SIZE = 72
-private const val ADD_BUTTON_SIZE = 48
-private const val HEADER_TOP_PADDING = 48
-private const val HEADER_BOTTOM_PADDING = 32
 private const val LIST_SPACING = 16
 private const val CARD_ELEVATION = 4
-private const val FONT_SIZE_TITLE = 24
 private const val FONT_SIZE_NAME = 18
 private const val FONT_SIZE_EMOJI = 36
 private const val EMPTY_STATE_EMOJI_SIZE = 64
@@ -68,13 +63,9 @@ fun AnimalListHeader(
                 .fillMaxWidth()
                 .background(
                     color = MaterialTheme.colorScheme.primary,
-                    shape =
-                        RoundedCornerShape(
-                            bottomStart = HEADER_ROUNDING.dp,
-                            bottomEnd = HEADER_ROUNDING.dp,
-                        ),
+                    shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp),
                 )
-                .padding(top = HEADER_TOP_PADDING.dp, bottom = HEADER_BOTTOM_PADDING.dp)
+                .padding(top = 12.dp, bottom = 20.dp)
                 .padding(horizontal = 24.dp),
     ) {
         Row(
@@ -84,16 +75,15 @@ fun AnimalListHeader(
         ) {
             Text(
                 text = stringResource(R.string.animals_title),
-                fontSize = FONT_SIZE_TITLE.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = PokieWhite,
             )
-
             IconButton(
                 onClick = onAddAnimal,
                 modifier =
                     Modifier
-                        .size(ADD_BUTTON_SIZE.dp)
+                        .size(48.dp)
                         .clip(CircleShape)
                         .background(PokieWhite.copy(alpha = 0.2f)),
             ) {
@@ -109,7 +99,7 @@ fun AnimalListHeader(
 
 @Composable
 fun AnimalLazyList(
-    animals: List<Animal>,
+    animals: AnimalItems,
     onAnimalClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -118,7 +108,7 @@ fun AnimalLazyList(
         verticalArrangement = Arrangement.spacedBy(LIST_SPACING.dp),
         contentPadding = PaddingValues(all = 24.dp),
     ) {
-        items(animals) { animal ->
+        items(animals.items) { animal ->
             AnimalCard(
                 animal = animal,
                 onClick = { onAnimalClick(animal.id) },

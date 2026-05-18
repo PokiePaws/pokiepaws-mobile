@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.validation.PasswordValidationError
+import com.pokiepaws.mobile.ui.settings.PasswordValidationErrors
 import com.pokiepaws.mobile.util.Countries
 import com.pokiepaws.mobile.util.Country
 import com.pokiepaws.mobile.util.theme.PokieWhite
@@ -172,7 +173,7 @@ internal fun RegisterContent(
                         },
                         isError = state.passwordValidationErrors.isNotEmpty(),
                         supportingText = {
-                            PasswordValidationMessage(errors = state.passwordValidationErrors)
+                            PasswordValidationMessage(errors = PasswordValidationErrors(state.passwordValidationErrors))
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(INPUT_ROUNDING.dp),
@@ -363,11 +364,11 @@ internal fun RegisterContent(
 }
 
 @Composable
-private fun PasswordValidationMessage(errors: List<PasswordValidationError>) {
-    if (errors.isEmpty()) return
+private fun PasswordValidationMessage(errors: PasswordValidationErrors) {
+    if (errors.items.isEmpty()) return
 
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        errors.forEach { error ->
+        errors.items.forEach { error ->
             Text(
                 text = stringResource(error.messageRes),
                 color = MaterialTheme.colorScheme.error,

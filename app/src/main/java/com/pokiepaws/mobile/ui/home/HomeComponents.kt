@@ -76,7 +76,6 @@ private const val OFFSET_SEARCH_BAR = -24
 private const val PET_CARD_WIDTH = 140
 private const val PET_CARD_HEIGHT = 160
 private const val AVATAR_SIZE = 70
-private const val ICON_SIZE_LARGE = 56
 private const val QUICK_ACTION_ICON_SIZE = 50
 private const val SECTION_SPACING = 24
 private const val QUICK_ACTION_WEIGHT_PRIMARY = 1.5f
@@ -115,7 +114,7 @@ fun HomeScreenContent(
 
             Column(modifier = Modifier.padding(horizontal = 36.dp)) {
                 SectionHeader(
-                    title = "Upcoming visit",
+                    title = stringResource(R.string.home_upcoming_visit),
                     onClick = onNavigateToAppointments,
                     textColor = PokieBlueDark,
                 )
@@ -128,7 +127,7 @@ fun HomeScreenContent(
                 Spacer(modifier = Modifier.height(SECTION_SPACING.dp))
 
                 Text(
-                    text = "Quick actions",
+                    text = stringResource(R.string.home_quick_actions),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = PokieBlueDark,
@@ -139,14 +138,14 @@ fun HomeScreenContent(
                     QuickActionCard(
                         modifier = Modifier.weight(QUICK_ACTION_WEIGHT_PRIMARY),
                         icon = Icons.Default.CalendarMonth,
-                        label = "Schedule your visit",
+                        label = stringResource(R.string.home_schedule_visit),
                         backgroundColor = PokieWhite.copy(alpha = 0.2f),
                         onClick = onNavigateToClinics,
                     )
                     QuickActionCard(
                         modifier = Modifier.weight(1f),
                         icon = Icons.Default.Add,
-                        label = "Add an animal",
+                        label = stringResource(R.string.home_add_animal),
                         backgroundColor = PokieWhite.copy(alpha = 0.2f),
                         onClick = onNavigateToAnimals,
                     )
@@ -155,7 +154,7 @@ fun HomeScreenContent(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 SectionHeader(
-                    title = "My animals",
+                    title = stringResource(R.string.home_my_animals),
                     onClick = onNavigateToAnimals,
                     textColor = PokieBlueDark,
                 )
@@ -179,7 +178,7 @@ fun HomeScreenContent(
                             }
                         }
                         is AnimalListUiState.Error -> {
-                            item { Text("Loading error", color = PokieRed) }
+                            item { Text(stringResource(R.string.home_loading_error), color = PokieRed) }
                         }
                     }
                     item { AddPetCard(onClick = onNavigateToAnimals) }
@@ -213,7 +212,7 @@ private fun HomeHeader(onNotificationsClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "Welcome to PokiePaws 🐾",
+                text = stringResource(R.string.home_welcome),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = PokieWhite,
@@ -225,7 +224,11 @@ private fun HomeHeader(onNotificationsClick: () -> Unit) {
                         .clip(CircleShape)
                         .background(PokieWhite.copy(alpha = 0.2f)),
             ) {
-                Icon(Icons.Default.Notifications, "Notifications", tint = PokieWhite)
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = stringResource(R.string.notifications_title),
+                    tint = PokieWhite,
+                )
             }
         }
     }
@@ -249,8 +252,14 @@ private fun SearchBar(
         TextField(
             value = query,
             onValueChange = onQueryChange,
-            placeholder = { Text("Search for a clinic...", color = Color.Gray) },
-            leadingIcon = { Icon(Icons.Default.Search, "Search", tint = PokieBlue) },
+            placeholder = { Text(stringResource(R.string.home_search_clinic), color = Color.Gray) },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = stringResource(R.string.search_content_description),
+                    tint = PokieBlue,
+                )
+            },
             colors =
                 TextFieldDefaults.colors(
                     unfocusedContainerColor = Color.Transparent,
@@ -281,7 +290,7 @@ fun SectionHeader(
     ) {
         Text(text = title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = textColor)
         TextButton(onClick = onClick) {
-            Text("View all", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.view_all), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -330,60 +339,6 @@ fun PetCard(
 }
 
 @Composable
-fun AppointmentCard(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Card(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .clickable { onClick() },
-        shape = RoundedCornerShape(CORNER_RADIUS_PET_CARD.dp),
-        colors = CardDefaults.cardColors(containerColor = PokieWhite),
-        elevation = CardDefaults.cardElevation(4.dp),
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                modifier =
-                    Modifier
-                        .size(ICON_SIZE_LARGE.dp)
-                        .clip(CircleShape)
-                        .background(APPOINTMENT_ICON_BG),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text("🐾", fontSize = 28.sp)
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text("Vaccination (Boguś)", fontWeight = FontWeight.Bold, color = PokieBlueDark)
-                Text("Dr. Jan Kowalski", color = Color.Gray, fontSize = 14.sp)
-            }
-            Card(
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = APPOINTMENT_CARD_BG),
-            ) {
-                Column(
-                    modifier = Modifier.padding(8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Text(
-                        text = "Tomorrow",
-                        fontSize = 11.sp,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Text("14:30", fontWeight = FontWeight.Bold, color = Color.Black)
-                }
-            }
-        }
-    }
-}
-
-@Composable
 fun AddPetCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -413,7 +368,7 @@ fun AddPetCard(
                 modifier = Modifier.size(32.dp),
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Add", color = Color.Gray, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.add_action), color = Color.Gray, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -552,7 +507,7 @@ private fun UpcomingVisitContent(visit: Visit) {
         modifier = Modifier.padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        VisitIcon(text = "đźľ")
+        VisitIcon(text = "🐾")
 
         Spacer(modifier = Modifier.width(16.dp))
 

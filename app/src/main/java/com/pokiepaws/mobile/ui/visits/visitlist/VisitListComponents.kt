@@ -18,7 +18,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -37,9 +40,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.model.Animal
 import com.pokiepaws.mobile.domain.model.Visit
 import com.pokiepaws.mobile.ui.animals.addanimal.animalSpeciesLabel
@@ -90,7 +95,7 @@ fun VisitListContent(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Moje wizyty",
+                    text = stringResource(R.string.visits_my_visits),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = PokieWhite,
@@ -105,7 +110,7 @@ fun VisitListContent(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Umów wizytę",
+                        contentDescription = stringResource(R.string.visit_schedule_content_description),
                         tint = PokieWhite,
                     )
                 }
@@ -125,7 +130,7 @@ fun VisitListContent(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(text = "Błąd: ${s.message}")
+                    Text(text = stringResource(R.string.visit_error, s.message))
                 }
 
             is VisitListUiState.Success -> {
@@ -142,7 +147,7 @@ fun VisitListContent(
                                 fontSize = 64.sp,
                             )
                             Text(
-                                text = "Brak nadchodzących wizyt",
+                                text = stringResource(R.string.visits_empty),
                                 fontWeight = FontWeight.Bold,
                                 color = PokieBlueDark,
                             )
@@ -150,7 +155,7 @@ fun VisitListContent(
                                 onClick = { showAnimalPicker = true },
                                 modifier = Modifier.padding(top = 8.dp),
                             ) {
-                                Text("Umów pierwszą wizytę")
+                                Text(stringResource(R.string.visit_book_first))
                             }
                         }
                     }
@@ -195,7 +200,7 @@ private fun AnimalPickerDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Wybierz zwierzę") },
+        title = { Text(stringResource(R.string.visit_select_animal_title)) },
         text = {
             when (animalState) {
                 is AnimalListUiState.Loading ->
@@ -208,13 +213,13 @@ private fun AnimalPickerDialog(
 
                 is AnimalListUiState.Error ->
                     Text(
-                        text = "Nie udało się załadować zwierząt",
+                        text = stringResource(R.string.visit_animals_load_error),
                         color = MaterialTheme.colorScheme.error,
                     )
 
                 is AnimalListUiState.Success -> {
                     if (animalState.animals.isEmpty()) {
-                        Text("Nie masz żadnych zwierząt. Dodaj najpierw zwierzę.")
+                        Text(stringResource(R.string.visit_no_animals_dialog))
                     } else {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             animalState.animals.forEach { animal ->
@@ -253,7 +258,7 @@ private fun AnimalPickerDialog(
         confirmButton = {},
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Anuluj")
+                Text(stringResource(R.string.cancel_button))
             }
         },
     )
@@ -282,20 +287,31 @@ private fun VisitCard(
                     Modifier
                         .size(72.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(PokieWhite),
+                        .background(PokieBlueDark.copy(alpha = 0.08f)),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(
-                    text = if (visit.status == "SCHEDULED") "📅" else "✅",
-                    fontSize = 36.sp,
-                )
+                if (visit.status == "CANCELLED") {
+                    Icon(
+                        imageVector = Icons.Default.Cancel,
+                        contentDescription = stringResource(R.string.visit_cancelled_content_description),
+                        tint = PokieBlueDark,
+                        modifier = Modifier.size(36.dp),
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.CalendarMonth,
+                        contentDescription = stringResource(R.string.visit_scheduled_content_description),
+                        tint = PokieBlueDark,
+                        modifier = Modifier.size(36.dp),
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.width(16.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Wizyta #${visit.id}",
+                    text = stringResource(R.string.visit_card_title, visit.id),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = PokieBlueDark,
@@ -318,15 +334,18 @@ private fun VisitCard(
                         },
                 )
                 if (visit.status == "SCHEDULED") {
-                    TextButton(
+                    Button(
                         onClick = { onCancel(visit.id) },
-                        contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
+                        modifier = Modifier.padding(top = 6.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
                         colors =
-                            ButtonDefaults.textButtonColors(
-                                contentColor = MaterialTheme.colorScheme.error,
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = PokieWhite,
                             ),
+                        shape = RoundedCornerShape(8.dp),
                     ) {
-                        Text("Anuluj wizytę", fontSize = 12.sp)
+                        Text(stringResource(R.string.visit_cancel_button), fontSize = 12.sp)
                     }
                 }
             }

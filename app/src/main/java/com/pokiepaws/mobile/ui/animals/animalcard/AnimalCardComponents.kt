@@ -1,10 +1,12 @@
 package com.pokiepaws.mobile.ui.animals.animalcard
 
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,12 +23,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FlightTakeoff
 import androidx.compose.material.icons.filled.MedicalServices
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -40,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.model.Animal
 import com.pokiepaws.mobile.domain.model.AnimalSpecies
+import com.pokiepaws.mobile.domain.model.RabiesRequirement
 import com.pokiepaws.mobile.ui.animals.addanimal.animalSpeciesLabel
 import com.pokiepaws.mobile.util.theme.PokieBlue
 import com.pokiepaws.mobile.util.theme.PokieBlueDark
@@ -50,11 +54,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
 private val DateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-
-private enum class RabiesRequirement {
-    REQUIRED_BY_LAW,
-    RECOMMENDED_OPTIONAL,
-}
 
 @Composable
 fun AnimalDetailsContent(
@@ -220,7 +219,7 @@ fun RabiesProphylaxisCard(
                 Box(
                     modifier =
                         Modifier
-                            .size(42.dp)
+                            .size(24.dp)
                             .clip(CircleShape)
                             .background(PokieBlue.copy(alpha = 0.12f)),
                     contentAlignment = Alignment.Center,
@@ -273,12 +272,53 @@ fun RabiesProphylaxisCard(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
-                Switch(
-                    checked = foreignTravelPlanned,
-                    onCheckedChange = onForeignTravelChanged,
-                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TravelChoiceButton(
+                        textRes = R.string.yes_option,
+                        selected = foreignTravelPlanned,
+                        onClick = { onForeignTravelChanged(true) },
+                    )
+                    TravelChoiceButton(
+                        textRes = R.string.no_option,
+                        selected = !foreignTravelPlanned,
+                        onClick = { onForeignTravelChanged(false) },
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun TravelChoiceButton(
+    @StringRes textRes: Int,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    Button(
+        onClick = onClick,
+        colors =
+            ButtonDefaults.buttonColors(
+                containerColor =
+                    if (selected) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    },
+                contentColor =
+                    if (selected) {
+                        MaterialTheme.colorScheme.onPrimary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+            ),
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+    ) {
+        Text(
+            text = stringResource(textRes),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+        )
     }
 }
 
@@ -323,7 +363,7 @@ fun birthDateLabel(birthDate: String?): String {
         try {
             LocalDate.parse(it).format(DateFormatter)
         } catch (e: DateTimeParseException) {
-            Log.w("AnimalScreen", "Cannot parse birth date: $it", e)
+            Log.w("AnimalScreen", "Cannot parse animal date field", e)
             noData
         }
     } ?: noData
@@ -339,7 +379,7 @@ fun vaccinationDateLabel(value: String?): String {
         try {
             LocalDate.parse(it).format(DateFormatter)
         } catch (e: DateTimeParseException) {
-            Log.w("AnimalScreen", "Cannot parse rabies vaccination date: $it", e)
+            Log.w("AnimalScreen", "Cannot parse animal date field", e)
             noData
         }
     } ?: noData
@@ -368,12 +408,12 @@ fun calculateAgeLabel(birthDate: String): String {
         val period = Period.between(date, now)
 
         when {
-            period.years > 0 -> context.getString(R.string.animal_age_years, period.years)
-            period.months > 0 -> context.getString(R.string.animal_age_months, period.months)
+            period.years > 0 -> context.resources.getQuantityString(R.plurals.animal_age_years, period.years, period.years)
+            period.months > 0 -> context.resources.getQuantityString(R.plurals.animal_age_months, period.months, period.months)
             else -> newborn
         }
     } catch (e: DateTimeParseException) {
-        Log.w("AnimalScreen", "Cannot parse age from: $birthDate", e)
+        Log.w("AnimalScreen", "Cannot parse animal age", e)
         noData
     }
 }

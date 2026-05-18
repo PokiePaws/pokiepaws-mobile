@@ -21,9 +21,9 @@ import com.pokiepaws.mobile.R
 fun AnimalListScreen(
     onAddAnimal: () -> Unit,
     onAnimalClick: (Long) -> Unit,
+    modifier: Modifier = Modifier,
     addedAnimalName: String? = null,
     onAddedAnimalMessageShown: () -> Unit = {},
-    modifier: Modifier = Modifier,
     viewModel: AnimalListViewModel = hiltViewModel(),
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
@@ -70,7 +70,7 @@ fun AnimalListScreen(
                         EmptyAnimalsView(onAddAnimal)
                     } else {
                         AnimalLazyList(
-                            animals = state.animals,
+                            animals = AnimalItems(state.animals),
                             onAnimalClick = onAnimalClick,
                         )
                     }

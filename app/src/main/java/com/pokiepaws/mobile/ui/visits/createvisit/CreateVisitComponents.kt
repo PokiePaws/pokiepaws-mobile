@@ -171,7 +171,7 @@ private fun CreateVisitStepContent(
         ->
             LoadingOrContent(isLoading = state.isLoading) {
                 ClinicListStep(
-                    clinics = state.clinics,
+                    clinics = ClinicItems(state.clinics),
                     onSelect = onSelectClinic,
                 )
             }
@@ -179,7 +179,7 @@ private fun CreateVisitStepContent(
         CreateVisitStep.SELECT_VET ->
             LoadingOrContent(isLoading = state.isLoading) {
                 VetListStep(
-                    vets = state.vets,
+                    vets = VetItems(state.vets),
                     onSelect = onSelectVet,
                 )
             }
@@ -187,7 +187,7 @@ private fun CreateVisitStepContent(
         CreateVisitStep.SELECT_SLOT ->
             SlotStep(
                 selectedDate = state.selectedDate,
-                slots = state.availableSlots,
+                slots = SlotItems(state.availableSlots),
                 isLoading = state.isLoading,
                 onDateSelected = onSelectDate,
                 onSlotSelected = onSelectSlot,
@@ -266,10 +266,10 @@ private fun EmptyVisitState(
 
 @Composable
 private fun ClinicListStep(
-    clinics: List<Clinic>,
+    clinics: ClinicItems,
     onSelect: (Clinic) -> Unit,
 ) {
-    if (clinics.isEmpty()) {
+    if (clinics.items.isEmpty()) {
         EmptyVisitState(
             emoji = "🏥",
             message = stringResource(R.string.create_visit_clinics_empty),
@@ -281,7 +281,7 @@ private fun ClinicListStep(
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        items(clinics, key = { it.id }) { clinic ->
+        items(clinics.items, key = { it.id }) { clinic ->
             Card(
                 onClick = { onSelect(clinic) },
                 modifier = Modifier.fillMaxWidth(),
@@ -336,10 +336,10 @@ private fun ClinicListStep(
 
 @Composable
 private fun VetListStep(
-    vets: List<Vet>,
+    vets: VetItems,
     onSelect: (Vet) -> Unit,
 ) {
-    if (vets.isEmpty()) {
+    if (vets.items.isEmpty()) {
         EmptyVisitState(
             emoji = "👨‍⚕️",
             message = stringResource(R.string.create_visit_vets_empty),
@@ -351,7 +351,7 @@ private fun VetListStep(
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        items(vets, key = { it.userId }) { vet ->
+        items(vets.items, key = { it.userId }) { vet ->
             Card(
                 onClick = { onSelect(vet) },
                 modifier = Modifier.fillMaxWidth(),
@@ -401,7 +401,7 @@ private fun VetListStep(
 @Composable
 private fun SlotStep(
     selectedDate: String?,
-    slots: List<String>,
+    slots: SlotItems,
     isLoading: Boolean,
     onDateSelected: (String) -> Unit,
     onSlotSelected: (String) -> Unit,
@@ -485,7 +485,7 @@ private fun SlotStep(
                     CircularProgressIndicator(color = PokieBlue)
                 }
 
-            slots.isEmpty() && selectedDate != null ->
+            slots.items.isEmpty() && selectedDate != null ->
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Text(
                         text = stringResource(R.string.create_visit_no_slots),
@@ -493,7 +493,7 @@ private fun SlotStep(
                     )
                 }
 
-            slots.isNotEmpty() -> {
+            slots.items.isNotEmpty() -> {
                 Text(
                     text = stringResource(R.string.create_visit_available_hours),
                     fontSize = 16.sp,
@@ -501,7 +501,7 @@ private fun SlotStep(
                     color = PokieBlueDark,
                 )
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(slots) { slot ->
+                    items(slots.items) { slot ->
                         val time = slot.substringAfter("T").take(TIME_LABEL_LENGTH)
                         Card(
                             onClick = { onSlotSelected(slot) },

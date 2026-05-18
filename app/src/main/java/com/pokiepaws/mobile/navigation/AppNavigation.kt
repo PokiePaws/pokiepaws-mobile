@@ -331,9 +331,9 @@ private data class BottomNavItem(
 
 private val bottomNavItems =
     listOf(
-        BottomNavItem(Screen.Home, R.string.nav_home, Icons.Default.Home),
         BottomNavItem(Screen.AnimalList, R.string.nav_animals, Icons.Default.Pets),
         BottomNavItem(Screen.AppointmentList, R.string.nav_visits, Icons.Default.CalendarMonth),
+        BottomNavItem(Screen.Home, R.string.nav_home, Icons.Default.Home),
         BottomNavItem(Screen.ClinicList, R.string.nav_clinics, Icons.Default.LocalHospital),
         BottomNavItem(Screen.Profile, R.string.nav_profile, Icons.Default.Person),
     )

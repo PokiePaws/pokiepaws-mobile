@@ -1,7 +1,7 @@
 package com.pokiepaws.mobile.ui.auth
 
-import com.pokiepaws.mobile.ui.auth.register.EmailValidationError
-import com.pokiepaws.mobile.ui.auth.register.PasswordValidationError
+import com.pokiepaws.mobile.domain.validation.EmailValidationError
+import com.pokiepaws.mobile.domain.validation.PasswordValidationError
 import com.pokiepaws.mobile.ui.auth.register.RegisterUiState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

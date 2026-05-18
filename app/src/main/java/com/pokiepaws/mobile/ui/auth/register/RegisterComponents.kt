@@ -52,9 +52,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pokiepaws.mobile.R
-import com.pokiepaws.mobile.ui.theme.PokieWhite
+import com.pokiepaws.mobile.domain.validation.PasswordValidationError
 import com.pokiepaws.mobile.util.Countries
 import com.pokiepaws.mobile.util.Country
+import com.pokiepaws.mobile.util.theme.PokieWhite
 
 private const val WEIGHT_POSTAL_CODE = 0.45f
 private const val WEIGHT_CITY = 0.55f

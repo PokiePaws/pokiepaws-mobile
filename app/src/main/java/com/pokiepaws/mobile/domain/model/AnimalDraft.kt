@@ -2,7 +2,7 @@ package com.pokiepaws.mobile.domain.model
 
 data class AnimalDraft(
     val name: String,
-    val species: String,
+    val species: AnimalSpecies,
     val breed: String? = null,
     val gender: String,
     val color: String? = null,

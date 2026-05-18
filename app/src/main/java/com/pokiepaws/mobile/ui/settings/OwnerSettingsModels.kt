@@ -1,22 +1,9 @@
 package com.pokiepaws.mobile.ui.settings
 
-import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.model.OwnerAddressDraft
 import com.pokiepaws.mobile.domain.model.OwnerPhoneDraft
-import com.pokiepaws.mobile.ui.auth.register.PasswordValidationError
-import com.pokiepaws.mobile.ui.auth.register.validatePassword
-
-@androidx.annotation.StringRes
-fun passwordValidationMessageRes(error: PasswordValidationError): Int =
-    when (error) {
-        PasswordValidationError.TooShort -> R.string.register_password_too_short
-        PasswordValidationError.MissingUppercase -> R.string.register_password_missing_uppercase
-        PasswordValidationError.MissingSpecialCharacter -> R.string.register_password_missing_special
-        PasswordValidationError.ContainsUserName -> R.string.register_password_contains_user_name
-        PasswordValidationError.ContainsSequence -> R.string.register_password_contains_sequence
-        PasswordValidationError.ContainsRepeatedCharacters -> R.string.register_password_repeated_characters
-        PasswordValidationError.TooCommon -> R.string.register_password_too_common
-    }
+import com.pokiepaws.mobile.domain.validation.PasswordValidationError
+import com.pokiepaws.mobile.domain.validation.validatePassword
 
 data class OwnerSettingsUiState(
     val phoneNumber: String = "",

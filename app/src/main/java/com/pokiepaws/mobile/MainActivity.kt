@@ -11,9 +11,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.pokiepaws.mobile.domain.repository.AuthRepository
+import com.pokiepaws.mobile.navigation.AppNavigation
 import com.pokiepaws.mobile.notifications.DeviceTokenRegistrar
-import com.pokiepaws.mobile.ui.nav.AppNavigation
-import com.pokiepaws.mobile.ui.theme.PokiePawsTheme
+import com.pokiepaws.mobile.util.theme.PokiePawsTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject

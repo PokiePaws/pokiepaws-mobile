@@ -10,7 +10,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.pokiepaws.mobile.ui.auth.register.PasswordValidationError
+import com.pokiepaws.mobile.R
+import com.pokiepaws.mobile.domain.validation.PasswordValidationError
+
+@androidx.annotation.StringRes
+fun passwordValidationMessageRes(error: PasswordValidationError): Int =
+    when (error) {
+        PasswordValidationError.TooShort -> R.string.register_password_too_short
+        PasswordValidationError.MissingUppercase -> R.string.register_password_missing_uppercase
+        PasswordValidationError.MissingSpecialCharacter -> R.string.register_password_missing_special
+        PasswordValidationError.ContainsUserName -> R.string.register_password_contains_user_name
+        PasswordValidationError.ContainsSequence -> R.string.register_password_contains_sequence
+        PasswordValidationError.ContainsRepeatedCharacters -> R.string.register_password_repeated_characters
+        PasswordValidationError.TooCommon -> R.string.register_password_too_common
+    }
 
 @Composable
 internal fun PasswordValidationMessages(

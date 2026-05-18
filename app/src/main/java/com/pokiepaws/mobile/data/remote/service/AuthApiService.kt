@@ -1,14 +1,14 @@
 package com.pokiepaws.mobile.data.remote.service
 
 import com.pokiepaws.mobile.data.remote.dto.auth.AuthResponse
-import com.pokiepaws.mobile.data.remote.dto.auth.ChangePasswordRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.DeviceTokenRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.ForgotPasswordRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.LoginRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.MessageResponse
 import com.pokiepaws.mobile.data.remote.dto.auth.RegisterRequest
-import com.pokiepaws.mobile.data.remote.dto.auth.UpdateOwnerAddressRequest
-import com.pokiepaws.mobile.data.remote.dto.auth.UpdateOwnerPhoneRequest
+import com.pokiepaws.mobile.data.remote.dto.settings.ChangePasswordRequest
+import com.pokiepaws.mobile.data.remote.dto.settings.UpdateOwnerAddressRequest
+import com.pokiepaws.mobile.data.remote.dto.settings.UpdateOwnerPhoneNumberRequest
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.PATCH
@@ -32,7 +32,7 @@ interface AuthApiService {
 
     @PATCH("api/owners/me/phone")
     suspend fun updateOwnerPhone(
-        @Body request: UpdateOwnerPhoneRequest,
+        @Body request: UpdateOwnerPhoneNumberRequest,
     ): Response<Unit>
 
     @PATCH("api/owners/me/address")

@@ -45,8 +45,6 @@ class DeviceTokenRegistrar
                     Log.e("FCM_TOKEN", "Backend odrzucił token FCM: HTTP ${e.code()}", e)
                 } catch (e: IOException) {
                     Log.e("FCM_TOKEN", "Błąd sieci przy rejestracji tokena FCM", e)
-                } catch (e: RuntimeException) {
-                    Log.e("FCM_TOKEN", "Nie udało się zarejestrować tokena FCM", e)
                 }
             }
         }

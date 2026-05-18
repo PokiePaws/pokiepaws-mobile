@@ -1,12 +1,12 @@
 package com.pokiepaws.mobile.data.repository
 
 import com.pokiepaws.mobile.data.local.TokenManager
-import com.pokiepaws.mobile.data.remote.dto.auth.ChangePasswordRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.ForgotPasswordRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.LoginRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.RegisterRequest
-import com.pokiepaws.mobile.data.remote.dto.auth.UpdateOwnerAddressRequest
-import com.pokiepaws.mobile.data.remote.dto.auth.UpdateOwnerPhoneRequest
+import com.pokiepaws.mobile.data.remote.dto.settings.ChangePasswordRequest
+import com.pokiepaws.mobile.data.remote.dto.settings.UpdateOwnerAddressRequest
+import com.pokiepaws.mobile.data.remote.dto.settings.UpdateOwnerPhoneNumberRequest
 import com.pokiepaws.mobile.data.remote.service.AuthApiService
 import com.pokiepaws.mobile.domain.model.AuthSession
 import com.pokiepaws.mobile.domain.model.OwnerAddressDraft
@@ -97,8 +97,8 @@ private fun RegistrationDraft.toRequest(): RegisterRequest =
         country = country,
     )
 
-private fun OwnerPhoneDraft.toRequest(): UpdateOwnerPhoneRequest =
-    UpdateOwnerPhoneRequest(
+private fun OwnerPhoneDraft.toRequest(): UpdateOwnerPhoneNumberRequest =
+    UpdateOwnerPhoneNumberRequest(
         phoneNumber = phoneNumber,
     )
 

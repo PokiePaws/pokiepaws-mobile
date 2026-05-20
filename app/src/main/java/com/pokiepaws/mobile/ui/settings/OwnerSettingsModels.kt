@@ -3,7 +3,9 @@ package com.pokiepaws.mobile.ui.settings
 import com.pokiepaws.mobile.domain.model.OwnerAddressDraft
 import com.pokiepaws.mobile.domain.model.OwnerPhoneDraft
 import com.pokiepaws.mobile.domain.validation.PasswordValidationError
+import com.pokiepaws.mobile.domain.validation.PostalCodeValidationError
 import com.pokiepaws.mobile.domain.validation.validatePassword
+import com.pokiepaws.mobile.domain.validation.validatePostalCode
 
 data class OwnerSettingsUiState(
     val phoneNumber: String = "",
@@ -38,6 +40,7 @@ data class OwnerSettingsUiState(
             )
 
     val passwordsMatch: Boolean get() = newPassword == confirmNewPassword || confirmNewPassword.isBlank()
+    val postalCodeValidationError: PostalCodeValidationError? get() = validatePostalCode(postalCode)
 
     val canSavePhone: Boolean get() = phoneNumber.isNotBlank()
 
@@ -47,6 +50,7 @@ data class OwnerSettingsUiState(
                 houseNumber.isNotBlank() &&
                 city.isNotBlank() &&
                 postalCode.isNotBlank() &&
+                postalCodeValidationError == null &&
                 country.isNotBlank()
 
     val canChangePassword: Boolean

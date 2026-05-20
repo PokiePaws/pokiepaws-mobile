@@ -3,10 +3,13 @@ package com.pokiepaws.mobile.ui.auth.register
 import com.pokiepaws.mobile.domain.model.RegistrationDraft
 import com.pokiepaws.mobile.domain.validation.EmailValidationError
 import com.pokiepaws.mobile.domain.validation.PasswordValidationError
+import com.pokiepaws.mobile.domain.validation.PostalCodeValidationError
 import com.pokiepaws.mobile.domain.validation.validateEmail
 import com.pokiepaws.mobile.domain.validation.validatePassword
-import com.pokiepaws.mobile.util.Countries
-import com.pokiepaws.mobile.util.Country
+import com.pokiepaws.mobile.domain.validation.validatePostalCode
+
+internal const val POLAND_COUNTRY_NAME = "Polska"
+internal const val POLAND_DIAL_CODE = "+48"
 
 data class RegisterUiState(
     val email: String = "",
@@ -17,8 +20,6 @@ data class RegisterUiState(
     val passwordVisible: Boolean = false,
     val confirmPasswordVisible: Boolean = false,
     val phoneNumber: String = "",
-    val phoneCountry: Country = Countries.first(),
-    val residenceCountry: Country = Countries.find { it.name == "Polska" } ?: Countries.first(),
     val street: String = "",
     val houseNumber: String = "",
     val apartmentNumber: String = "",
@@ -29,6 +30,7 @@ data class RegisterUiState(
 ) {
     val passwordsMatch: Boolean get() = password == confirmPassword || confirmPassword.isEmpty()
     val emailValidationError: EmailValidationError? get() = validateEmail(email)
+    val postalCodeValidationError: PostalCodeValidationError? get() = validatePostalCode(postalCode)
     val passwordValidationErrors: List<PasswordValidationError>
         get() =
             validatePassword(
@@ -42,6 +44,7 @@ data class RegisterUiState(
             email.isNotBlank() &&
                 password.isNotBlank() &&
                 confirmPassword.isNotBlank() &&
+                postalCodeValidationError == null &&
                 emailValidationError == null &&
                 passwordValidationErrors.isEmpty() &&
                 passwordsMatch
@@ -52,13 +55,13 @@ data class RegisterUiState(
             password = password,
             firstName = firstName,
             lastName = lastName,
-            phoneNumber = "${phoneCountry.dialCode}$phoneNumber",
+            phoneNumber = "$POLAND_DIAL_CODE$phoneNumber",
             street = street,
             houseNumber = houseNumber,
             apartmentNumber = apartmentNumber.ifBlank { null },
             city = city,
             postalCode = postalCode,
-            country = residenceCountry.name,
+            country = POLAND_COUNTRY_NAME,
         )
 }
 
@@ -78,10 +81,6 @@ sealed interface RegisterEvent {
     data object ToggleConfirmPasswordVisibility : RegisterEvent
 
     data class PhoneNumberChanged(val value: String) : RegisterEvent
-
-    data class PhoneCountryChanged(val value: Country) : RegisterEvent
-
-    data class ResidenceCountryChanged(val value: Country) : RegisterEvent
 
     data class StreetChanged(val value: String) : RegisterEvent
 

@@ -1,10 +1,10 @@
 package com.pokiepaws.mobile.ui.notifications
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun NotificationScreen(
@@ -12,12 +12,13 @@ fun NotificationScreen(
     modifier: Modifier = Modifier,
     viewModel: NotificationViewModel = hiltViewModel(),
 ) {
-    val notifications by viewModel.notifications.collectAsState(initial = emptyList())
+    val notifications by viewModel.notifications.collectAsStateWithLifecycle()
 
     NotificationContent(
         notifications = NotificationItems(notifications),
         onBack = onBack,
         onMarkAllAsRead = viewModel::markAllAsRead,
+        onNotificationClick = viewModel::markAsRead,
         modifier = modifier,
     )
 }

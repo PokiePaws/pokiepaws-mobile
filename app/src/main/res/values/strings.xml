@@ -7,9 +7,8 @@
     <string name="nav_profile">Profile</string>
 
     <string name="profile_title">My Profile</string>
-    <string name="profile_user_name">Admin PokiePaws</string>
-    <string name="profile_user_email">admin@pokiepaws.pl</string>
-    <string name="profile_user_data">User data</string>
+    <string name="profile_loading">Loading profile</string>
+    <string name="profile_loading_error">Could not load profile</string>
     <string name="profile_language">Language</string>
     <string name="profile_app_settings">App settings</string>
     <string name="profile_logout">Log out</string>
@@ -61,10 +60,11 @@
     <string name="email_verification_instruction">To use PokiePaws, you must confirm your profile. Click the button in the email message.</string>
     <string name="email_verification_spam_hint">If you do not see the message, check your Spam folder or try sending it again.</string>
     <string name="phone_number_label">Phone number</string>
-    <string name="country_picker_title">Choose country</string>
-    <string name="country_search_label">Search country&#8230;</string>
 
     <string name="animals_title">My animals</string>
+    <string name="animal_search_placeholder">Search animal&#8230;</string>
+    <string name="animals_no_results">No animals found for "%1$s"</string>
+    <string name="animal_unknown_name">Unknown animal</string>
     <string name="animal_add_content_description">Add animal</string>
     <string name="animal_birth_date_prefix">Born %1$s</string>
     <string name="animals_empty_title">You do not have any animals yet</string>
@@ -135,6 +135,8 @@
     <string name="animal_save_button">Save</string>
     <string name="clinics_empty">No clinics</string>
     <string name="vets_empty">No vets in this clinic</string>
+    <string name="vet_search_placeholder">Search vet&#8230;</string>
+    <string name="vets_no_results">No vets found for "%1$s"</string>
     <string name="error_with_message">Error: %1$s</string>
     <string name="clinic_phone">Phone: %1$s</string>
     <string name="clinic_search_placeholder">Search clinic&#8230;</string>
@@ -184,10 +186,10 @@
     <string name="apartment_label">Apartment</string>
     <string name="optional_placeholder">optional</string>
     <string name="postal_code_label">Postal code</string>
+    <string name="postal_code_invalid_format">Postal code must use the XX-XXX format</string>
     <string name="city_label">City</string>
     <string name="register_button">Register</string>
     <string name="register_login_prompt">Already have an account? Log in</string>
-    <string name="country_of_residence_label">Country of residence</string>
     <string name="create_visit_select_clinic">Choose clinic</string>
     <string name="create_visit_select_vet">Choose vet</string>
     <string name="create_visit_select_slot">Choose appointment time</string>
@@ -216,7 +218,19 @@
     <string name="visit_no_animals_dialog">You do not have any animals. Add an animal first.</string>
     <string name="visit_cancelled_content_description">Cancelled visit</string>
     <string name="visit_scheduled_content_description">Scheduled visit</string>
-    <string name="visit_card_title">Visit #%1$d</string>
+    <string name="visit_card_animal_title">%1$s - visit #%2$d</string>
+    <string name="visit_card_date">Date: %1$s</string>
+    <string name="visit_card_status">Status: %1$s</string>
+    <string name="visit_search_placeholder">Search by date, status or animal&#8230;</string>
+    <string name="visits_no_results">No visits found for "%1$s"</string>
+    <string name="visit_type_checkup">Checkup</string>
+    <string name="visit_type_vaccination">Vaccination</string>
+    <string name="visit_type_emergency">Emergency</string>
+    <string name="visit_type_prevention">Prevention</string>
+    <string name="visit_type_specialist_consultation">Specialist consultation</string>
+    <string name="visit_type_diagnostic_exam">Diagnostic exam</string>
+    <string name="visit_type_surgery">Surgery</string>
+    <string name="visit_type_dental_procedure">Dental procedure</string>
     <string name="visit_cancel_button">Cancel visit</string>
     <string name="visit_details_title">Visit details</string>
     <string name="visit_cancel_dialog_title">Cancel visit</string>

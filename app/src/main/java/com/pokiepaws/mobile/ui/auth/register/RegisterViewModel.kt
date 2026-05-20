@@ -41,8 +41,6 @@ class RegisterViewModel
                 is RegisterEvent.PostalCodeChanged,
                 -> updateTextField(event)
 
-                is RegisterEvent.PhoneCountryChanged,
-                is RegisterEvent.ResidenceCountryChanged,
                 RegisterEvent.TogglePasswordVisibility,
                 RegisterEvent.ToggleConfirmPasswordVisibility,
                 -> updateOption(event)
@@ -73,8 +71,6 @@ class RegisterViewModel
 
         private fun updateOption(event: RegisterEvent) {
             when (event) {
-                is RegisterEvent.PhoneCountryChanged -> updateState { it.copy(phoneCountry = event.value) }
-                is RegisterEvent.ResidenceCountryChanged -> updateState { it.copy(residenceCountry = event.value) }
                 RegisterEvent.TogglePasswordVisibility ->
                     updateState { it.copy(passwordVisible = !it.passwordVisible) }
 

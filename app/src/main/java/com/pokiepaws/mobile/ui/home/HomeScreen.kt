@@ -10,20 +10,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 fun HomeScreen(
     onNavigateToNotifications: () -> Unit,
     modifier: Modifier = Modifier,
-    onNavigateToAnimals: () -> Unit = {},
     onNavigateToAppointments: () -> Unit = {},
-    onNavigateToClinics: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
 
     HomeScreenContent(
-        animalState = state.animalState,
         visitState = state.visitState,
         onNavigateToNotifications = onNavigateToNotifications,
         modifier = modifier,
-        onNavigateToAnimals = onNavigateToAnimals,
         onNavigateToAppointments = onNavigateToAppointments,
-        onNavigateToClinics = onNavigateToClinics,
     )
 }

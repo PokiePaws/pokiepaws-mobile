@@ -35,11 +35,12 @@ class PokiePawsMessagingService : FirebaseMessagingService() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: "PokiePaws"
-        val message = remoteMessage.notification?.body ?: remoteMessage.data["message"] ?: "Nowa wiadomość"
-        val type = remoteMessage.data["type"]
+        Log.d(FCM_LOG_TAG, "Push notification received (Data payload keys: ${remoteMessage.data.keys})")
 
-        Log.d(FCM_LOG_TAG, "Push notification received")
+        // Backend przesyła wszystko w mapie data (klucze "title" oraz "body")
+        val title = remoteMessage.data["title"] ?: "PokiePaws"
+        val message = remoteMessage.data["body"] ?: "Brak treści"
+        val type = remoteMessage.data["type"]
 
         showNotification(title, message)
         saveToDatabase(title, message, type)
@@ -77,8 +78,8 @@ class PokiePawsMessagingService : FirebaseMessagingService() {
     }
 
     private fun showNotification(
-        title: String?,
-        message: String?,
+        title: String,
+        message: String,
     ) {
         val channelId = "appointment_reminders"
         val notificationId = System.currentTimeMillis().toInt()

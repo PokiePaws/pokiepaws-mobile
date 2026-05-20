@@ -15,5 +15,6 @@ data class VisitResponse(
     val diagnosis: String? = null,
     val recommendations: String? = null,
     val status: String,
+    val type: String? = null,
     val used: Boolean,
 )

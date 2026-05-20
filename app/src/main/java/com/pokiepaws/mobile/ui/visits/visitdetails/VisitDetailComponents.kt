@@ -17,6 +17,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Healing
+import androidx.compose.material.icons.filled.MedicalServices
+import androidx.compose.material.icons.filled.Recommend
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Science
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -37,19 +45,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.model.Visit
+import com.pokiepaws.mobile.domain.model.VisitType
 import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieWhite
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 private const val HEADER_ROUNDING = 32
 private const val HEADER_TOP_PADDING = 48
 private const val HEADER_BOTTOM_PADDING = 32
 private val AvatarBg = Color(0xFFF0F8FA)
+private val VisitDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
 
 @Composable
 fun VisitDetailContent(
@@ -182,35 +195,26 @@ private fun VisitDetailsBody(
                 modifier = Modifier.padding(16.dp),
                 verticalAlignment = Alignment.Top,
             ) {
-                Box(
-                    modifier =
-                        Modifier
-                            .size(72.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(AvatarBg),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = if (visit.status == "SCHEDULED") "📅" else "✅",
-                        fontSize = 36.sp,
-                    )
-                }
+                BlueIconBox(
+                    icon = if (visit.status == "CANCELLED") Icons.Default.Cancel else Icons.Default.CalendarMonth,
+                    modifier = Modifier.size(72.dp),
+                )
 
                 Spacer(modifier = Modifier.width(16.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = stringResource(R.string.visit_card_title, visit.id),
+                        text = stringResource(visit.type.titleRes),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = PokieBlueDark,
                     )
                     Spacer(modifier = Modifier.height(6.dp))
-                    InfoRow(label = "📋", text = visit.status)
-                    InfoRow(label = "🕐", text = visit.startsAt.replace("T", " ").take(16))
-                    InfoRow(label = "🕑", text = visit.endsAt.replace("T", " ").take(16))
+                    InfoRow(icon = Icons.Default.MedicalServices, text = visit.status)
+                    InfoRow(icon = Icons.Default.Schedule, text = visit.startsAt.toVisitDateLabel())
+                    InfoRow(icon = Icons.Default.CalendarMonth, text = visit.endsAt.toVisitDateLabel())
                     visit.description?.takeIf { it.isNotBlank() }?.let {
-                        InfoRow(label = "📝", text = it)
+                        InfoRow(icon = Icons.Default.Description, text = it)
                     }
                 }
             }
@@ -240,13 +244,17 @@ private fun VisitDetailsBody(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     visit.disease?.takeIf { it.isNotBlank() }?.let {
-                        MedicalSection(emoji = "🦠", label = stringResource(R.string.visit_disease_label), value = it)
+                        MedicalSection(icon = Icons.Default.Healing, label = stringResource(R.string.visit_disease_label), value = it)
                     }
                     visit.diagnosis?.takeIf { it.isNotBlank() }?.let {
-                        MedicalSection(emoji = "🔬", label = stringResource(R.string.visit_diagnosis_label), value = it)
+                        MedicalSection(icon = Icons.Default.Science, label = stringResource(R.string.visit_diagnosis_label), value = it)
                     }
                     visit.recommendations?.takeIf { it.isNotBlank() }?.let {
-                        MedicalSection(emoji = "💊", label = stringResource(R.string.visit_recommendations_label), value = it)
+                        MedicalSection(
+                            icon = Icons.Default.Recommend,
+                            label = stringResource(R.string.visit_recommendations_label),
+                            value = it,
+                        )
                     }
                 }
             }
@@ -271,15 +279,41 @@ private fun VisitDetailsBody(
 }
 
 @Composable
+private fun BlueIconBox(
+    icon: ImageVector,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(16.dp))
+                .background(AvatarBg),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = PokieBlueDark,
+            modifier = Modifier.size(36.dp),
+        )
+    }
+}
+
+@Composable
 private fun InfoRow(
-    label: String,
+    icon: ImageVector,
     text: String,
 ) {
     Row(
         modifier = Modifier.padding(top = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(text = label, fontSize = 13.sp)
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = PokieBlueDark,
+            modifier = Modifier.size(16.dp),
+        )
         Spacer(modifier = Modifier.width(6.dp))
         Text(text = text, fontSize = 13.sp, color = Color.Gray)
     }
@@ -287,13 +321,18 @@ private fun InfoRow(
 
 @Composable
 private fun MedicalSection(
-    emoji: String,
+    icon: ImageVector,
     label: String,
     value: String,
 ) {
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = emoji, fontSize = 14.sp)
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = PokieBlueDark,
+                modifier = Modifier.size(16.dp),
+            )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
                 text = label,
@@ -306,7 +345,25 @@ private fun MedicalSection(
             text = value,
             fontSize = 13.sp,
             color = Color.Gray,
-            modifier = Modifier.padding(start = 20.dp, top = 2.dp),
+            modifier = Modifier.padding(start = 22.dp, top = 2.dp),
         )
     }
 }
+
+private fun String.toVisitDateLabel(): String =
+    runCatching { LocalDateTime.parse(this).format(VisitDateFormatter) }
+        .recoverCatching { substringBefore("T").split("-").let { "${it[2]}-${it[1]}-${it[0]}" } }
+        .getOrDefault(this)
+
+private val VisitType.titleRes: Int
+    get() =
+        when (this) {
+            VisitType.CHECKUP -> R.string.visit_type_checkup
+            VisitType.VACCINATION -> R.string.visit_type_vaccination
+            VisitType.EMERGENCY -> R.string.visit_type_emergency
+            VisitType.PREVENTIVE_CARE -> R.string.visit_type_prevention
+            VisitType.SPECIALIST_CONSULTATION -> R.string.visit_type_specialist_consultation
+            VisitType.DIAGNOSTIC_EXAM -> R.string.visit_type_diagnostic_exam
+            VisitType.SURGICAL_PROCEDURE -> R.string.visit_type_surgery
+            VisitType.DENTAL_PROCEDURE -> R.string.visit_type_dental_procedure
+        }

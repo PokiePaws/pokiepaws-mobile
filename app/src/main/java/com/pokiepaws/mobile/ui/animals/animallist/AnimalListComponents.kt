@@ -19,6 +19,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -31,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -49,8 +52,6 @@ private const val AVATAR_SIZE = 72
 private const val LIST_SPACING = 16
 private const val CARD_ELEVATION = 4
 private const val FONT_SIZE_NAME = 18
-private const val FONT_SIZE_EMOJI = 36
-private const val EMPTY_STATE_EMOJI_SIZE = 64
 
 @Composable
 fun AnimalListHeader(
@@ -65,7 +66,7 @@ fun AnimalListHeader(
                     color = MaterialTheme.colorScheme.primary,
                     shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp),
                 )
-                .padding(top = 12.dp, bottom = 20.dp)
+                .padding(top = 12.dp, bottom = 44.dp)
                 .padding(horizontal = 24.dp),
     ) {
         Row(
@@ -144,7 +145,7 @@ fun AnimalCard(
                         .background(AnimalAvatarBackground),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(text = "🐾", fontSize = FONT_SIZE_EMOJI.sp)
+                Icon(imageVector = Icons.Default.Pets, contentDescription = null, tint = PokieBlueDark, modifier = Modifier.size(36.dp))
             }
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -183,7 +184,7 @@ fun EmptyAnimalsView(
 ) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "🐾", fontSize = EMPTY_STATE_EMOJI_SIZE.sp)
+            AnimalStateIcon(icon = Icons.Default.Pets)
             Text(
                 text = stringResource(R.string.animals_empty_title),
                 fontWeight = FontWeight.Bold,
@@ -197,6 +198,45 @@ fun EmptyAnimalsView(
                 Text(stringResource(R.string.animals_empty_button))
             }
         }
+    }
+}
+
+@Composable
+fun EmptyAnimalsSearchView(
+    searchQuery: String,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            AnimalStateIcon(icon = Icons.Default.Search)
+            Text(
+                text = stringResource(R.string.animals_no_results, searchQuery),
+                fontWeight = FontWeight.Bold,
+                color = PokieBlueDark,
+            )
+        }
+    }
+}
+
+@Composable
+private fun AnimalStateIcon(
+    icon: ImageVector,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier =
+            modifier
+                .size(64.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(AnimalAvatarBackground),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = PokieBlueDark,
+            modifier = Modifier.size(36.dp),
+        )
     }
 }
 

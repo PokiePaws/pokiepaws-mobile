@@ -14,8 +14,13 @@ enum class PasswordValidationError {
     TooCommon,
 }
 
+enum class PostalCodeValidationError {
+    InvalidFormat,
+}
+
 private val specialCharacterRegex = Regex("[^A-Za-z0-9]")
 private val emailRegex = Regex("^[A-Za-z0-9+_.%\\-]+@[A-Za-z0-9.\\-]+\\.[A-Za-z]{2,}$")
+private val polishPostalCodeRegex = Regex("^\\d{2}-\\d{3}$")
 private val repeatedCharacterRegex = Regex("(.)\\1{2,}")
 private val keyboardSequences =
     listOf(
@@ -58,6 +63,11 @@ private val commonPasswords =
 fun validateEmail(email: String): EmailValidationError? {
     if (email.isBlank()) return null
     return if (emailRegex.matches(email.trim())) null else EmailValidationError.InvalidFormat
+}
+
+fun validatePostalCode(postalCode: String): PostalCodeValidationError? {
+    if (postalCode.isBlank()) return null
+    return if (polishPostalCodeRegex.matches(postalCode.trim())) null else PostalCodeValidationError.InvalidFormat
 }
 
 fun validatePassword(

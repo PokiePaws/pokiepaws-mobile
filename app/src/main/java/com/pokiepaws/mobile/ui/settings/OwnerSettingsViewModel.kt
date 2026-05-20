@@ -2,6 +2,7 @@ package com.pokiepaws.mobile.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pokiepaws.mobile.domain.model.OwnerProfile
 import com.pokiepaws.mobile.domain.repository.AppSettingsRepository
 import com.pokiepaws.mobile.domain.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,6 +25,7 @@ class OwnerSettingsViewModel
 
         init {
             observeAppSettings()
+            loadOwnerProfile()
         }
 
         fun onEvent(event: OwnerSettingsEvent) {
@@ -163,6 +165,23 @@ class OwnerSettingsViewModel
             }
         }
 
+        private fun loadOwnerProfile() {
+            viewModelScope.launch {
+                updateState { it.copy(errorMessage = null) }
+                runCatching { authRepository.getCurrentOwnerProfile() }
+                    .onSuccess { profile ->
+                        updateState { current ->
+                            current.withOwnerProfile(profile)
+                        }
+                    }
+                    .onFailure { error ->
+                        updateState {
+                            it.copy(errorMessage = error.message ?: "Server connection error")
+                        }
+                    }
+            }
+        }
+
         private fun observeAppSettings() {
             viewModelScope.launch {
                 appSettingsRepository.foreignTravelPlanned.collect { value ->
@@ -175,3 +194,14 @@ class OwnerSettingsViewModel
             _uiState.update(transform)
         }
     }
+
+private fun OwnerSettingsUiState.withOwnerProfile(profile: OwnerProfile): OwnerSettingsUiState =
+    copy(
+        phoneNumber = profile.phoneNumber,
+        street = profile.street,
+        houseNumber = profile.houseNumber,
+        apartmentNumber = profile.apartmentNumber.orEmpty(),
+        city = profile.city,
+        postalCode = profile.postalCode,
+        country = profile.country,
+    )

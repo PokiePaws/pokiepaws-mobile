@@ -22,6 +22,15 @@ tasks.register("qualityCheck") {
     )
 }
 
+tasks.register("projectRebuild") {
+    group = "rebuild"
+    description = "Rebuilds project."
+
+    dependsOn(
+        ":app:clean",
+    )
+}
+
 tasks.register("qualityFormat") {
     group = "formatting"
     description = "Formats Kotlin code with ktlint."

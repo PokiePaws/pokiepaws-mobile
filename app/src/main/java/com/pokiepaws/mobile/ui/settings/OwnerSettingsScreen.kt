@@ -27,6 +27,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -54,7 +55,6 @@ import com.pokiepaws.mobile.ui.settings.address.AddressSettingsSection
 import com.pokiepaws.mobile.ui.settings.password.PasswordSettingsSection
 import com.pokiepaws.mobile.ui.settings.phone.PhoneSettingsSection
 import com.pokiepaws.mobile.util.theme.PokieBlue
-import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieCream
 import com.pokiepaws.mobile.util.theme.PokieWhite
 
@@ -65,6 +65,8 @@ private const val CONTENT_OFFSET = -16
 private const val CARD_ROUNDING = 24
 private const val ICON_BG_ROUNDING = 12
 private const val INDICATOR_SIZE = 18
+private const val INPUT_ROUNDING = 12
+private const val SECTION_DIVIDER_ALPHA = 0.7f
 
 @Composable
 fun SettingsScreen(
@@ -187,29 +189,39 @@ internal fun SettingsSectionCard(
         elevation = CardDefaults.cardElevation(4.dp),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier =
-                        Modifier
-                            .size(40.dp)
-                            .clip(RoundedCornerShape(ICON_BG_ROUNDING.dp))
-                            .background(PokieCream),
-                    contentAlignment = Alignment.Center,
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                HorizontalDivider(modifier = Modifier.weight(1f), thickness = 0.5.dp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = 12.dp),
                 ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = PokieBlue,
-                        modifier = Modifier.size(20.dp),
+                    Box(
+                        modifier =
+                            Modifier
+                                .size(28.dp)
+                                .clip(RoundedCornerShape(ICON_BG_ROUNDING.dp))
+                                .background(PokieCream),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = PokieBlue,
+                            modifier = Modifier.size(16.dp),
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(titleRes).uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = SECTION_DIVIDER_ALPHA),
                     )
                 }
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = stringResource(titleRes),
-                    fontWeight = FontWeight.Bold,
-                    color = PokieBlueDark,
-                    style = MaterialTheme.typography.titleMedium,
-                )
+                HorizontalDivider(modifier = Modifier.weight(1f), thickness = 0.5.dp)
             }
             Spacer(modifier = Modifier.height(16.dp))
             content()
@@ -224,16 +236,26 @@ internal fun SettingsTextField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     keyboardType: KeyboardType = KeyboardType.Text,
+    isError: Boolean = false,
+    @StringRes supportingTextRes: Int? = null,
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(stringResource(labelRes)) },
         singleLine = true,
+        isError = isError,
+        supportingText = {
+            if (supportingTextRes != null) {
+                Text(
+                    text = stringResource(supportingTextRes),
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+        },
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-        modifier =
-            modifier
-                .fillMaxWidth(),
+        shape = RoundedCornerShape(INPUT_ROUNDING.dp),
+        modifier = modifier.fillMaxWidth(),
     )
 }
 
@@ -263,9 +285,8 @@ internal fun PasswordField(
                 )
             }
         },
-        modifier =
-            modifier
-                .fillMaxWidth(),
+        shape = RoundedCornerShape(INPUT_ROUNDING.dp),
+        modifier = modifier.fillMaxWidth(),
     )
 }
 
@@ -279,7 +300,8 @@ internal fun SaveButton(
     Button(
         onClick = onClick,
         enabled = enabled,
-        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        modifier = Modifier.fillMaxWidth().height(50.dp),
     ) {
         if (loading) {
             CircularProgressIndicator(
@@ -289,7 +311,10 @@ internal fun SaveButton(
             )
             Spacer(modifier = Modifier.width(8.dp))
         }
-        Text(text = stringResource(textRes))
+        Text(
+            text = stringResource(textRes),
+            fontWeight = FontWeight.Bold,
+        )
     }
 }
 

@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,17 +27,16 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.outlined.MarkEmailRead
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -96,6 +96,7 @@ private fun styleFor(type: String?): NotifStyle =
                 iconBg = ReminderIconBg,
                 borderColor = ReminderIconTint,
             )
+
         "VACCINATION_REMINDER",
         "VACCINE",
         ->
@@ -105,6 +106,7 @@ private fun styleFor(type: String?): NotifStyle =
                 iconBg = VaccineIconBg,
                 borderColor = VaccineIconTint,
             )
+
         "VISIT_CONFIRMED",
         "PRESCRIPTION_CREATED",
         "VISIT_MEDICAL_DATA_UPDATED",
@@ -116,6 +118,7 @@ private fun styleFor(type: String?): NotifStyle =
                 iconBg = SuccessIconBg,
                 borderColor = SuccessIconTint,
             )
+
         else ->
             NotifStyle(
                 iconVector = Icons.Default.Notifications,
@@ -130,6 +133,7 @@ fun NotificationContent(
     notifications: NotificationItems,
     onBack: () -> Unit,
     onMarkAllAsRead: () -> Unit,
+    onNotificationClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -155,7 +159,9 @@ fun NotificationContent(
         ) {
             IconButton(
                 onClick = onBack,
-                modifier = Modifier.align(Alignment.CenterStart),
+                modifier =
+                    Modifier.clip(CircleShape)
+                        .background(PokieWhite.copy(alpha = 0.2f)),
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -163,6 +169,7 @@ fun NotificationContent(
                     tint = PokieWhite,
                 )
             }
+
             Text(
                 text = stringResource(R.string.notifications_title),
                 fontSize = 24.sp,
@@ -170,15 +177,19 @@ fun NotificationContent(
                 color = PokieWhite,
                 modifier = Modifier.align(Alignment.Center),
             )
-            TextButton(
+
+            IconButton(
                 onClick = onMarkAllAsRead,
-                modifier = Modifier.align(Alignment.CenterEnd),
+                modifier =
+                    Modifier
+                        .align(Alignment.CenterEnd)
+                        .clip(CircleShape)
+                        .background(PokieWhite.copy(alpha = 0.2f)),
             ) {
-                Text(
-                    text = stringResource(R.string.notifications_mark_all_read),
-                    color = PokieWhite,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp,
+                Icon(
+                    imageVector = Icons.Outlined.MarkEmailRead,
+                    contentDescription = stringResource(R.string.notifications_mark_all_read),
+                    tint = PokieWhite,
                 )
             }
         }
@@ -225,6 +236,7 @@ fun NotificationContent(
                     AnimatedNotificationItem(
                         notification = notification,
                         animationDelay = index * ANIMATION_DELAY_PER_ITEM_MS,
+                        onClick = { onNotificationClick(notification.id) },
                     )
                 }
             }
@@ -236,22 +248,20 @@ fun NotificationContent(
 private fun AnimatedNotificationItem(
     notification: AppNotification,
     animationDelay: Int,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val alpha = remember { Animatable(0f) }
     val offsetX = remember { Animatable(INITIAL_OFFSET_X) }
-    val scope = rememberCoroutineScope()
-
     LaunchedEffect(notification.id) {
-        scope.launch {
-            delay(animationDelay.toLong())
-            launch { alpha.animateTo(1f, tween(durationMillis = ITEM_ANIMATION_DURATION)) }
-            launch { offsetX.animateTo(0f, tween(durationMillis = ITEM_ANIMATION_DURATION)) }
-        }
+        delay(animationDelay.toLong())
+        launch { alpha.animateTo(1f, tween(durationMillis = ITEM_ANIMATION_DURATION)) }
+        launch { offsetX.animateTo(0f, tween(durationMillis = ITEM_ANIMATION_DURATION)) }
     }
 
     NotificationItem(
         notification = notification,
+        onClick = onClick,
         modifier =
             modifier.graphicsLayer {
                 this.alpha = alpha.value
@@ -263,18 +273,25 @@ private fun AnimatedNotificationItem(
 @Composable
 fun NotificationItem(
     notification: AppNotification,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val style = styleFor(notification.type)
     val isUnread = !notification.isRead
 
     Card(
+        onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(CARD_ROUNDING.dp),
         colors = CardDefaults.cardColors(containerColor = PokieWhite),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Max),
+        ) {
             UnreadIndicator(isUnread = isUnread, borderColor = style.borderColor)
             NotificationBody(notification = notification, style = style, isUnread = isUnread)
         }
@@ -361,7 +378,12 @@ private fun NotificationBody(
             Text(
                 text = notification.content,
                 style = MaterialTheme.typography.bodySmall,
-                color = if (isUnread) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                color =
+                    if (isUnread) {
+                        MaterialTheme.colorScheme.onSurface
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
                 lineHeight = 18.sp,
             )
         }

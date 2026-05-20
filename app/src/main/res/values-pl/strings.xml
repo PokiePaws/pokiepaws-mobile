@@ -7,9 +7,8 @@
     <string name="nav_profile">Profil</string>
 
     <string name="profile_title">Mój profil</string>
-    <string name="profile_user_name">Admin PokiePaws</string>
-    <string name="profile_user_email">admin@pokiepaws.pl</string>
-    <string name="profile_user_data">Dane użytkownika</string>
+    <string name="profile_loading">Ładowanie profilu</string>
+    <string name="profile_loading_error">Nie udało się załadować profilu</string>
     <string name="profile_language">Język</string>
     <string name="profile_app_settings">Ustawienia aplikacji</string>
     <string name="profile_logout">Wyloguj się</string>
@@ -61,10 +60,11 @@
     <string name="email_verification_instruction">Aby korzystać z PokiePaws, musisz potwierdzić swój profil. Kliknij przycisk w otrzymanej wiadomości e-mail.</string>
     <string name="email_verification_spam_hint">Jeśli nie widzisz wiadomości, sprawdź folder Spam lub spróbuj wysłać ją ponownie.</string>
     <string name="phone_number_label">Numer telefonu</string>
-    <string name="country_picker_title">Wybierz kraj</string>
-    <string name="country_search_label">Szukaj kraju&#8230;</string>
 
     <string name="animals_title">Moje zwierzęta</string>
+    <string name="animal_search_placeholder">Szukaj zwierzęcia</string>
+    <string name="animals_no_results">Brak zwierząt dla "%1$s"</string>
+    <string name="animal_unknown_name">Nieznane zwierzę</string>
     <string name="animal_add_content_description">Dodaj zwierzę</string>
     <string name="animal_birth_date_prefix">Ur. %1$s</string>
     <string name="animals_empty_title">Nie masz jeszcze żadnych zwierzaków</string>
@@ -139,15 +139,17 @@
     <string name="animal_save_button">Zapisz w systemie</string>
     <string name="clinics_empty">Brak gabinetów</string>
     <string name="vets_empty">Brak weterynarzy w tym gabinecie</string>
+    <string name="vet_search_placeholder">Szukaj weterynarza</string>
+    <string name="vets_no_results">Brak weterynarzy dla "%1$s"</string>
     <string name="error_with_message">Błąd: %1$s</string>
     <string name="clinic_phone">Telefon: %1$s</string>
-    <string name="clinic_search_placeholder">Szukaj kliniki&#8230;</string>
+    <string name="clinic_search_placeholder">Szukaj kliniki</string>
     <string name="clinics_no_results">Brak wyników dla "%1$s"</string>
     <string name="search_content_description">Szukaj</string>
     <string name="notifications_title">Powiadomienia</string>
     <string name="notifications_mark_all_read">Odczytaj wszystkie</string>
     <string name="notifications_empty">Brak nowych powiadomień</string>
-    <string name="upcoming_visit_loading">Ładowanie&#8230;</string>
+    <string name="upcoming_visit_loading">Ładowanie</string>
     <string name="upcoming_visit_loading_description">Pobieranie nadchodzącej wizyty</string>
     <string name="upcoming_visit_loading_error">Błąd ładowania</string>
     <string name="upcoming_visit_empty">Brak nadchodzących wizyt</string>
@@ -161,7 +163,7 @@
     <string name="home_add_animal">Dodaj zwierzę</string>
     <string name="home_my_animals">Moje zwierzęta</string>
     <string name="home_loading_error">Błąd ładowania</string>
-    <string name="home_search_clinic">Szukaj kliniki&#8230;</string>
+    <string name="home_search_clinic">Szukaj kliniki</string>
     <string name="view_all">Zobacz wszystkie</string>
     <string name="add_action">Dodaj</string>
     <string name="today_label">Dzisiaj</string>
@@ -188,10 +190,10 @@
     <string name="apartment_label">Lokal</string>
     <string name="optional_placeholder">opcjonalnie</string>
     <string name="postal_code_label">Kod</string>
+    <string name="postal_code_invalid_format">Kod pocztowy musi mieć format XX-XXX</string>
     <string name="city_label">Miasto</string>
     <string name="register_button">Zarejestruj się</string>
     <string name="register_login_prompt">Masz już konto? Zaloguj się</string>
-    <string name="country_of_residence_label">Kraj zamieszkania</string>
     <string name="create_visit_select_clinic">Wybierz gabinet</string>
     <string name="create_visit_select_vet">Wybierz weterynarza</string>
     <string name="create_visit_select_slot">Wybierz termin</string>
@@ -207,7 +209,7 @@
     <string name="create_visit_summary_vet">Weterynarz</string>
     <string name="create_visit_summary_date">Termin</string>
     <string name="create_visit_description_label">Opis wizyty (opcjonalnie)</string>
-    <string name="create_visit_description_placeholder">Powód wizyty, objawy&#8230;</string>
+    <string name="create_visit_description_placeholder">Powód wizyty, objawy.</string>
     <string name="create_visit_submit">Umów wizytę</string>
     <string name="vets_title">Weterynarze</string>
     <string name="visits_my_visits">Moje wizyty</string>
@@ -220,7 +222,19 @@
     <string name="visit_no_animals_dialog">Nie masz żadnych zwierząt. Dodaj najpierw zwierzę.</string>
     <string name="visit_cancelled_content_description">Anulowana wizyta</string>
     <string name="visit_scheduled_content_description">Zaplanowana wizyta</string>
-    <string name="visit_card_title">Wizyta #%1$d</string>
+    <string name="visit_card_animal_title">%1$s - wizyta #%2$d</string>
+    <string name="visit_card_date">Data: %1$s</string>
+    <string name="visit_card_status">Status: %1$s</string>
+    <string name="visit_search_placeholder">Szukaj po dacie, statusie lub zwierzęciu</string>
+    <string name="visits_no_results">Brak wizyt dla "%1$s"</string>
+    <string name="visit_type_checkup">Kontrola</string>
+    <string name="visit_type_vaccination">Szczepienie</string>
+    <string name="visit_type_emergency">Nagły przypadek</string>
+    <string name="visit_type_prevention">Profilaktyka</string>
+    <string name="visit_type_specialist_consultation">Konsultacja specjalistyczna</string>
+    <string name="visit_type_diagnostic_exam">Badanie diagnostyczne</string>
+    <string name="visit_type_surgery">Zabieg chirurgiczny</string>
+    <string name="visit_type_dental_procedure">Zabieg stomatologiczny</string>
     <string name="visit_cancel_button">Anuluj wizytę</string>
     <string name="visit_details_title">Szczegóły wizyty</string>
     <string name="visit_cancel_dialog_title">Anuluj wizytę</string>

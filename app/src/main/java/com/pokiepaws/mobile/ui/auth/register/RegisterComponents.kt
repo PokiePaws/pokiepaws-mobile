@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -24,23 +23,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -53,9 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.validation.PasswordValidationError
+import com.pokiepaws.mobile.domain.validation.PostalCodeValidationError
 import com.pokiepaws.mobile.ui.settings.PasswordValidationErrors
-import com.pokiepaws.mobile.util.Countries
-import com.pokiepaws.mobile.util.Country
 import com.pokiepaws.mobile.util.theme.PokieWhite
 
 private const val WEIGHT_POSTAL_CODE = 0.45f
@@ -72,7 +61,6 @@ private const val SPACING_MEDIUM = 24
 private const val SPACING_SMALL = 8
 private const val FONT_SIZE_BUTTON = 16
 private const val FONT_SIZE_ERROR = 12
-private const val FONT_SIZE_FLAG = 18
 
 @Composable
 internal fun RegisterContent(
@@ -250,20 +238,13 @@ internal fun RegisterContent(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(INPUT_ROUNDING.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                        prefix = { Text("${state.phoneCountry.dialCode} ") },
+                        prefix = { Text("$POLAND_DIAL_CODE ") },
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
 
                     SectionLabel(stringResource(R.string.register_address_data))
                     Spacer(modifier = Modifier.height(12.dp))
-
-                    CountryDropdownField(
-                        selectedCountry = state.residenceCountry,
-                        onCountrySelected = { onEvent(RegisterEvent.ResidenceCountryChanged(it)) },
-                    )
-
-                    Spacer(modifier = Modifier.height(SPACING_SMALL.dp))
 
                     OutlinedTextField(
                         value = state.street,
@@ -302,13 +283,23 @@ internal fun RegisterContent(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
+                        val postalCodeValidationError = state.postalCodeValidationError
                         OutlinedTextField(
                             value = state.postalCode,
                             onValueChange = { onEvent(RegisterEvent.PostalCodeChanged(it)) },
                             label = { Text(stringResource(R.string.postal_code_label)) },
                             modifier = Modifier.weight(WEIGHT_POSTAL_CODE),
                             shape = RoundedCornerShape(INPUT_ROUNDING.dp),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            isError = postalCodeValidationError != null,
+                            supportingText = {
+                                if (postalCodeValidationError != null) {
+                                    Text(
+                                        text = stringResource(postalCodeValidationError.messageRes),
+                                        color = MaterialTheme.colorScheme.error,
+                                    )
+                                }
+                            },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                         )
                         OutlinedTextField(
                             value = state.city,
@@ -390,6 +381,12 @@ private val PasswordValidationError.messageRes: Int
             PasswordValidationError.TooCommon -> R.string.register_password_too_common
         }
 
+private val PostalCodeValidationError.messageRes: Int
+    get() =
+        when (this) {
+            PostalCodeValidationError.InvalidFormat -> R.string.postal_code_invalid_format
+        }
+
 @Composable
 private fun BoxBackground(
     modifier: Modifier = Modifier,
@@ -420,57 +417,5 @@ private fun SectionLabel(
             color = MaterialTheme.colorScheme.primary.copy(alpha = SECTION_DIVIDER_ALPHA),
         )
         HorizontalDivider(modifier = Modifier.weight(1f), thickness = 0.5.dp)
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-internal fun CountryDropdownField(
-    selectedCountry: Country,
-    onCountrySelected: (Country) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        OutlinedTextField(
-            value = "${selectedCountry.flag} ${selectedCountry.name}",
-            onValueChange = {},
-            readOnly = true,
-            label = { Text(stringResource(R.string.country_of_residence_label)) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-            modifier =
-                Modifier
-                    .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
-                    .fillMaxWidth(),
-            shape = RoundedCornerShape(INPUT_ROUNDING.dp),
-        )
-
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-        ) {
-            Countries.forEach { country ->
-                DropdownMenuItem(
-                    text = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(country.flag, fontSize = FONT_SIZE_FLAG.sp)
-                            Spacer(Modifier.width(12.dp))
-                            Text(country.name)
-                        }
-                    },
-                    onClick = {
-                        onCountrySelected(country)
-                        expanded = false
-                    },
-                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                )
-            }
-        }
     }
 }

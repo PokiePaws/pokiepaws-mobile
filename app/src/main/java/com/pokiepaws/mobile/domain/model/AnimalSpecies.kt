@@ -1,10 +1,5 @@
 package com.pokiepaws.mobile.domain.model
 
-enum class AnimalSpeciesCategory {
-    DOMESTIC,
-    FARM,
-}
-
 enum class AnimalSpecies(
     val apiValue: String,
     val category: AnimalSpeciesCategory,

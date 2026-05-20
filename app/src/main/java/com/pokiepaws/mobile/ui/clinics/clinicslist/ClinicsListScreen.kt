@@ -59,7 +59,7 @@ fun ClinicsListScreen(
                                 bottomEnd = HEADER_ROUNDING.dp,
                             ),
                     )
-                    .padding(top = HEADER_TOP_PADDING.dp, bottom = (HEADER_BOTTOM_PADDING + 12).dp)
+                    .padding(top = HEADER_TOP_PADDING.dp, bottom = (HEADER_BOTTOM_PADDING + 36).dp)
                     .padding(horizontal = 24.dp),
         ) {
             Text(

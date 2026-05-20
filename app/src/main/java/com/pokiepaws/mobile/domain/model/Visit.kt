@@ -12,4 +12,5 @@ data class Visit(
     val diagnosis: String?,
     val recommendations: String?,
     val status: String,
+    val type: VisitType = VisitType.CHECKUP,
 )

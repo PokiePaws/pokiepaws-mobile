@@ -27,12 +27,12 @@ fun passwordValidationMessageRes(error: PasswordValidationError): Int =
 
 @Composable
 internal fun PasswordValidationMessages(
-    errors: List<PasswordValidationError>,
+    errors: PasswordValidationErrors,
     modifier: Modifier = Modifier,
 ) {
-    if (errors.isNotEmpty()) {
+    if (errors.items.isNotEmpty()) {
         Column(modifier = modifier.padding(top = 8.dp)) {
-            errors.forEach { error ->
+            errors.items.forEach { error ->
                 Text(
                     text = stringResource(passwordValidationMessageRes(error)),
                     color = MaterialTheme.colorScheme.error,

@@ -8,7 +8,6 @@ plugins {
     alias(libs.plugins.google.services) apply false
     alias(libs.plugins.ktlint) apply false
     alias(libs.plugins.detekt) apply false
-    alias(libs.plugins.sonarqube) apply false
 }
 
 tasks.register("qualityCheck") {
@@ -20,6 +19,15 @@ tasks.register("qualityCheck") {
         ":app:detekt",
         ":app:lintDebug",
         ":app:testDebugUnitTest",
+    )
+}
+
+tasks.register("projectRebuild") {
+    group = "rebuild"
+    description = "Rebuilds project."
+
+    dependsOn(
+        ":app:clean",
     )
 }
 

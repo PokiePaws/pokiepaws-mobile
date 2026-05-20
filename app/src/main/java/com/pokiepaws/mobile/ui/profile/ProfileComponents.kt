@@ -24,11 +24,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -62,42 +62,27 @@ private const val MENU_ANIMATION_DELAY = 100
 private const val CARD_ROUNDING = 24
 private const val ICON_BG_ROUNDING = 12
 private const val LOGOUT_COLOR = 0xFFEF4444
-
-private val PersonIconTint = Color(0xFF3B82F6)
-private val PersonIconBg = Color(0xFFDBEAFE)
-private val NotificationIconTint = Color(0xFFF97316)
-private val NotificationIconBg = Color(0xFFFFEDD5)
 private val SettingsIconTint = Color(0xFF6B7280)
 private val SettingsIconBg = Color(0xFFE5E7EB)
 
 @Composable
 fun ProfileContent(
+    state: ProfileUiState,
     onLogout: () -> Unit,
     onSettingsClick: () -> Unit,
     onLanguageClick: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val menuItems =
         remember(onLanguageClick, onSettingsClick) {
             listOf(
                 ProfileMenuItem(
-                    icon = Icons.Default.Person,
-                    labelRes = R.string.profile_user_data,
-                    iconColor = PersonIconTint,
-                    bgColor = PersonIconBg,
-                ),
-                ProfileMenuItem(
                     icon = Icons.Default.Language,
                     labelRes = R.string.profile_language,
                     iconColor = PokieBlue,
                     bgColor = PokieCream,
                     onClick = onLanguageClick,
-                ),
-                ProfileMenuItem(
-                    icon = Icons.Default.Notifications,
-                    labelRes = R.string.profile_notification_settings,
-                    iconColor = NotificationIconTint,
-                    bgColor = NotificationIconBg,
                 ),
                 ProfileMenuItem(
                     icon = Icons.Default.Settings,
@@ -161,7 +146,12 @@ fun ProfileContent(
                             .background(PokieCream),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(text = "A", fontSize = 36.sp)
+                    Text(
+                        text = state.initials.ifBlank { "?" },
+                        fontSize = 36.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = PokieBlueDark,
+                    )
                 }
             }
         }
@@ -174,18 +164,16 @@ fun ProfileContent(
                     .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = stringResource(R.string.profile_user_name),
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = PokieBlueDark,
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = stringResource(R.string.profile_user_email),
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            when {
+                state.isLoading -> ProfileLoading()
+                state.errorMessage != null ->
+                    ProfileError(
+                        message = state.errorMessage,
+                        onRetry = onRetry,
+                    )
+
+                else -> ProfileIdentity(state = state)
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -199,6 +187,66 @@ fun ProfileContent(
             LogoutButton(onLogout)
 
             Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
+}
+
+@Composable
+private fun ProfileIdentity(state: ProfileUiState) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = state.displayName,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = PokieBlueDark,
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = state.email,
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun ProfileLoading() {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(24.dp),
+            strokeWidth = 2.dp,
+            color = PokieBlue,
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.profile_loading),
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun ProfileError(
+    message: String,
+    onRetry: () -> Unit,
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = stringResource(R.string.profile_loading_error),
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.error,
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = message,
+            fontSize = 13.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Button(onClick = onRetry) {
+            Text(text = stringResource(R.string.retry_button))
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.pokiepaws.mobile.ui.clinics.clinicslist
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocalHospital
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -31,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -41,11 +44,14 @@ import com.pokiepaws.mobile.util.theme.PokieBlue
 import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieWhite
 
+private val ClinicIconBackground = Color(0xFFE3F6FC)
+
 @Composable
 fun ClinicSearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    @StringRes placeholderRes: Int = R.string.clinic_search_placeholder,
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -56,8 +62,14 @@ fun ClinicSearchBar(
         TextField(
             value = query,
             onValueChange = onQueryChange,
-            placeholder = { Text("Szukaj kliniki...", color = Color.Gray) },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Szukaj", tint = PokieBlue) },
+            placeholder = { Text(stringResource(placeholderRes), color = Color.Gray) },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = stringResource(R.string.search_content_description),
+                    tint = PokieBlue,
+                )
+            },
             colors =
                 TextFieldDefaults.colors(
                     unfocusedContainerColor = Color.Transparent,
@@ -117,7 +129,7 @@ fun ClinicsResult(
         state.clinics.isEmpty() -> {
             Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = "🏥", fontSize = 64.sp)
+                    BlueClinicIcon(icon = Icons.Default.LocalHospital, size = 64)
                     Text(
                         text = stringResource(R.string.clinics_empty),
                         fontWeight = FontWeight.Bold,
@@ -129,9 +141,9 @@ fun ClinicsResult(
         filtered.isEmpty() -> {
             Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = "🔍", fontSize = 64.sp)
+                    BlueClinicIcon(icon = Icons.Default.Search, size = 64)
                     Text(
-                        text = "Brak wyników dla \"$searchQuery\"",
+                        text = stringResource(R.string.clinics_no_results, searchQuery),
                         fontWeight = FontWeight.Bold,
                         color = PokieBlueDark,
                     )
@@ -189,16 +201,7 @@ fun ClinicCard(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Box(
-                modifier =
-                    Modifier
-                        .size(72.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(PokieWhite),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(text = "🏥", fontSize = 36.sp)
-            }
+            BlueClinicIcon(icon = Icons.Default.LocalHospital, size = 72)
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -223,5 +226,28 @@ fun ClinicCard(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun BlueClinicIcon(
+    icon: ImageVector,
+    size: Int,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier =
+            modifier
+                .size(size.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(ClinicIconBackground),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = PokieBlueDark,
+            modifier = Modifier.size((size / 2).dp),
+        )
     }
 }

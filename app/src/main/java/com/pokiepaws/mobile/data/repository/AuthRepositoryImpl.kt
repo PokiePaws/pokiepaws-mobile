@@ -5,12 +5,14 @@ import com.pokiepaws.mobile.data.remote.dto.auth.ForgotPasswordRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.LoginRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.RegisterRequest
 import com.pokiepaws.mobile.data.remote.dto.settings.ChangePasswordRequest
+import com.pokiepaws.mobile.data.remote.dto.settings.OwnerProfileResponse
 import com.pokiepaws.mobile.data.remote.dto.settings.UpdateOwnerAddressRequest
 import com.pokiepaws.mobile.data.remote.dto.settings.UpdateOwnerPhoneNumberRequest
 import com.pokiepaws.mobile.data.remote.service.AuthApiService
 import com.pokiepaws.mobile.domain.model.AuthSession
 import com.pokiepaws.mobile.domain.model.OwnerAddressDraft
 import com.pokiepaws.mobile.domain.model.OwnerPhoneDraft
+import com.pokiepaws.mobile.domain.model.OwnerProfile
 import com.pokiepaws.mobile.domain.model.RegistrationDraft
 import com.pokiepaws.mobile.domain.repository.AuthRepository
 import kotlinx.coroutines.flow.Flow
@@ -52,6 +54,8 @@ class AuthRepositoryImpl
                 throw HttpException(response)
             }
         }
+
+        override suspend fun getCurrentOwnerProfile(): OwnerProfile = authApiService.getCurrentOwnerProfile().toDomain()
 
         override suspend fun updateOwnerPhone(phone: OwnerPhoneDraft) {
             val response = authApiService.updateOwnerPhone(phone.toRequest())
@@ -109,5 +113,20 @@ private fun OwnerAddressDraft.toRequest(): UpdateOwnerAddressRequest =
         apartmentNumber = apartmentNumber,
         city = city,
         postalCode = postalCode,
+        country = country,
+    )
+
+private fun OwnerProfileResponse.toDomain(): OwnerProfile =
+    OwnerProfile(
+        userId = userId,
+        email = email,
+        firstName = firstName,
+        lastName = lastName,
+        phoneNumber = phoneNumber,
+        street = street,
+        houseNumber = houseNumber,
+        apartmentNumber = apartmentNumber,
+        postalCode = postalCode,
+        city = city,
         country = country,
     )

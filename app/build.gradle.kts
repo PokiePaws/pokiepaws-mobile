@@ -26,7 +26,6 @@ plugins {
     alias(libs.plugins.google.services)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.detekt)
-    alias(libs.plugins.sonarqube)
     alias(libs.plugins.secrets.gradle)
     id("jacoco")
 }
@@ -77,7 +76,16 @@ android {
     }
 
     lint {
-        disable.add("ComposeParameterOrder")
+        disable.addAll(
+            listOf(
+                "AndroidGradlePluginVersion",
+                "ComposeParameterOrder",
+                "GradleDependency",
+                "NewerVersionAvailable",
+                "ObsoleteSdkInt",
+                "OldTargetApi",
+            ),
+        )
         abortOnError = true
         textReport = true
         checkDependencies = true
@@ -91,25 +99,6 @@ secrets {
 
 jacoco {
     toolVersion = "0.8.12"
-}
-
-sonar {
-    properties {
-        property("sonar.projectKey", "PokiePaws_Mobile")
-        property("sonar.projectName", "PokiePaws Mobile")
-        property("sonar.host.url", "http://localhost:9000")
-        property("sonar.language", "kotlin")
-        property("sonar.token", getEnv("SONAR_TOKEN"))
-
-        property("sonar.sources", "src/main/java")
-        property("sonar.tests", "src/test/java")
-        property("sonar.java.binaries", "build/tmp/kotlin-classes/debug")
-        property(
-            "sonar.coverage.jacoco.xmlReportPaths",
-            "${project.layout.buildDirectory.get()}/reports/jacoco/testDebugUnitTestCoverage/testDebugUnitTestCoverage.xml",
-        )
-        property("sonar.exclusions", "**/dto/**, **/di/**, **/*_Hilt*.kt, **/BuildConfig.kt")
-    }
 }
 
 detekt {

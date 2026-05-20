@@ -18,18 +18,21 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -39,6 +42,8 @@ import com.pokiepaws.mobile.domain.model.Vet
 import com.pokiepaws.mobile.util.theme.PokieBlue
 import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieWhite
+
+private val VetIconBackground = Color(0xFFE3F6FC)
 
 @Composable
 fun BackHeader(
@@ -77,6 +82,7 @@ fun BackHeader(
 @Composable
 fun VetsContent(
     state: VetsUiState,
+    searchQuery: String,
     onVetClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -84,7 +90,12 @@ fun VetsContent(
         when (state) {
             VetsUiState.Loading -> LoadingView()
             is VetsUiState.Error -> MessageView(text = stringResource(R.string.error_with_message, state.message))
-            is VetsUiState.Success -> VetsResult(state = state, onVetClick = onVetClick)
+            is VetsUiState.Success ->
+                VetsResult(
+                    state = state,
+                    searchQuery = searchQuery,
+                    onVetClick = onVetClick,
+                )
         }
     }
 }
@@ -92,15 +103,41 @@ fun VetsContent(
 @Composable
 fun VetsResult(
     state: VetsUiState.Success,
+    searchQuery: String,
     onVetClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val filteredVets =
+        remember(state.vets, searchQuery) {
+            val q = searchQuery.trim().lowercase()
+            if (q.isEmpty()) {
+                state.vets
+            } else {
+                state.vets.filter { vet ->
+                    vet.firstName.lowercase().contains(q) ||
+                        vet.lastName.lowercase().contains(q) ||
+                        vet.specialization.orEmpty().lowercase().contains(q)
+                }
+            }
+        }
+
     if (state.vets.isEmpty()) {
         Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = "👨‍⚕️", fontSize = 64.sp)
+                BlueVetIcon(icon = Icons.Default.Person, size = 64)
                 Text(
                     text = stringResource(R.string.vets_empty),
+                    fontWeight = FontWeight.Bold,
+                    color = PokieBlueDark,
+                )
+            }
+        }
+    } else if (filteredVets.isEmpty()) {
+        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                BlueVetIcon(icon = Icons.Default.Search, size = 64)
+                Text(
+                    text = stringResource(R.string.vets_no_results, searchQuery),
                     fontWeight = FontWeight.Bold,
                     color = PokieBlueDark,
                 )
@@ -112,7 +149,7 @@ fun VetsResult(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = modifier.fillMaxSize(),
         ) {
-            items(state.vets, key = { it.userId }) { vet ->
+            items(filteredVets, key = { it.userId }) { vet ->
                 VetCard(vet = vet, onClick = { onVetClick(vet.userId) })
             }
         }
@@ -153,16 +190,7 @@ fun VetCard(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Box(
-                modifier =
-                    Modifier
-                        .size(72.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(text = "👨‍⚕️", fontSize = 32.sp)
-            }
+            BlueVetIcon(icon = Icons.Default.Person, size = 72)
 
             Spacer(modifier = Modifier.width(16.dp))
 
@@ -182,5 +210,28 @@ fun VetCard(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun BlueVetIcon(
+    icon: ImageVector,
+    size: Int,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier =
+            modifier
+                .size(size.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(VetIconBackground),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = PokieBlueDark,
+            modifier = Modifier.size((size / 2).dp),
+        )
     }
 }

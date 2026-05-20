@@ -19,16 +19,20 @@ class DeviceTokenRegistrar
     constructor(
         private val authApiService: AuthApiService,
     ) {
+        private companion object {
+            const val LOG_TAG = "FCM_REGISTRATION"
+        }
+
         private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
         fun registerCurrentToken() {
             FirebaseMessaging.getInstance().token
                 .addOnSuccessListener { token ->
-                    Log.d("FCM_TOKEN", "Aktualny token: $token")
+                    Log.d(LOG_TAG, "Current FCM registration value fetched")
                     registerToken(token)
                 }
                 .addOnFailureListener { error ->
-                    Log.e("FCM_TOKEN", "Nie udało się pobrać tokena FCM", error)
+                    Log.e(LOG_TAG, "Failed to fetch FCM registration value", error)
                 }
         }
 
@@ -37,14 +41,14 @@ class DeviceTokenRegistrar
                 try {
                     val response = authApiService.registerDeviceToken(DeviceTokenRequest(token = token))
                     if (response.isSuccessful) {
-                        Log.d("FCM_TOKEN", "Token FCM zarejestrowany w backendzie")
+                        Log.d(LOG_TAG, "FCM registration value sent to backend")
                     } else {
                         throw HttpException(response)
                     }
                 } catch (e: HttpException) {
-                    Log.e("FCM_TOKEN", "Backend odrzucił token FCM: HTTP ${e.code()}", e)
+                    Log.e(LOG_TAG, "Backend rejected FCM registration: HTTP ${e.code()}", e)
                 } catch (e: IOException) {
-                    Log.e("FCM_TOKEN", "Błąd sieci przy rejestracji tokena FCM", e)
+                    Log.e(LOG_TAG, "Network error while registering FCM", e)
                 }
             }
         }

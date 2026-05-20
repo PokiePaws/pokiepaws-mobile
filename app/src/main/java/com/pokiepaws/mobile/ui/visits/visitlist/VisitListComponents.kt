@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -18,7 +19,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -37,20 +43,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.model.Animal
 import com.pokiepaws.mobile.domain.model.Visit
+import com.pokiepaws.mobile.domain.model.VisitType
 import com.pokiepaws.mobile.ui.animals.addanimal.animalSpeciesLabel
 import com.pokiepaws.mobile.ui.animals.animallist.AnimalListUiState
+import com.pokiepaws.mobile.ui.clinics.clinicslist.ClinicSearchBar
 import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieWhite
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 private const val HEADER_ROUNDING = 32
 private const val HEADER_TOP_PADDING = 48
 private const val HEADER_BOTTOM_PADDING = 32
 private const val ADD_BUTTON_SIZE = 48
+private const val SEARCH_BAR_OFFSET = -24
+private val VisitDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
 
 @Composable
 fun VisitListContent(
@@ -62,6 +77,7 @@ fun VisitListContent(
     modifier: Modifier = Modifier,
 ) {
     var showAnimalPicker by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
 
     Column(
         modifier =
@@ -81,7 +97,7 @@ fun VisitListContent(
                                 bottomEnd = HEADER_ROUNDING.dp,
                             ),
                     )
-                    .padding(top = HEADER_TOP_PADDING.dp, bottom = HEADER_BOTTOM_PADDING.dp)
+                    .padding(top = HEADER_TOP_PADDING.dp, bottom = (HEADER_BOTTOM_PADDING + 24).dp)
                     .padding(horizontal = 24.dp),
         ) {
             Row(
@@ -90,7 +106,7 @@ fun VisitListContent(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Moje wizyty",
+                    text = stringResource(R.string.visits_my_visits),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = PokieWhite,
@@ -105,12 +121,21 @@ fun VisitListContent(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Umów wizytę",
+                        contentDescription = stringResource(R.string.visit_schedule_content_description),
                         tint = PokieWhite,
                     )
                 }
             }
         }
+        ClinicSearchBar(
+            query = searchQuery,
+            onQueryChange = { searchQuery = it },
+            placeholderRes = R.string.visit_search_placeholder,
+            modifier =
+                Modifier
+                    .padding(horizontal = 16.dp)
+                    .offset(y = SEARCH_BAR_OFFSET.dp),
+        )
         when (val s = state) {
             is VisitListUiState.Loading ->
                 Box(
@@ -125,11 +150,19 @@ fun VisitListContent(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(text = "Błąd: ${s.message}")
+                    Text(text = stringResource(R.string.visit_error, s.message))
                 }
 
             is VisitListUiState.Success -> {
                 val visits = s.visits.sortedBy { it.startsAt }
+                val animalNames = animalState.animalNamesById()
+                val filteredVisits =
+                    remember(visits, animalNames, searchQuery) {
+                        visits.filterBySearchQuery(
+                            searchQuery = searchQuery,
+                            animalNames = animalNames,
+                        )
+                    }
 
                 if (visits.isEmpty()) {
                     Box(
@@ -137,12 +170,9 @@ fun VisitListContent(
                         contentAlignment = Alignment.Center,
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            VisitStateIcon(icon = Icons.Default.CalendarMonth)
                             Text(
-                                text = "📅",
-                                fontSize = 64.sp,
-                            )
-                            Text(
-                                text = "Brak nadchodzących wizyt",
+                                text = stringResource(R.string.visits_empty),
                                 fontWeight = FontWeight.Bold,
                                 color = PokieBlueDark,
                             )
@@ -150,8 +180,22 @@ fun VisitListContent(
                                 onClick = { showAnimalPicker = true },
                                 modifier = Modifier.padding(top = 8.dp),
                             ) {
-                                Text("Umów pierwszą wizytę")
+                                Text(stringResource(R.string.visit_book_first))
                             }
+                        }
+                    }
+                } else if (filteredVisits.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            VisitStateIcon(icon = Icons.Default.Search)
+                            Text(
+                                text = stringResource(R.string.visits_no_results, searchQuery),
+                                fontWeight = FontWeight.Bold,
+                                color = PokieBlueDark,
+                            )
                         }
                     }
                 } else {
@@ -161,11 +205,12 @@ fun VisitListContent(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         items(
-                            items = visits,
+                            items = filteredVisits,
                             key = { it.id },
                         ) { v ->
                             VisitCard(
                                 visit = v,
+                                animalName = animalNames[v.animalId],
                                 onClick = { onVisitClick(v.id) },
                                 onCancel = onCancelVisit,
                             )
@@ -195,7 +240,7 @@ private fun AnimalPickerDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Wybierz zwierzę") },
+        title = { Text(stringResource(R.string.visit_select_animal_title)) },
         text = {
             when (animalState) {
                 is AnimalListUiState.Loading ->
@@ -208,13 +253,13 @@ private fun AnimalPickerDialog(
 
                 is AnimalListUiState.Error ->
                     Text(
-                        text = "Nie udało się załadować zwierząt",
+                        text = stringResource(R.string.visit_animals_load_error),
                         color = MaterialTheme.colorScheme.error,
                     )
 
                 is AnimalListUiState.Success -> {
                     if (animalState.animals.isEmpty()) {
-                        Text("Nie masz żadnych zwierząt. Dodaj najpierw zwierzę.")
+                        Text(stringResource(R.string.visit_no_animals_dialog))
                     } else {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             animalState.animals.forEach { animal ->
@@ -228,7 +273,12 @@ private fun AnimalPickerDialog(
                                         modifier = Modifier.padding(12.dp),
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
-                                        Text(text = "🐾", fontSize = 24.sp)
+                                        Icon(
+                                            imageVector = Icons.Default.Pets,
+                                            contentDescription = null,
+                                            tint = PokieBlueDark,
+                                            modifier = Modifier.size(24.dp),
+                                        )
                                         Spacer(modifier = Modifier.width(12.dp))
                                         Column {
                                             Text(
@@ -253,7 +303,7 @@ private fun AnimalPickerDialog(
         confirmButton = {},
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Anuluj")
+                Text(stringResource(R.string.cancel_button))
             }
         },
     )
@@ -262,6 +312,7 @@ private fun AnimalPickerDialog(
 @Composable
 private fun VisitCard(
     visit: Visit,
+    animalName: String?,
     onClick: () -> Unit,
     onCancel: (Long) -> Unit,
     modifier: Modifier = Modifier,
@@ -282,31 +333,52 @@ private fun VisitCard(
                     Modifier
                         .size(72.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(PokieWhite),
+                        .background(PokieBlueDark.copy(alpha = 0.08f)),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(
-                    text = if (visit.status == "SCHEDULED") "📅" else "✅",
-                    fontSize = 36.sp,
-                )
+                if (visit.status == "CANCELLED") {
+                    Icon(
+                        imageVector = Icons.Default.Cancel,
+                        contentDescription = stringResource(R.string.visit_cancelled_content_description),
+                        tint = PokieBlueDark,
+                        modifier = Modifier.size(36.dp),
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.CalendarMonth,
+                        contentDescription = stringResource(R.string.visit_scheduled_content_description),
+                        tint = PokieBlueDark,
+                        modifier = Modifier.size(36.dp),
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.width(16.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Wizyta #${visit.id}",
+                    text = stringResource(visit.type.titleRes),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = PokieBlueDark,
                 )
                 Text(
-                    text = visit.startsAt.replace("T", " ").take(16),
+                    text =
+                        stringResource(
+                            R.string.visit_card_animal_title,
+                            animalName ?: stringResource(R.string.animal_unknown_name),
+                            visit.id,
+                        ),
                     fontSize = 13.sp,
                     color = Color.Gray,
                 )
                 Text(
-                    text = visit.status,
+                    text = stringResource(R.string.visit_card_date, visit.startsAt.toVisitDateLabel()),
+                    fontSize = 13.sp,
+                    color = Color.Gray,
+                )
+                Text(
+                    text = stringResource(R.string.visit_card_status, visit.status),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(top = 4.dp),
@@ -318,18 +390,84 @@ private fun VisitCard(
                         },
                 )
                 if (visit.status == "SCHEDULED") {
-                    TextButton(
+                    Button(
                         onClick = { onCancel(visit.id) },
-                        contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
+                        modifier = Modifier.padding(top = 6.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
                         colors =
-                            ButtonDefaults.textButtonColors(
-                                contentColor = MaterialTheme.colorScheme.error,
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = PokieWhite,
                             ),
+                        shape = RoundedCornerShape(8.dp),
                     ) {
-                        Text("Anuluj wizytę", fontSize = 12.sp)
+                        Text(stringResource(R.string.visit_cancel_button), fontSize = 12.sp)
                     }
                 }
             }
         }
     }
 }
+
+@Composable
+private fun VisitStateIcon(
+    icon: ImageVector,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier =
+            modifier
+                .size(64.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(PokieBlueDark.copy(alpha = 0.08f)),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = PokieBlueDark,
+            modifier = Modifier.size(36.dp),
+        )
+    }
+}
+
+private fun AnimalListUiState.animalNamesById(): Map<Long, String> =
+    when (this) {
+        is AnimalListUiState.Success -> animals.associate { it.id to it.name }
+        else -> emptyMap()
+    }
+
+private fun List<Visit>.filterBySearchQuery(
+    searchQuery: String,
+    animalNames: Map<Long, String>,
+): List<Visit> {
+    val q = searchQuery.trim().lowercase()
+    if (q.isEmpty()) return this
+
+    return filter { visit ->
+        val animalName = animalNames[visit.animalId].orEmpty()
+        val dateLabel = visit.startsAt.toVisitDateLabel()
+        animalName.lowercase().contains(q) ||
+            visit.status.lowercase().contains(q) ||
+            dateLabel.lowercase().contains(q) ||
+            visit.startsAt.lowercase().contains(q)
+    }
+}
+
+private fun String.toVisitDateLabel(): String =
+    runCatching { LocalDateTime.parse(this).format(VisitDateFormatter) }
+        .recoverCatching { substringBefore("T").split("-").let { "${it[2]}-${it[1]}-${it[0]}" } }
+        .getOrDefault(this)
+
+private val VisitType.titleRes: Int
+    get() =
+        when (this) {
+            VisitType.CHECKUP -> R.string.visit_type_checkup
+            VisitType.VACCINATION -> R.string.visit_type_vaccination
+            VisitType.EMERGENCY -> R.string.visit_type_emergency
+            VisitType.PREVENTIVE_CARE -> R.string.visit_type_prevention
+            VisitType.SPECIALIST_CONSULTATION -> R.string.visit_type_specialist_consultation
+            VisitType.DIAGNOSTIC_EXAM -> R.string.visit_type_diagnostic_exam
+            VisitType.SURGICAL_PROCEDURE -> R.string.visit_type_surgery
+            VisitType.DENTAL_PROCEDURE -> R.string.visit_type_dental_procedure
+        }

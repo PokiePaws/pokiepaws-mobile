@@ -5,6 +5,7 @@ import com.pokiepaws.mobile.data.remote.dto.visit.VisitResponse
 import com.pokiepaws.mobile.data.remote.service.VisitApiService
 import com.pokiepaws.mobile.domain.model.CreateVisitDraft
 import com.pokiepaws.mobile.domain.model.Visit
+import com.pokiepaws.mobile.domain.model.VisitType
 import com.pokiepaws.mobile.domain.repository.VisitRepository
 import javax.inject.Inject
 
@@ -44,4 +45,10 @@ private fun VisitResponse.toDomain(): Visit =
         diagnosis = diagnosis,
         recommendations = recommendations,
         status = status,
+        type = type.toVisitTypeOrDefault(),
     )
+
+private fun String?.toVisitTypeOrDefault(): VisitType =
+    this
+        ?.let { value -> runCatching { VisitType.valueOf(value) }.getOrNull() }
+        ?: VisitType.CHECKUP

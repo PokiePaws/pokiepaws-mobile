@@ -7,10 +7,12 @@ import com.pokiepaws.mobile.data.remote.dto.auth.LoginRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.MessageResponse
 import com.pokiepaws.mobile.data.remote.dto.auth.RegisterRequest
 import com.pokiepaws.mobile.data.remote.dto.settings.ChangePasswordRequest
+import com.pokiepaws.mobile.data.remote.dto.settings.OwnerProfileResponse
 import com.pokiepaws.mobile.data.remote.dto.settings.UpdateOwnerAddressRequest
 import com.pokiepaws.mobile.data.remote.dto.settings.UpdateOwnerPhoneNumberRequest
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 
@@ -29,6 +31,9 @@ interface AuthApiService {
     suspend fun forgotPassword(
         @Body request: ForgotPasswordRequest,
     ): Response<MessageResponse>
+
+    @GET("api/owners/me")
+    suspend fun getCurrentOwnerProfile(): OwnerProfileResponse
 
     @PATCH("api/owners/me/phone")
     suspend fun updateOwnerPhone(

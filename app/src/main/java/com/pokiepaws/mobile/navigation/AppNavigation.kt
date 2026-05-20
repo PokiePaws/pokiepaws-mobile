@@ -1,6 +1,13 @@
 package com.pokiepaws.mobile.navigation
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -27,6 +34,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -60,6 +68,7 @@ import com.pokiepaws.mobile.util.theme.PokieWhite
 import kotlinx.coroutines.launch
 
 private const val ADDED_ANIMAL_NAME_KEY = "added_animal_name"
+private const val NAVIGATION_ANIMATION_DURATION_MS = 300
 
 @Composable
 fun AppNavigation(
@@ -137,6 +146,10 @@ fun AppNavigation(
             navController = navController,
             startDestination = dynamicStartDestination,
             modifier = Modifier.padding(innerPadding),
+            enterTransition = { appEnterTransition() },
+            exitTransition = { appExitTransition() },
+            popEnterTransition = { appPopEnterTransition() },
+            popExitTransition = { appPopExitTransition() },
         ) {
             composable(Screen.Login.route) {
                 LoginScreen(
@@ -185,10 +198,8 @@ fun AppNavigation(
 
             composable(Screen.Home.route) {
                 HomeScreen(
-                    onNavigateToAnimals = { navController.navigate(Screen.AnimalList.route) },
                     onNavigateToAppointments = { navController.navigate(Screen.AppointmentList.route) },
                     onNavigateToNotifications = { navController.navigate(Screen.Notifications.route) },
-                    onNavigateToClinics = { navController.navigate(Screen.ClinicList.route) },
                 )
             }
 
@@ -331,11 +342,61 @@ private data class BottomNavItem(
 
 private val bottomNavItems =
     listOf(
-        BottomNavItem(Screen.Home, R.string.nav_home, Icons.Default.Home),
         BottomNavItem(Screen.AnimalList, R.string.nav_animals, Icons.Default.Pets),
         BottomNavItem(Screen.AppointmentList, R.string.nav_visits, Icons.Default.CalendarMonth),
+        BottomNavItem(Screen.Home, R.string.nav_home, Icons.Default.Home),
         BottomNavItem(Screen.ClinicList, R.string.nav_clinics, Icons.Default.LocalHospital),
         BottomNavItem(Screen.Profile, R.string.nav_profile, Icons.Default.Person),
     )
 
 private val bottomNavRoutes = bottomNavItems.map { it.screen.route }.toSet()
+
+private fun <T> navigationTween() =
+    tween<T>(
+        durationMillis = NAVIGATION_ANIMATION_DURATION_MS,
+        easing = FastOutSlowInEasing,
+    )
+
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.isBottomNavigationTransition(): Boolean =
+    initialState.destination.route in bottomNavRoutes &&
+        targetState.destination.route in bottomNavRoutes
+
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.appEnterTransition(): EnterTransition =
+    if (isBottomNavigationTransition()) {
+        fadeIn(animationSpec = navigationTween())
+    } else {
+        slideIntoContainer(
+            AnimatedContentTransitionScope.SlideDirection.Left,
+            animationSpec = navigationTween(),
+        )
+    }
+
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.appExitTransition(): ExitTransition =
+    if (isBottomNavigationTransition()) {
+        fadeOut(animationSpec = navigationTween())
+    } else {
+        slideOutOfContainer(
+            AnimatedContentTransitionScope.SlideDirection.Left,
+            animationSpec = navigationTween(),
+        )
+    }
+
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.appPopEnterTransition(): EnterTransition =
+    if (isBottomNavigationTransition()) {
+        fadeIn(animationSpec = navigationTween())
+    } else {
+        slideIntoContainer(
+            AnimatedContentTransitionScope.SlideDirection.Right,
+            animationSpec = navigationTween(),
+        )
+    }
+
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.appPopExitTransition(): ExitTransition =
+    if (isBottomNavigationTransition()) {
+        fadeOut(animationSpec = navigationTween())
+    } else {
+        slideOutOfContainer(
+            AnimatedContentTransitionScope.SlideDirection.Right,
+            animationSpec = navigationTween(),
+        )
+    }

@@ -21,7 +21,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.LocalHospital
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -43,11 +46,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -56,6 +61,7 @@ import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.model.Clinic
 import com.pokiepaws.mobile.domain.model.CreateVisitStep
 import com.pokiepaws.mobile.domain.model.Vet
+import com.pokiepaws.mobile.ui.clinics.clinicslist.ClinicSearchBar
 import com.pokiepaws.mobile.util.theme.PokieBlue
 import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieWhite
@@ -69,6 +75,8 @@ private const val SUMMARY_SLOT_LABEL_LENGTH = 17
 private const val HEADER_ROUNDING = 32
 private const val HEADER_TOP_PADDING = 48
 private const val HEADER_BOTTOM_PADDING = 32
+private const val SEARCH_BAR_OFFSET = -24
+private val CreateVisitIconBackground = Color(0xFFE3F6FC)
 private val VisitDateFormatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE
 
 @Composable
@@ -104,7 +112,7 @@ fun CreateVisitContent(
                                     bottomEnd = HEADER_ROUNDING.dp,
                                 ),
                         )
-                        .padding(top = HEADER_TOP_PADDING.dp, bottom = (HEADER_BOTTOM_PADDING + 12).dp)
+                        .padding(top = HEADER_TOP_PADDING.dp, bottom = (HEADER_BOTTOM_PADDING + 36).dp)
                         .padding(horizontal = 24.dp),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -165,13 +173,18 @@ private fun CreateVisitStepContent(
     onDescriptionChange: (String) -> Unit,
     onConfirm: () -> Unit,
 ) {
+    var clinicSearchQuery by rememberSaveable { mutableStateOf("") }
+    var vetSearchQuery by rememberSaveable { mutableStateOf("") }
+
     when (state.step) {
         CreateVisitStep.SELECT_ANIMAL,
         CreateVisitStep.SELECT_CLINIC,
         ->
             LoadingOrContent(isLoading = state.isLoading) {
                 ClinicListStep(
-                    clinics = state.clinics,
+                    clinics = ClinicItems(state.clinics),
+                    searchQuery = clinicSearchQuery,
+                    onSearchQueryChange = { clinicSearchQuery = it },
                     onSelect = onSelectClinic,
                 )
             }
@@ -179,7 +192,9 @@ private fun CreateVisitStepContent(
         CreateVisitStep.SELECT_VET ->
             LoadingOrContent(isLoading = state.isLoading) {
                 VetListStep(
-                    vets = state.vets,
+                    vets = VetItems(state.vets),
+                    searchQuery = vetSearchQuery,
+                    onSearchQueryChange = { vetSearchQuery = it },
                     onSelect = onSelectVet,
                 )
             }
@@ -187,7 +202,7 @@ private fun CreateVisitStepContent(
         CreateVisitStep.SELECT_SLOT ->
             SlotStep(
                 selectedDate = state.selectedDate,
-                slots = state.availableSlots,
+                slots = SlotItems(state.availableSlots),
                 isLoading = state.isLoading,
                 onDateSelected = onSelectDate,
                 onSlotSelected = onSelectSlot,
@@ -248,12 +263,12 @@ private val CreateVisitStep.titleRes: Int
 
 @Composable
 private fun EmptyVisitState(
-    emoji: String,
+    icon: ImageVector,
     message: String,
 ) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = emoji, fontSize = 64.sp)
+            BlueVisitIcon(icon = icon, size = 64)
             Spacer(Modifier.height(8.dp))
             Text(
                 text = message,
@@ -266,66 +281,80 @@ private fun EmptyVisitState(
 
 @Composable
 private fun ClinicListStep(
-    clinics: List<Clinic>,
+    clinics: ClinicItems,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
     onSelect: (Clinic) -> Unit,
 ) {
-    if (clinics.isEmpty()) {
+    if (clinics.items.isEmpty()) {
         EmptyVisitState(
-            emoji = "🏥",
+            icon = Icons.Default.LocalHospital,
             message = stringResource(R.string.create_visit_clinics_empty),
         )
         return
     }
 
-    LazyColumn(
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        items(clinics, key = { it.id }) { clinic ->
-            Card(
-                onClick = { onSelect(clinic) },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = PokieWhite),
-                elevation = CardDefaults.cardElevation(4.dp),
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+    val filteredClinics = rememberFilteredClinics(clinics, searchQuery)
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        ClinicSearchBar(
+            query = searchQuery,
+            onQueryChange = onSearchQueryChange,
+            modifier =
+                Modifier
+                    .padding(start = 16.dp, end = 16.dp)
+                    .offset(y = SEARCH_BAR_OFFSET.dp),
+        )
+
+        if (filteredClinics.isEmpty()) {
+            EmptyVisitState(
+                icon = Icons.Default.Search,
+                message = stringResource(R.string.clinics_no_results, searchQuery),
+            )
+            return@Column
+        }
+
+        LazyColumn(
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            items(filteredClinics, key = { it.id }) { clinic ->
+                Card(
+                    onClick = { onSelect(clinic) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = PokieWhite),
+                    elevation = CardDefaults.cardElevation(4.dp),
                 ) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .size(72.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(PokieWhite),
-                        contentAlignment = Alignment.Center,
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(text = "🏥", fontSize = 36.sp)
-                    }
+                        BlueVisitIcon(icon = Icons.Default.LocalHospital, size = 72)
 
-                    Spacer(Modifier.width(16.dp))
+                        Spacer(Modifier.width(16.dp))
 
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = clinic.clinicName,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = PokieBlueDark,
-                        )
-                        Text(
-                            text = "${clinic.street} ${clinic.houseNumber}, ${clinic.city}",
-                            fontSize = 13.sp,
-                            color = Color.Gray,
-                        )
-                        clinic.phone?.let { phone ->
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = stringResource(R.string.clinic_phone, phone),
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.padding(top = 4.dp),
-                                color = MaterialTheme.colorScheme.primary,
+                                text = clinic.clinicName,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = PokieBlueDark,
                             )
+                            Text(
+                                text = "${clinic.street} ${clinic.houseNumber}, ${clinic.city}",
+                                fontSize = 13.sp,
+                                color = Color.Gray,
+                            )
+                            clinic.phone?.let { phone ->
+                                Text(
+                                    text = stringResource(R.string.clinic_phone, phone),
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    modifier = Modifier.padding(top = 4.dp),
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
                         }
                     }
                 }
@@ -336,59 +365,74 @@ private fun ClinicListStep(
 
 @Composable
 private fun VetListStep(
-    vets: List<Vet>,
+    vets: VetItems,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
     onSelect: (Vet) -> Unit,
 ) {
-    if (vets.isEmpty()) {
+    if (vets.items.isEmpty()) {
         EmptyVisitState(
-            emoji = "👨‍⚕️",
+            icon = Icons.Default.Person,
             message = stringResource(R.string.create_visit_vets_empty),
         )
         return
     }
 
-    LazyColumn(
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        items(vets, key = { it.userId }) { vet ->
-            Card(
-                onClick = { onSelect(vet) },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = PokieWhite),
-                elevation = CardDefaults.cardElevation(4.dp),
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+    val filteredVets = rememberFilteredVets(vets, searchQuery)
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        ClinicSearchBar(
+            query = searchQuery,
+            onQueryChange = onSearchQueryChange,
+            placeholderRes = R.string.vet_search_placeholder,
+            modifier =
+                Modifier
+                    .padding(start = 16.dp, end = 16.dp)
+                    .offset(y = SEARCH_BAR_OFFSET.dp),
+        )
+
+        if (filteredVets.isEmpty()) {
+            EmptyVisitState(
+                icon = Icons.Default.Search,
+                message = stringResource(R.string.vets_no_results, searchQuery),
+            )
+            return@Column
+        }
+
+        LazyColumn(
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            items(filteredVets, key = { it.userId }) { vet ->
+                Card(
+                    onClick = { onSelect(vet) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = PokieWhite),
+                    elevation = CardDefaults.cardElevation(4.dp),
                 ) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .size(72.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(MaterialTheme.colorScheme.primaryContainer),
-                        contentAlignment = Alignment.Center,
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(text = "👨‍⚕️", fontSize = 32.sp)
-                    }
+                        BlueVisitIcon(icon = Icons.Default.Person, size = 72)
 
-                    Spacer(Modifier.width(16.dp))
+                        Spacer(Modifier.width(16.dp))
 
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "${vet.firstName} ${vet.lastName}",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = PokieBlueDark,
-                        )
-                        vet.specialization?.let {
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = it,
-                                fontSize = 13.sp,
-                                color = Color.Gray,
+                                text = "${vet.firstName} ${vet.lastName}",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = PokieBlueDark,
                             )
+                            vet.specialization?.let {
+                                Text(
+                                    text = it,
+                                    fontSize = 13.sp,
+                                    color = Color.Gray,
+                                )
+                            }
                         }
                     }
                 }
@@ -397,11 +441,70 @@ private fun VetListStep(
     }
 }
 
+@Composable
+private fun BlueVisitIcon(
+    icon: ImageVector,
+    size: Int,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier =
+            modifier
+                .size(size.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(CreateVisitIconBackground),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = PokieBlueDark,
+            modifier = Modifier.size((size / 2).dp),
+        )
+    }
+}
+
+@Composable
+private fun rememberFilteredClinics(
+    clinics: ClinicItems,
+    searchQuery: String,
+): List<Clinic> =
+    remember(clinics.items, searchQuery) {
+        val q = searchQuery.trim().lowercase()
+        if (q.isEmpty()) {
+            clinics.items
+        } else {
+            clinics.items.filter { clinic ->
+                clinic.clinicName.lowercase().contains(q) ||
+                    clinic.street.lowercase().contains(q) ||
+                    clinic.city.lowercase().contains(q)
+            }
+        }
+    }
+
+@Composable
+private fun rememberFilteredVets(
+    vets: VetItems,
+    searchQuery: String,
+): List<Vet> =
+    remember(vets.items, searchQuery) {
+        val q = searchQuery.trim().lowercase()
+        if (q.isEmpty()) {
+            vets.items
+        } else {
+            vets.items.filter { vet ->
+                vet.firstName.lowercase().contains(q) ||
+                    vet.lastName.lowercase().contains(q) ||
+                    vet.specialization.orEmpty().lowercase().contains(q)
+            }
+        }
+    }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SlotStep(
     selectedDate: String?,
-    slots: List<String>,
+    slots: SlotItems,
     isLoading: Boolean,
     onDateSelected: (String) -> Unit,
     onSlotSelected: (String) -> Unit,
@@ -485,7 +588,7 @@ private fun SlotStep(
                     CircularProgressIndicator(color = PokieBlue)
                 }
 
-            slots.isEmpty() && selectedDate != null ->
+            slots.items.isEmpty() && selectedDate != null ->
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Text(
                         text = stringResource(R.string.create_visit_no_slots),
@@ -493,7 +596,7 @@ private fun SlotStep(
                     )
                 }
 
-            slots.isNotEmpty() -> {
+            slots.items.isNotEmpty() -> {
                 Text(
                     text = stringResource(R.string.create_visit_available_hours),
                     fontSize = 16.sp,
@@ -501,7 +604,7 @@ private fun SlotStep(
                     color = PokieBlueDark,
                 )
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(slots) { slot ->
+                    items(slots.items) { slot ->
                         val time = slot.substringAfter("T").take(TIME_LABEL_LENGTH)
                         Card(
                             onClick = { onSlotSelected(slot) },

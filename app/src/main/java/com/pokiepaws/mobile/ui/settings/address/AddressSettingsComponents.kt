@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.pokiepaws.mobile.R
+import com.pokiepaws.mobile.domain.validation.PostalCodeValidationError
 import com.pokiepaws.mobile.ui.settings.OwnerSettingsEvent
 import com.pokiepaws.mobile.ui.settings.OwnerSettingsUiState
 import com.pokiepaws.mobile.ui.settings.SaveButton
@@ -61,6 +62,8 @@ internal fun AddressSettingsSection(
                 value = sectionState.postalCode,
                 labelRes = R.string.owner_settings_postal_code,
                 modifier = Modifier.weight(1f),
+                isError = sectionState.postalCodeValidationError != null,
+                supportingTextRes = sectionState.postalCodeValidationError?.messageRes,
                 onValueChange = { onEvent(OwnerSettingsEvent.PostalCodeChanged(it)) },
             )
             SettingsTextField(
@@ -84,3 +87,9 @@ internal fun AddressSettingsSection(
         )
     }
 }
+
+private val PostalCodeValidationError.messageRes: Int
+    get() =
+        when (this) {
+            PostalCodeValidationError.InvalidFormat -> R.string.postal_code_invalid_format
+        }

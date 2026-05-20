@@ -3,6 +3,7 @@ package com.pokiepaws.mobile.domain.repository
 import com.pokiepaws.mobile.domain.model.AuthSession
 import com.pokiepaws.mobile.domain.model.OwnerAddressDraft
 import com.pokiepaws.mobile.domain.model.OwnerPhoneDraft
+import com.pokiepaws.mobile.domain.model.OwnerProfile
 import com.pokiepaws.mobile.domain.model.RegistrationDraft
 import kotlinx.coroutines.flow.Flow
 
@@ -17,6 +18,8 @@ interface AuthRepository {
     suspend fun register(registration: RegistrationDraft)
 
     suspend fun forgotPassword(email: String)
+
+    suspend fun getCurrentOwnerProfile(): OwnerProfile
 
     suspend fun updateOwnerPhone(phone: OwnerPhoneDraft)
 

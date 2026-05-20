@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.pokiepaws.mobile.domain.model.Clinic
 import com.pokiepaws.mobile.domain.model.CreateVisitStep
 import com.pokiepaws.mobile.domain.model.Vet
+import com.pokiepaws.mobile.domain.model.VisitDescription
 
 @Immutable
 data class ClinicItems(val items: List<Clinic>)
@@ -24,7 +25,7 @@ data class CreateVisitUiState(
     val selectedDate: String? = null,
     val availableSlots: List<String> = emptyList(),
     val selectedSlot: String? = null,
-    val description: String = "",
+    val description: VisitDescription = VisitDescription.CHECKUP,
     val success: Boolean = false,
     val error: String? = null,
 )

@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.model.Visit
+import com.pokiepaws.mobile.domain.model.VisitDescription
 import com.pokiepaws.mobile.ui.visits.visitlist.VisitListUiState
 import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieRed
@@ -275,9 +276,7 @@ private fun UpcomingVisitContent(visit: Visit) {
                 color = PokieBlueDark,
             )
             Text(
-                text =
-                    visit.description?.takeIf { it.isNotBlank() }
-                        ?: stringResource(R.string.upcoming_visit_details_hint),
+                text = stringResource(visit.description.titleRes),
                 color = Color.Gray,
                 fontSize = 14.sp,
                 maxLines = 1,
@@ -330,6 +329,19 @@ private fun parseIsoLocalDateTimeOrNull(value: String): LocalDateTime? {
         null
     }
 }
+
+private val VisitDescription.titleRes: Int
+    get() =
+        when (this) {
+            VisitDescription.CHECKUP -> R.string.visit_type_checkup
+            VisitDescription.VACCINATION -> R.string.visit_type_vaccination
+            VisitDescription.EMERGENCY -> R.string.visit_type_emergency
+            VisitDescription.PREVENTIVE_CARE -> R.string.visit_type_prevention
+            VisitDescription.SPECIALIST_CONSULTATION -> R.string.visit_type_specialist_consultation
+            VisitDescription.DIAGNOSTIC_EXAM -> R.string.visit_type_diagnostic_exam
+            VisitDescription.SURGICAL_PROCEDURE -> R.string.visit_type_surgery
+            VisitDescription.DENTAL_PROCEDURE -> R.string.visit_type_dental_procedure
+        }
 
 @Composable
 private fun formatDayLabel(date: LocalDate): String {

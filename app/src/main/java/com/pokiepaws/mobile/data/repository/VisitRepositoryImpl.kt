@@ -5,7 +5,7 @@ import com.pokiepaws.mobile.data.remote.dto.visit.VisitResponse
 import com.pokiepaws.mobile.data.remote.service.VisitApiService
 import com.pokiepaws.mobile.domain.model.CreateVisitDraft
 import com.pokiepaws.mobile.domain.model.Visit
-import com.pokiepaws.mobile.domain.model.VisitType
+import com.pokiepaws.mobile.domain.model.VisitDescription
 import com.pokiepaws.mobile.domain.repository.VisitRepository
 import javax.inject.Inject
 
@@ -20,6 +20,19 @@ class VisitRepositoryImpl
 
         override suspend fun getById(visitId: Long): Visit = api.getVisitById(visitId).toDomain()
 
+        override suspend fun getByAnimal(animalId: Long): List<Visit> = api.getVisitsByAnimal(animalId).map { it.toDomain() }
+
+        override suspend fun getAvailableSlots(
+            clinicId: Long,
+            vetUserId: Long,
+            date: String,
+        ): List<String> =
+            api.getAvailableSlots(
+                clinicId = clinicId,
+                vetUserId = vetUserId,
+                date = date,
+            ).availableStarts
+
         override suspend fun create(visit: CreateVisitDraft): Visit = api.createVisit(visit.toRequest()).toDomain()
     }
 
@@ -29,7 +42,7 @@ private fun CreateVisitDraft.toRequest(): CreateVisitRequest =
         clinicId = clinicId,
         vetUserId = vetUserId,
         startsAt = startsAt,
-        description = description,
+        description = description.name,
     )
 
 private fun VisitResponse.toDomain(): Visit =
@@ -40,15 +53,14 @@ private fun VisitResponse.toDomain(): Visit =
         vetUserId = vetUserId,
         startsAt = startsAt,
         endsAt = endsAt,
-        description = description,
+        description = description.toVisitDescriptionOrDefault(),
         disease = disease,
         diagnosis = diagnosis,
         recommendations = recommendations,
         status = status,
-        type = type.toVisitTypeOrDefault(),
     )
 
-private fun String?.toVisitTypeOrDefault(): VisitType =
+private fun String?.toVisitDescriptionOrDefault(): VisitDescription =
     this
-        ?.let { value -> runCatching { VisitType.valueOf(value) }.getOrNull() }
-        ?: VisitType.CHECKUP
+        ?.let { value -> runCatching { VisitDescription.valueOf(value) }.getOrNull() }
+        ?: VisitDescription.CHECKUP

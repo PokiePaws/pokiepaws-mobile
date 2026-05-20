@@ -1,5 +1,6 @@
 package com.pokiepaws.mobile.data.remote.service
 
+import com.pokiepaws.mobile.data.remote.dto.visit.AvailableSlotsResponse
 import com.pokiepaws.mobile.data.remote.dto.visit.CreateVisitRequest
 import com.pokiepaws.mobile.data.remote.dto.visit.VisitResponse
 import retrofit2.http.Body
@@ -23,6 +24,13 @@ interface VisitApiService {
     suspend fun getVisitsByAnimal(
         @Path("animalId") animalId: Long,
     ): List<VisitResponse>
+
+    @GET("api/clinics/{clinicId}/vets/{vetUserId}/available-slots")
+    suspend fun getAvailableSlots(
+        @Path("clinicId") clinicId: Long,
+        @Path("vetUserId") vetUserId: Long,
+        @Query("date") date: String,
+    ): AvailableSlotsResponse
 
     @POST("api/visits")
     suspend fun createVisit(

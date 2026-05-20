@@ -21,6 +21,10 @@ sealed class Screen(val route: String) {
         fun createRoute(animalId: Long) = "animal_detail/$animalId"
     }
 
+    data object AnimalVisitsHistory : Screen("animal_visits_history/{animalId}") {
+        fun createRoute(animalId: Long) = "animal_visits_history/$animalId"
+    }
+
     data object ClinicList : Screen("clinic_list")
 
     data object VetList : Screen("vet_list/{clinicId}") {

@@ -110,6 +110,17 @@
     <string name="no_data">No data</string>
     <string name="none_value">None</string>
     <string name="animal_no_notes">No notes</string>
+    <string name="animal_visits_history_button">Visit history</string>
+    <string name="animal_visits_history_title">Visit history</string>
+    <string name="animal_visits_history_empty">No visits for this animal yet</string>
+    <string name="animal_visits_history_empty_range">No visits in this date range</string>
+    <string name="animal_visits_history_from">From</string>
+    <string name="animal_visits_history_to">To</string>
+    <string name="animal_visits_history_clear_dates">Clear dates</string>
+    <string name="animal_visits_history_start">Start</string>
+    <string name="animal_visits_history_end">End</string>
+    <string name="animal_visits_history_prescriptions">Prescriptions / recommendations</string>
+    <string name="animal_visits_history_no_prescriptions">No prescriptions or recommendations</string>
     <string name="animal_weight_not_provided">Not provided</string>
     <plurals name="animal_age_years">
         <item quantity="one">%1$d year</item>
@@ -204,7 +215,7 @@
     <string name="create_visit_summary_address">Address</string>
     <string name="create_visit_summary_vet">Vet</string>
     <string name="create_visit_summary_date">Date</string>
-    <string name="create_visit_description_label">Visit description (optional)</string>
+    <string name="create_visit_description_label">Visit type</string>
     <string name="create_visit_description_placeholder">Reason for visit, symptoms&#8230;</string>
     <string name="create_visit_submit">Book visit</string>
     <string name="vets_title">Veterinarian</string>
@@ -223,6 +234,7 @@
     <string name="visit_card_status">Status: %1$s</string>
     <string name="visit_search_placeholder">Search by date, status or animal&#8230;</string>
     <string name="visits_no_results">No visits found for "%1$s"</string>
+    <string name="visits_no_results_filtered">No visits in this date range</string>
     <string name="visit_type_checkup">Checkup</string>
     <string name="visit_type_vaccination">Vaccination</string>
     <string name="visit_type_emergency">Emergency</string>

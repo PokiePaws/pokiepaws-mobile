@@ -5,7 +5,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 
 fun interface VetApiService {
-    @GET("api/clinics/{clinicId}/vets")
+    @GET("/api/vets/clinic/{clinicId}")
     suspend fun getByClinicList(
         @Path("clinicId") clinicId: Long,
     ): List<VetListResponse>

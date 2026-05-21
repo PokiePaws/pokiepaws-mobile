@@ -1,8 +1,10 @@
 package com.pokiepaws.mobile.data.repository
 
+import com.pokiepaws.mobile.data.local.LocalDataCleaner
 import com.pokiepaws.mobile.data.local.TokenManager
 import com.pokiepaws.mobile.data.remote.dto.auth.ForgotPasswordRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.LoginRequest
+import com.pokiepaws.mobile.data.remote.dto.auth.RefreshTokenRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.RegisterRequest
 import com.pokiepaws.mobile.data.remote.dto.settings.ChangePasswordRequest
 import com.pokiepaws.mobile.data.remote.dto.settings.OwnerProfileResponse
@@ -16,6 +18,7 @@ import com.pokiepaws.mobile.domain.model.OwnerProfile
 import com.pokiepaws.mobile.domain.model.RegistrationDraft
 import com.pokiepaws.mobile.domain.repository.AuthRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import retrofit2.HttpException
 import javax.inject.Inject
 
@@ -24,6 +27,7 @@ class AuthRepositoryImpl
     constructor(
         private val authApiService: AuthApiService,
         private val tokenManager: TokenManager,
+        private val localDataCleaner: LocalDataCleaner,
     ) : AuthRepository {
         override val token: Flow<String?> = tokenManager.token
 
@@ -37,7 +41,10 @@ class AuthRepositoryImpl
                 token = token,
                 role = response.role.orEmpty(),
             ).also {
-                tokenManager.saveToken(token)
+                tokenManager.saveTokens(
+                    accessToken = token,
+                    refreshToken = response.resolvedRefreshToken,
+                )
             }
         }
 
@@ -82,6 +89,10 @@ class AuthRepositoryImpl
         }
 
         override suspend fun logout() {
+            tokenManager.refreshToken.first()?.let { refreshToken ->
+                runCatching { authApiService.logout(RefreshTokenRequest(refreshToken)) }
+            }
+            localDataCleaner.clearSensitiveData()
             tokenManager.clearToken()
         }
     }

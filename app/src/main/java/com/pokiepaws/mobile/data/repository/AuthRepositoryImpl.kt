@@ -59,7 +59,7 @@ class AuthRepositoryImpl
             }
         }
 
-    override suspend fun getCurrentOwnerProfile(): OwnerProfile =
+        override suspend fun getCurrentOwnerProfile(): OwnerProfile =
             runCatching {
                 authApiService.getCurrentOwnerProfile().toDomain()
             }.onSuccess { profile ->

@@ -347,6 +347,7 @@ private fun formatDayLabel(date: LocalDate): String {
         else -> date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
     }
 }
+
 private val APPOINTMENT_ICON_BG = Color(0xFFE3F6FC)
 private val APPOINTMENT_CARD_BG = Color(0xFFF0F8FA)
 private const val CORNER_RADIUS_HEADER = 18

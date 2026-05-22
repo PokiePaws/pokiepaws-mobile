@@ -233,4 +233,5 @@ private fun BlueVetIcon(
         )
     }
 }
+
 private val VetIconBackground = Color(0xFFE3F6FC)

@@ -155,6 +155,7 @@ private fun PasswordField(
         isError = isError,
     )
 }
+
 @Composable
 private fun ErrorText(message: String?) {
     if (message == null) return

@@ -99,5 +99,6 @@ sealed interface RegisterEffect {
 
     data object NavigateToLogin : RegisterEffect
 }
+
 internal const val POLAND_COUNTRY_NAME = "Polska"
 internal const val POLAND_DIAL_CODE = "+48"

@@ -52,6 +52,7 @@ import com.pokiepaws.mobile.util.theme.PokieBlue
 import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieCream
 import com.pokiepaws.mobile.util.theme.PokieWhite
+
 @Composable
 fun ProfileContent(
     state: ProfileUiState,
@@ -352,6 +353,7 @@ private fun AnimatedMenuItem(
         }
     }
 }
+
 private const val HEADER_ROUNDING = 32
 private const val HEADER_TOP_PADDING = 48
 private const val HEADER_BOTTOM_PADDING = 48

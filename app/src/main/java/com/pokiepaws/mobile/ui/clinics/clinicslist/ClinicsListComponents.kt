@@ -249,4 +249,5 @@ private fun BlueClinicIcon(
         )
     }
 }
+
 private val ClinicIconBackground = Color(0xFFE3F6FC)

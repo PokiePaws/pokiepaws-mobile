@@ -57,6 +57,7 @@ import com.pokiepaws.mobile.ui.settings.phone.PhoneSettingsSection
 import com.pokiepaws.mobile.util.theme.PokieBlue
 import com.pokiepaws.mobile.util.theme.PokieCream
 import com.pokiepaws.mobile.util.theme.PokieWhite
+
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
@@ -324,6 +325,7 @@ internal fun StatusText(
         }
     }
 }
+
 private const val HEADER_ROUNDING = 32
 private const val HEADER_TOP_PADDING = 48
 private const val HEADER_BOTTOM_PADDING = 48

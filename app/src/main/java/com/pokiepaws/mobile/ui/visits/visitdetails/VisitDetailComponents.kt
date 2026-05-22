@@ -57,6 +57,7 @@ import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieWhite
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+
 @Composable
 fun VisitDetailContent(
     state: VisitDetailUiState,

@@ -254,6 +254,7 @@ data class LanguageOption(
     val tag: String,
     val labelRes: Int,
 )
+
 private const val ENGLISH_TAG = "en"
 private const val POLISH_TAG = "pl"
 

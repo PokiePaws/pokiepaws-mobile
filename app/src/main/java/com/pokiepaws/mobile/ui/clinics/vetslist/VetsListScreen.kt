@@ -77,6 +77,7 @@ fun VetsListScreen(
         )
     }
 }
+
 private const val HEADER_ROUNDING = 32
 private const val HEADER_TOP_PADDING = 48
 private const val HEADER_BOTTOM_PADDING = 32

@@ -46,6 +46,7 @@ import com.pokiepaws.mobile.domain.validation.PasswordValidationError
 import com.pokiepaws.mobile.domain.validation.PostalCodeValidationError
 import com.pokiepaws.mobile.ui.settings.PasswordValidationErrors
 import com.pokiepaws.mobile.util.theme.PokieWhite
+
 @Composable
 internal fun RegisterContent(
     state: RegisterUiState,
@@ -403,6 +404,7 @@ private fun SectionLabel(
         HorizontalDivider(modifier = Modifier.weight(1f), thickness = 0.5.dp)
     }
 }
+
 private const val WEIGHT_POSTAL_CODE = 0.45f
 private const val WEIGHT_CITY = 0.55f
 private const val SECTION_DIVIDER_ALPHA = 0.7f

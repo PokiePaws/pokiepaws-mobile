@@ -43,6 +43,7 @@ import com.pokiepaws.mobile.domain.model.Animal
 import com.pokiepaws.mobile.ui.animals.addanimal.animalSpeciesLabel
 import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieWhite
+
 @Composable
 fun AnimalListHeader(
     onAddAnimal: () -> Unit,
@@ -249,6 +250,7 @@ fun ErrorView(
         }
     }
 }
+
 private val AnimalAvatarBackground = Color(0xFFF0F8FA)
 private const val CARD_ROUNDING = 24
 private const val AVATAR_ROUNDING = 16

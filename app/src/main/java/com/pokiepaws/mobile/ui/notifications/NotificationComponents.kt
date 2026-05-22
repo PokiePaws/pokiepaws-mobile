@@ -371,6 +371,7 @@ private fun NotificationBody(
 }
 
 private fun formatTimestamp(timestamp: Long): String = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(timestamp))
+
 private const val ANIMATION_DELAY_PER_ITEM_MS = 80
 private const val ITEM_ANIMATION_DURATION = 300
 private const val INITIAL_OFFSET_X = -20f

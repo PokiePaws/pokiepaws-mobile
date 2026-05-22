@@ -65,6 +65,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+
 @Composable
 fun AnimalVisitsHistoryContent(
     state: AnimalVisitsHistoryUiState,
@@ -149,7 +150,9 @@ private fun HistoryHeader(
 }
 
 @Composable
-private fun VisitsHistoryList(@SuppressLint("ComposeUnstableCollections") visits: List<Visit>) {
+private fun VisitsHistoryList(
+    @SuppressLint("ComposeUnstableCollections") visits: List<Visit>,
+) {
     var fromDateMillis by rememberSaveable { mutableStateOf<Long?>(null) }
     var toDateMillis by rememberSaveable { mutableStateOf<Long?>(null) }
     val fromDate = remember(fromDateMillis) { fromDateMillis?.toLocalDate() }

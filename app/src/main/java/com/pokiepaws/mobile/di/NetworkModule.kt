@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import okhttp3.Authenticator
+import okhttp3.CertificatePinner
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -30,6 +31,7 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
+    private const val API_HOST = "api.pokiepaws.pl"
     private const val HTTP_UNAUTHORIZED = 401
     private const val TIMEOUT_SECONDS = 30L
     private const val MAX_AUTH_RETRIES = 2
@@ -42,6 +44,15 @@ object NetworkModule {
             "/api/auth/refresh",
             "/api/auth/logout",
         )
+
+    private val certificatePinner =
+        CertificatePinner.Builder()
+            .add(
+                API_HOST,
+                "sha256/XyDIIRSt8/nOJDY3pudOaQ9hmMlboj0SRIMciM18ie4=",
+                "sha256/XyDIIRSt8/nOJDY3pudOaQ9hmMlboj0SRIMciM18ie4=",
+            )
+            .build()
 
     @Provides
     @Singleton
@@ -58,6 +69,7 @@ object NetworkModule {
         json: Json,
     ): OkHttpClient {
         return OkHttpClient.Builder()
+            .certificatePinner(certificatePinner)
             .addInterceptor { chain ->
                 val token = runBlocking { tokenManager.token.first() }
                 val originalRequest = chain.request()

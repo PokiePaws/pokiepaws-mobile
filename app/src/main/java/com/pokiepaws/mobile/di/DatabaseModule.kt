@@ -6,6 +6,8 @@ import com.pokiepaws.mobile.data.local.DatabasePassphraseProvider
 import com.pokiepaws.mobile.data.local.dao.AnimalDao
 import com.pokiepaws.mobile.data.local.dao.ClinicDao
 import com.pokiepaws.mobile.data.local.dao.NotificationDao
+import com.pokiepaws.mobile.data.local.dao.OwnerProfileDao
+import com.pokiepaws.mobile.data.local.dao.VetDao
 import com.pokiepaws.mobile.data.local.dao.VisitDao
 import com.pokiepaws.mobile.data.local.room.PokieDatabase
 import dagger.Module
@@ -51,4 +53,8 @@ object DatabaseModule {
     @Provides fun provideClinicDao(db: PokieDatabase): ClinicDao = db.clinicDao()
 
     @Provides fun provideVisitDao(db: PokieDatabase): VisitDao = db.visitDao()
+
+    @Provides fun provideVetDao(db: PokieDatabase): VetDao = db.vetDao()
+
+    @Provides fun provideOwnerProfileDao(db: PokieDatabase): OwnerProfileDao = db.ownerProfileDao()
 }

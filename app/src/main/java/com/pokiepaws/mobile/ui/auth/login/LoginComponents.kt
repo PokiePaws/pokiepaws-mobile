@@ -1,10 +1,7 @@
 package com.pokiepaws.mobile.ui.auth.login
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -84,8 +81,6 @@ internal fun LoginCard(
                 isError = state.errorMessage != null,
             )
 
-            ForgotPasswordLink { onEvent(LoginEvent.ForgotPasswordClicked) }
-
             ErrorText(message = state.errorMessage)
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -160,26 +155,6 @@ private fun PasswordField(
         isError = isError,
     )
 }
-
-@Composable
-private fun ForgotPasswordLink(onClick: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.End,
-    ) {
-        TextButton(
-            onClick = onClick,
-            contentPadding = PaddingValues(0.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.login_forgot_password),
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.primary,
-            )
-        }
-    }
-}
-
 @Composable
 private fun ErrorText(message: String?) {
     if (message == null) return

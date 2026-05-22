@@ -157,7 +157,7 @@ private fun DrTuptusImage(modifier: Modifier = Modifier) {
             contentScale = ContentScale.Fit,
             modifier =
                 Modifier
-                    .fillMaxWidth(0.72f)
+                    .fillMaxWidth(WIDTH)
                     .height(170.dp),
         )
     }
@@ -380,3 +380,5 @@ private val APPOINTMENT_ICON_BG = Color(0xFFE3F6FC)
 private val APPOINTMENT_CARD_BG = Color(0xFFF0F8FA)
 private const val CORNER_RADIUS_HEADER = 18
 private const val SECTION_SPACING = 24
+
+private const val WIDTH = 0.72f

@@ -1,6 +1,6 @@
 package com.pokiepaws.mobile.domain.model
 
-enum class VisitType {
+enum class VisitDescription {
     CHECKUP,
     VACCINATION,
     EMERGENCY,

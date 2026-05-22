@@ -145,6 +145,8 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
+    implementation(libs.androidx.sqlite)
+    implementation(libs.sqlcipher.android)
 
     implementation(libs.datastore.preferences)
     implementation(libs.kotlinx.serialization.json)

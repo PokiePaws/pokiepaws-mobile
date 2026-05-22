@@ -6,6 +6,7 @@ import com.pokiepaws.mobile.domain.model.Clinic
 import com.pokiepaws.mobile.domain.model.CreateVisitDraft
 import com.pokiepaws.mobile.domain.model.CreateVisitStep
 import com.pokiepaws.mobile.domain.model.Vet
+import com.pokiepaws.mobile.domain.model.VisitDescription
 import com.pokiepaws.mobile.domain.repository.ClinicRepository
 import com.pokiepaws.mobile.domain.repository.VetRepository
 import com.pokiepaws.mobile.domain.repository.VisitRepository
@@ -16,13 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.LocalTime
 import javax.inject.Inject
-
-private const val FIRST_VISIT_HOUR = 9
-private const val LAST_VISIT_HOUR = 16
-private const val LAST_VISIT_MINUTE = 30
-private const val VISIT_INTERVAL_MINUTES = 30L
 
 @HiltViewModel
 class CreateVisitViewModel
@@ -83,19 +78,49 @@ class CreateVisitViewModel
 
         fun selectDate(date: String) {
             val parsedDate = parseVisitDate(date)
+            val clinic = _uiState.value.selectedClinic
+            val vet = _uiState.value.selectedVet
 
             if (parsedDate == null) {
                 _uiState.update { state -> state.copy(error = "Podaj date w formacie YYYY-MM-DD") }
             } else if (parsedDate.isBefore(LocalDate.now())) {
                 _uiState.update { state -> state.copy(error = "Nie mozna wybrac daty z przeszlosci") }
+            } else if (clinic == null || vet == null) {
+                _uiState.update { state -> state.copy(error = "Wybierz gabinet i weterynarza") }
             } else {
-                _uiState.update {
-                    it.copy(
-                        selectedDate = date,
-                        availableSlots = generateSlots(parsedDate),
-                        selectedSlot = null,
-                        error = null,
-                    )
+                viewModelScope.launch {
+                    _uiState.update {
+                        it.copy(
+                            selectedDate = date,
+                            availableSlots = emptyList(),
+                            selectedSlot = null,
+                            isLoading = true,
+                            error = null,
+                        )
+                    }
+                    runCatching {
+                        visitRepository.getAvailableSlots(
+                            clinicId = clinic.id,
+                            vetUserId = vet.userId,
+                            date = date,
+                        )
+                    }.onSuccess { slots ->
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                availableSlots = slots,
+                                error = null,
+                            )
+                        }
+                    }.onFailure { error ->
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                availableSlots = emptyList(),
+                                error = error.message ?: "Nie udalo sie zaladowac dostepnych terminow",
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -106,7 +131,7 @@ class CreateVisitViewModel
             }
         }
 
-        fun updateDescription(description: String) {
+        fun updateDescription(description: VisitDescription) {
             _uiState.update { it.copy(description = description) }
         }
 
@@ -191,16 +216,7 @@ private fun CreateVisitUiState.toCreateVisitDraft(animalId: Long): CreateVisitDr
             clinicId = clinic.id,
             vetUserId = vet.userId,
             startsAt = slot,
-            description = description.takeIf { it.isNotBlank() },
+            description = description,
         )
     }
-}
-
-private fun generateSlots(date: LocalDate): List<String> {
-    val start = LocalTime.of(FIRST_VISIT_HOUR, 0)
-    val end = LocalTime.of(LAST_VISIT_HOUR, LAST_VISIT_MINUTE)
-    return generateSequence(start) { it.plusMinutes(VISIT_INTERVAL_MINUTES) }
-        .takeWhile { !it.isAfter(end) }
-        .map { time -> date.toString() + "T$time:00" }
-        .toList()
 }

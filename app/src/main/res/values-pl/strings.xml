@@ -110,6 +110,17 @@
     <string name="no_data">Brak danych</string>
     <string name="none_value">Brak</string>
     <string name="animal_no_notes">Brak notatek</string>
+    <string name="animal_visits_history_button">Historia wizyt</string>
+    <string name="animal_visits_history_title">Historia wizyt</string>
+    <string name="animal_visits_history_empty">Brak wizyt dla tego zwierzęcia</string>
+    <string name="animal_visits_history_empty_range">Brak wizyt w wybranym zakresie dat</string>
+    <string name="animal_visits_history_from">Od</string>
+    <string name="animal_visits_history_to">Do</string>
+    <string name="animal_visits_history_clear_dates">Wyczyść daty</string>
+    <string name="animal_visits_history_start">Początek</string>
+    <string name="animal_visits_history_end">Koniec</string>
+    <string name="animal_visits_history_prescriptions">Recepty / zalecenia</string>
+    <string name="animal_visits_history_no_prescriptions">Brak recept lub zaleceń</string>
     <string name="animal_weight_not_provided">Nie podano</string>
     <plurals name="animal_age_years">
         <item quantity="one">%1$d rok</item>
@@ -208,7 +219,7 @@
     <string name="create_visit_summary_address">Adres</string>
     <string name="create_visit_summary_vet">Weterynarz</string>
     <string name="create_visit_summary_date">Termin</string>
-    <string name="create_visit_description_label">Opis wizyty (opcjonalnie)</string>
+    <string name="create_visit_description_label">Typ wizyty</string>
     <string name="create_visit_description_placeholder">Powód wizyty, objawy.</string>
     <string name="create_visit_submit">Umów wizytę</string>
     <string name="vets_title">Weterynarze</string>
@@ -227,6 +238,7 @@
     <string name="visit_card_status">Status: %1$s</string>
     <string name="visit_search_placeholder">Szukaj po dacie, statusie lub zwierzęciu</string>
     <string name="visits_no_results">Brak wizyt dla "%1$s"</string>
+    <string name="visits_no_results_filtered">Brak wizyt w wybranym zakresie dat</string>
     <string name="visit_type_checkup">Kontrola</string>
     <string name="visit_type_vaccination">Szczepienie</string>
     <string name="visit_type_emergency">Nagły przypadek</string>

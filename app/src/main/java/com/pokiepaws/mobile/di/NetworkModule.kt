@@ -2,6 +2,7 @@ package com.pokiepaws.mobile.di
 
 import com.pokiepaws.mobile.BuildConfig
 import com.pokiepaws.mobile.data.local.TokenManager
+import com.pokiepaws.mobile.data.remote.dto.auth.RefreshTokenRequest
 import com.pokiepaws.mobile.data.remote.service.AnimalApiService
 import com.pokiepaws.mobile.data.remote.service.AuthApiService
 import com.pokiepaws.mobile.data.remote.service.ClinicApiService
@@ -14,25 +15,44 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
+import okhttp3.Authenticator
+import okhttp3.CertificatePinner
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.Response
+import okhttp3.Route
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
+    private const val API_HOST = "api.pokiepaws.pl"
     private const val HTTP_UNAUTHORIZED = 401
     private const val TIMEOUT_SECONDS = 30L
+    private const val MAX_AUTH_RETRIES = 2
+
     private val publicAuthPaths =
         setOf(
             "/api/auth/login",
             "/api/auth/register",
             "/api/auth/forgot-password",
+            "/api/auth/refresh",
+            "/api/auth/logout",
         )
+
+    private val certificatePinner =
+        CertificatePinner.Builder()
+            .add(
+                API_HOST,
+                "sha256/XyDIIRSt8/nOJDY3pudOaQ9hmMlboj0SRIMciM18ie4=",
+                "sha256/XyDIIRSt8/nOJDY3pudOaQ9hmMlboj0SRIMciM18ie4=",
+            )
+            .build()
 
     @Provides
     @Singleton
@@ -44,35 +64,116 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(tokenManager: TokenManager): OkHttpClient {
+    fun provideOkHttpClient(
+        tokenManager: TokenManager,
+        json: Json,
+    ): OkHttpClient {
         return OkHttpClient.Builder()
+            .certificatePinner(certificatePinner)
             .addInterceptor { chain ->
                 val token = runBlocking { tokenManager.token.first() }
                 val originalRequest = chain.request()
                 val isPublicAuthRequest = originalRequest.url.encodedPath in publicAuthPaths
-                val request = originalRequest.newBuilder()
 
+                val requestBuilder = originalRequest.newBuilder()
                 if (!token.isNullOrEmpty() && !isPublicAuthRequest) {
-                    request.header("Authorization", "Bearer $token")
-                }
-                val response = chain.proceed(request.build())
-
-                if (response.code == HTTP_UNAUTHORIZED && !isPublicAuthRequest) {
-                    runBlocking { tokenManager.clearToken() }
+                    requestBuilder.header("Authorization", "Bearer $token")
                 }
 
-                response
+                chain.proceed(requestBuilder.build())
             }
+            .authenticator(refreshTokenAuthenticator(tokenManager, json))
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
-                    level = HttpLoggingInterceptor.Level.HEADERS
+                    redactHeader("Authorization")
+                    redactHeader("Cookie")
+                    level =
+                        if (BuildConfig.DEBUG) {
+                            HttpLoggingInterceptor.Level.BASIC
+                        } else {
+                            HttpLoggingInterceptor.Level.NONE
+                        }
                 },
             )
-            .connectTimeout(TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
-            .readTimeout(TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
-            .writeTimeout(TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
+            .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .writeTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .build()
     }
+
+    private fun refreshTokenAuthenticator(
+        tokenManager: TokenManager,
+        json: Json,
+    ): Authenticator =
+        object : Authenticator {
+            override fun authenticate(
+                route: Route?,
+                response: Response,
+            ): okhttp3.Request? {
+                val shouldTryRefresh =
+                    response.code == HTTP_UNAUTHORIZED && response.responseCount < MAX_AUTH_RETRIES
+
+                val resultRequest: okhttp3.Request? =
+                    if (!shouldTryRefresh) {
+                        null
+                    } else {
+                        val refreshToken = runBlocking { tokenManager.refreshToken.first() }
+
+                        if (refreshToken.isNullOrBlank()) {
+                            null
+                        } else {
+                            val refreshedAccessToken: String? =
+                                synchronized(this) {
+                                    runBlocking {
+                                        runCatching {
+                                            val authApi =
+                                                Retrofit.Builder()
+                                                    .baseUrl(normalizedBaseUrl())
+                                                    .client(OkHttpClient.Builder().build())
+                                                    .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+                                                    .build()
+                                                    .create(AuthApiService::class.java)
+
+                                            val authResponse = authApi.refresh(RefreshTokenRequest(refreshToken))
+                                            val accessToken = requireNotNull(authResponse.resolvedToken)
+
+                                            tokenManager.saveTokens(
+                                                accessToken = accessToken,
+                                                refreshToken = authResponse.resolvedRefreshToken,
+                                            )
+                                            accessToken
+                                        }.getOrElse {
+                                            tokenManager.clearToken()
+                                            null
+                                        }
+                                    }
+                                }
+
+                            if (refreshedAccessToken == null) {
+                                null
+                            } else {
+                                response.request
+                                    .newBuilder()
+                                    .header("Authorization", "Bearer $refreshedAccessToken")
+                                    .build()
+                            }
+                        }
+                    }
+
+                return resultRequest
+            }
+        }
+
+    private val Response.responseCount: Int
+        get() {
+            var current: Response? = this
+            var count = 1
+            while (current?.priorResponse != null) {
+                count++
+                current = current.priorResponse
+            }
+            return count
+        }
 
     @Provides
     @Singleton
@@ -83,9 +184,7 @@ object NetworkModule {
         return Retrofit.Builder()
             .baseUrl(normalizedBaseUrl())
             .client(client)
-            .addConverterFactory(
-                json.asConverterFactory("application/json".toMediaType()),
-            )
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
     }
 
@@ -98,31 +197,21 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideAuthApiService(retrofit: Retrofit): AuthApiService {
-        return retrofit.create(AuthApiService::class.java)
-    }
+    fun provideAuthApiService(retrofit: Retrofit): AuthApiService = retrofit.create(AuthApiService::class.java)
 
     @Provides
     @Singleton
-    fun provideAnimalApiService(retrofit: Retrofit): AnimalApiService {
-        return retrofit.create(AnimalApiService::class.java)
-    }
+    fun provideAnimalApiService(retrofit: Retrofit): AnimalApiService = retrofit.create(AnimalApiService::class.java)
 
     @Provides
     @Singleton
-    fun provideVisitApiService(retrofit: Retrofit): VisitApiService {
-        return retrofit.create(VisitApiService::class.java)
-    }
+    fun provideVisitApiService(retrofit: Retrofit): VisitApiService = retrofit.create(VisitApiService::class.java)
 
     @Provides
     @Singleton
-    fun provideClinicApiService(retrofit: Retrofit): ClinicApiService {
-        return retrofit.create(ClinicApiService::class.java)
-    }
+    fun provideClinicApiService(retrofit: Retrofit): ClinicApiService = retrofit.create(ClinicApiService::class.java)
 
     @Provides
     @Singleton
-    fun provideVetApiService(retrofit: Retrofit): VetApiService {
-        return retrofit.create(VetApiService::class.java)
-    }
+    fun provideVetApiService(retrofit: Retrofit): VetApiService = retrofit.create(VetApiService::class.java)
 }

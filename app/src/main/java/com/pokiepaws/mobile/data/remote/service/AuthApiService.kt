@@ -5,6 +5,7 @@ import com.pokiepaws.mobile.data.remote.dto.auth.DeviceTokenRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.ForgotPasswordRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.LoginRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.MessageResponse
+import com.pokiepaws.mobile.data.remote.dto.auth.RefreshTokenRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.RegisterRequest
 import com.pokiepaws.mobile.data.remote.dto.settings.ChangePasswordRequest
 import com.pokiepaws.mobile.data.remote.dto.settings.OwnerProfileResponse
@@ -21,6 +22,16 @@ interface AuthApiService {
     suspend fun login(
         @Body request: LoginRequest,
     ): AuthResponse
+
+    @POST("api/auth/refresh")
+    suspend fun refresh(
+        @Body request: RefreshTokenRequest,
+    ): AuthResponse
+
+    @POST("api/auth/logout")
+    suspend fun logout(
+        @Body request: RefreshTokenRequest,
+    ): Response<Unit>
 
     @POST("api/auth/register")
     suspend fun register(

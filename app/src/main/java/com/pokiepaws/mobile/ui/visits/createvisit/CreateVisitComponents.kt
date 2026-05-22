@@ -32,7 +32,10 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -61,6 +64,7 @@ import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.model.Clinic
 import com.pokiepaws.mobile.domain.model.CreateVisitStep
 import com.pokiepaws.mobile.domain.model.Vet
+import com.pokiepaws.mobile.domain.model.VisitDescription
 import com.pokiepaws.mobile.ui.clinics.clinicslist.ClinicSearchBar
 import com.pokiepaws.mobile.util.theme.PokieBlue
 import com.pokiepaws.mobile.util.theme.PokieBlueDark
@@ -89,7 +93,7 @@ fun CreateVisitContent(
     onSelectVet: (Vet) -> Unit,
     onSelectDate: (String) -> Unit,
     onSelectSlot: (String) -> Unit,
-    onDescriptionChange: (String) -> Unit,
+    onDescriptionChange: (VisitDescription) -> Unit,
     onConfirm: () -> Unit,
     onClearError: () -> Unit,
 ) {
@@ -170,7 +174,7 @@ private fun CreateVisitStepContent(
     onSelectVet: (Vet) -> Unit,
     onSelectDate: (String) -> Unit,
     onSelectSlot: (String) -> Unit,
-    onDescriptionChange: (String) -> Unit,
+    onDescriptionChange: (VisitDescription) -> Unit,
     onConfirm: () -> Unit,
 ) {
     var clinicSearchQuery by rememberSaveable { mutableStateOf("") }
@@ -651,8 +655,8 @@ private fun SlotStep(
 @Composable
 private fun ConfirmStep(
     state: CreateVisitUiState,
-    description: String,
-    onDescriptionChange: (String) -> Unit,
+    description: VisitDescription,
+    onDescriptionChange: (VisitDescription) -> Unit,
     onConfirm: () -> Unit,
     isLoading: Boolean,
 ) {
@@ -704,15 +708,10 @@ private fun ConfirmStep(
             }
         }
 
-        OutlinedTextField(
-            value = description,
-            onValueChange = onDescriptionChange,
-            label = { Text(stringResource(R.string.create_visit_description_label)) },
-            placeholder = { Text(stringResource(R.string.create_visit_description_placeholder)) },
+        VisitDescriptionDropdown(
+            selectedDescription = description,
+            onDescriptionChange = onDescriptionChange,
             modifier = Modifier.fillMaxWidth(),
-            minLines = 3,
-            maxLines = 5,
-            shape = RoundedCornerShape(16.dp),
         )
 
         Spacer(Modifier.weight(1f))
@@ -780,6 +779,50 @@ private fun SummaryDivider() {
     )
 }
 
+@Suppress("DEPRECATION")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun VisitDescriptionDropdown(
+    selectedDescription: VisitDescription,
+    onDescriptionChange: (VisitDescription) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier,
+    ) {
+        OutlinedTextField(
+            value = stringResource(selectedDescription.titleRes),
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(stringResource(R.string.create_visit_description_label)) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier =
+                Modifier
+                    .menuAnchor()
+                    .fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            VisitDescription.entries.forEach { description ->
+                DropdownMenuItem(
+                    text = { Text(stringResource(description.titleRes)) },
+                    onClick = {
+                        onDescriptionChange(description)
+                        expanded = false
+                    },
+                )
+            }
+        }
+    }
+}
+
 private fun String.toDateMillisOrNull(): Long? =
     runCatching {
         LocalDate.parse(this, VisitDateFormatter)
@@ -792,3 +835,16 @@ private fun localDateFromMillis(utcTimeMillis: Long): LocalDate =
     Instant.ofEpochMilli(utcTimeMillis)
         .atZone(ZoneOffset.UTC)
         .toLocalDate()
+
+private val VisitDescription.titleRes: Int
+    get() =
+        when (this) {
+            VisitDescription.CHECKUP -> R.string.visit_type_checkup
+            VisitDescription.VACCINATION -> R.string.visit_type_vaccination
+            VisitDescription.EMERGENCY -> R.string.visit_type_emergency
+            VisitDescription.PREVENTIVE_CARE -> R.string.visit_type_prevention
+            VisitDescription.SPECIALIST_CONSULTATION -> R.string.visit_type_specialist_consultation
+            VisitDescription.DIAGNOSTIC_EXAM -> R.string.visit_type_diagnostic_exam
+            VisitDescription.SURGICAL_PROCEDURE -> R.string.visit_type_surgery
+            VisitDescription.DENTAL_PROCEDURE -> R.string.visit_type_dental_procedure
+        }

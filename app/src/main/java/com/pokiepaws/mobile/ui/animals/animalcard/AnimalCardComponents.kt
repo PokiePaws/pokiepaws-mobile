@@ -1,12 +1,10 @@
 package com.pokiepaws.mobile.ui.animals.animalcard
 
 import android.util.Log
-import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.FlightTakeoff
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material3.Button
@@ -59,7 +58,7 @@ private val DateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 fun AnimalDetailsContent(
     animal: Animal,
     foreignTravelPlanned: Boolean,
-    onForeignTravelChanged: (Boolean) -> Unit,
+    onVisitsHistoryClick: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -102,8 +101,31 @@ fun AnimalDetailsContent(
             RabiesProphylaxisCard(
                 animal = animal,
                 foreignTravelPlanned = foreignTravelPlanned,
-                onForeignTravelChanged = onForeignTravelChanged,
             )
+            Button(
+                onClick = onVisitsHistoryClick,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = PokieBlue,
+                        contentColor = PokieWhite,
+                    ),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CalendarMonth,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(R.string.animal_visits_history_button),
+                    fontWeight = FontWeight.Bold,
+                )
+            }
             DataCard(
                 label = stringResource(R.string.animal_notes_label),
                 value = animal.notes.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.animal_no_notes),
@@ -198,7 +220,6 @@ fun AnimalHeader(
 fun RabiesProphylaxisCard(
     animal: Animal,
     foreignTravelPlanned: Boolean,
-    onForeignTravelChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val requirement = rabiesRequirementFor(animal.species, foreignTravelPlanned)
@@ -272,53 +293,21 @@ fun RabiesProphylaxisCard(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TravelChoiceButton(
-                        textRes = R.string.yes_option,
-                        selected = foreignTravelPlanned,
-                        onClick = { onForeignTravelChanged(true) },
-                    )
-                    TravelChoiceButton(
-                        textRes = R.string.no_option,
-                        selected = !foreignTravelPlanned,
-                        onClick = { onForeignTravelChanged(false) },
-                    )
-                }
+                Text(
+                    text =
+                        stringResource(
+                            if (foreignTravelPlanned) {
+                                R.string.yes_option
+                            } else {
+                                R.string.no_option
+                            },
+                        ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
             }
         }
-    }
-}
-
-@Composable
-private fun TravelChoiceButton(
-    @StringRes textRes: Int,
-    selected: Boolean,
-    onClick: () -> Unit,
-) {
-    Button(
-        onClick = onClick,
-        colors =
-            ButtonDefaults.buttonColors(
-                containerColor =
-                    if (selected) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.surfaceVariant
-                    },
-                contentColor =
-                    if (selected) {
-                        MaterialTheme.colorScheme.onPrimary
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-            ),
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-    ) {
-        Text(
-            text = stringResource(textRes),
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
-        )
     }
 }
 

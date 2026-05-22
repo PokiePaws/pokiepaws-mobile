@@ -13,13 +13,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Healing
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.Recommend
@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.model.Visit
-import com.pokiepaws.mobile.domain.model.VisitType
+import com.pokiepaws.mobile.domain.model.VisitDescription
 import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieWhite
 import java.time.LocalDateTime
@@ -102,8 +102,7 @@ fun VisitDetailContent(
                     onClick = onBack,
                     modifier =
                         Modifier
-                            .size(40.dp)
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(CircleShape)
                             .background(PokieWhite.copy(alpha = 0.2f)),
                 ) {
                     Icon(
@@ -204,7 +203,7 @@ private fun VisitDetailsBody(
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = stringResource(visit.type.titleRes),
+                        text = stringResource(visit.description.titleRes),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = PokieBlueDark,
@@ -213,9 +212,6 @@ private fun VisitDetailsBody(
                     InfoRow(icon = Icons.Default.MedicalServices, text = visit.status)
                     InfoRow(icon = Icons.Default.Schedule, text = visit.startsAt.toVisitDateLabel())
                     InfoRow(icon = Icons.Default.CalendarMonth, text = visit.endsAt.toVisitDateLabel())
-                    visit.description?.takeIf { it.isNotBlank() }?.let {
-                        InfoRow(icon = Icons.Default.Description, text = it)
-                    }
                 }
             }
         }
@@ -355,15 +351,15 @@ private fun String.toVisitDateLabel(): String =
         .recoverCatching { substringBefore("T").split("-").let { "${it[2]}-${it[1]}-${it[0]}" } }
         .getOrDefault(this)
 
-private val VisitType.titleRes: Int
+private val VisitDescription.titleRes: Int
     get() =
         when (this) {
-            VisitType.CHECKUP -> R.string.visit_type_checkup
-            VisitType.VACCINATION -> R.string.visit_type_vaccination
-            VisitType.EMERGENCY -> R.string.visit_type_emergency
-            VisitType.PREVENTIVE_CARE -> R.string.visit_type_prevention
-            VisitType.SPECIALIST_CONSULTATION -> R.string.visit_type_specialist_consultation
-            VisitType.DIAGNOSTIC_EXAM -> R.string.visit_type_diagnostic_exam
-            VisitType.SURGICAL_PROCEDURE -> R.string.visit_type_surgery
-            VisitType.DENTAL_PROCEDURE -> R.string.visit_type_dental_procedure
+            VisitDescription.CHECKUP -> R.string.visit_type_checkup
+            VisitDescription.VACCINATION -> R.string.visit_type_vaccination
+            VisitDescription.EMERGENCY -> R.string.visit_type_emergency
+            VisitDescription.PREVENTIVE_CARE -> R.string.visit_type_prevention
+            VisitDescription.SPECIALIST_CONSULTATION -> R.string.visit_type_specialist_consultation
+            VisitDescription.DIAGNOSTIC_EXAM -> R.string.visit_type_diagnostic_exam
+            VisitDescription.SURGICAL_PROCEDURE -> R.string.visit_type_surgery
+            VisitDescription.DENTAL_PROCEDURE -> R.string.visit_type_dental_procedure
         }

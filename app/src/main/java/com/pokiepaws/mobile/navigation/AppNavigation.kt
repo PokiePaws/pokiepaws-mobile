@@ -48,6 +48,7 @@ import com.pokiepaws.mobile.domain.repository.AuthRepository
 import com.pokiepaws.mobile.ui.animals.addanimal.AddAnimalScreen
 import com.pokiepaws.mobile.ui.animals.animalcard.AnimalCardScreen
 import com.pokiepaws.mobile.ui.animals.animallist.AnimalListScreen
+import com.pokiepaws.mobile.ui.animals.animalvisitshistory.AnimalVisitsHistoryScreen
 import com.pokiepaws.mobile.ui.auth.emailverification.EmailVerificationScreen
 import com.pokiepaws.mobile.ui.auth.forgotpassword.ForgotPasswordScreen
 import com.pokiepaws.mobile.ui.auth.login.LoginScreen
@@ -241,6 +242,20 @@ fun AppNavigation(
             ) { backStackEntry ->
                 val animalId = backStackEntry.arguments?.getLong("animalId") ?: 0L
                 AnimalCardScreen(
+                    animalId = animalId,
+                    onBack = { navController.popBackStack() },
+                    onVisitsHistoryClick = { id ->
+                        navController.navigate(Screen.AnimalVisitsHistory.createRoute(id))
+                    },
+                )
+            }
+
+            composable(
+                route = Screen.AnimalVisitsHistory.route,
+                arguments = listOf(navArgument("animalId") { type = NavType.LongType }),
+            ) { backStackEntry ->
+                val animalId = backStackEntry.arguments?.getLong("animalId") ?: 0L
+                AnimalVisitsHistoryScreen(
                     animalId = animalId,
                     onBack = { navController.popBackStack() },
                 )

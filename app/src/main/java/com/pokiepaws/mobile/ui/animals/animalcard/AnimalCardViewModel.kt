@@ -37,10 +37,6 @@ class AnimalCardViewModel
                     .onFailure { error -> _uiState.value = AnimalCardUiState.Error(error.toLoadMessage()) }
             }
         }
-
-        fun setForeignTravelPlanned(value: Boolean) {
-            viewModelScope.launch { appSettingsRepository.setForeignTravelPlanned(value) }
-        }
     }
 
 private fun Throwable.toLoadMessage(): String =

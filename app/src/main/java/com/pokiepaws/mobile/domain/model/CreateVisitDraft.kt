@@ -5,5 +5,5 @@ data class CreateVisitDraft(
     val clinicId: Long,
     val vetUserId: Long,
     val startsAt: String,
-    val description: String? = null,
+    val description: VisitDescription,
 )

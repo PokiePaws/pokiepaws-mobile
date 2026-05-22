@@ -8,6 +8,14 @@ interface VisitRepository {
 
     suspend fun getById(visitId: Long): Visit
 
+    suspend fun getByAnimal(animalId: Long): List<Visit>
+
+    suspend fun getAvailableSlots(
+        clinicId: Long,
+        vetUserId: Long,
+        date: String,
+    ): List<String>
+
     suspend fun create(visit: CreateVisitDraft): Visit
 
     suspend fun cancel(visitId: Long): Visit

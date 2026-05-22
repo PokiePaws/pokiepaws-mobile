@@ -15,6 +15,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 fun AnimalCardScreen(
     animalId: Long,
     onBack: () -> Unit,
+    onVisitsHistoryClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AnimalCardViewModel = hiltViewModel(),
 ) {
@@ -34,7 +35,7 @@ fun AnimalCardScreen(
                 AnimalDetailsContent(
                     animal = state.animal,
                     foreignTravelPlanned = state.foreignTravelPlanned,
-                    onForeignTravelChanged = viewModel::setForeignTravelPlanned,
+                    onVisitsHistoryClick = { onVisitsHistoryClick(state.animal.id) },
                     onBack = onBack,
                 )
             }

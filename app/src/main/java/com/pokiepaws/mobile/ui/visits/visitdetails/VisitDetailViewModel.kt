@@ -24,7 +24,7 @@ class VisitDetailViewModel
                 _uiState.value = VisitDetailUiState.Loading
                 runCatching { repo.getById(visitId) }
                     .onSuccess { _uiState.value = VisitDetailUiState.Success(it) }
-                    .onFailure { _uiState.value = VisitDetailUiState.Error(it.message ?: "Błąd") }
+                    .onFailure { _uiState.value = VisitDetailUiState.Error(it.message ?: "Error") }
             }
         }
 
@@ -35,7 +35,7 @@ class VisitDetailViewModel
             viewModelScope.launch {
                 runCatching { repo.cancel(visitId) }
                     .onSuccess { onDone() }
-                    .onFailure { _uiState.value = VisitDetailUiState.Error(it.message ?: "Błąd anulowania") }
+                    .onFailure { _uiState.value = VisitDetailUiState.Error(it.message ?: "Cancel error") }
             }
         }
     }

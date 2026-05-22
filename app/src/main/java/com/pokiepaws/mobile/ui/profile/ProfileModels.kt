@@ -14,7 +14,7 @@ data class ProfileUiState(
 
 data class ProfileMenuItem(
     val icon: ImageVector,
-    @StringRes val labelRes: Int,
+    @param:StringRes val labelRes: Int,
     val iconColor: Color,
     val bgColor: Color,
     val onClick: () -> Unit = {},

@@ -51,7 +51,7 @@
     <string name="forgot_password_title">Resetuj hasło</string>
     <string name="forgot_password_description">Podaj adres email powiązany z Twoim kontem, a wyślemy Ci link do zmiany hasła.</string>
     <string name="email_address_label">Adres email</string>
-    <string name="email_example_placeholder">np. gabi@pokiepaws.pl</string>
+    <string name="email_example_placeholder">np. ownerx@pokiepaws.pl</string>
     <string name="forgot_password_server_format_message">Link wysłany. Sprawdź pocztę. Serwer zwrócił nieoczekiwany format odpowiedzi.</string>
     <string name="forgot_password_send_link">Wyślij link</string>
     <string name="back_to_login">Wróć do logowania</string>
@@ -167,7 +167,7 @@
     <string name="upcoming_visit_empty_description">Umów wizytę w zakładce Gabinety</string>
     <string name="upcoming_visit_fallback_day">Nadchodząca</string>
     <string name="upcoming_visit_details_hint">Dotknij, aby zobaczyć szczegóły</string>
-    <string name="home_welcome">Witaj w PokiePaws 🐾</string>
+    <string name="home_welcome">Witaj w PokiePaws</string>
     <string name="home_upcoming_visit">Nadchodząca wizyta</string>
     <string name="home_quick_actions">Szybkie akcje</string>
     <string name="home_schedule_visit">Umów wizytę</string>
@@ -218,6 +218,8 @@
     <string name="create_visit_summary_clinic">Gabinet</string>
     <string name="create_visit_summary_address">Adres</string>
     <string name="create_visit_summary_vet">Weterynarz</string>
+    <string name="clinics">Kliniki</string>
+    <string name="country">Polska</string>
     <string name="create_visit_summary_date">Termin</string>
     <string name="create_visit_description_label">Typ wizyty</string>
     <string name="create_visit_description_placeholder">Powód wizyty, objawy.</string>

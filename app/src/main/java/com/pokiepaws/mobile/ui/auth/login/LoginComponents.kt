@@ -45,7 +45,7 @@ internal fun Logo() {
     Image(
         painter = painterResource(id = R.drawable.logo),
         contentDescription = stringResource(R.string.logo_content_description),
-        modifier = Modifier.size(250.dp),
+        modifier = Modifier.size(350.dp),
     )
 }
 

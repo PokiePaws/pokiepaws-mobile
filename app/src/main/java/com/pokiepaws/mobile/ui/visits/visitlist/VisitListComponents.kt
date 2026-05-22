@@ -69,15 +69,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-
-private const val HEADER_ROUNDING = 32
-private const val HEADER_TOP_PADDING = 48
-private const val HEADER_BOTTOM_PADDING = 32
-private const val ADD_BUTTON_SIZE = 48
-private const val SEARCH_BAR_OFFSET = -24
-private val VisitDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-private val FilterDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-
 @Composable
 fun VisitListContent(
     state: VisitListUiState,
@@ -149,7 +140,7 @@ fun VisitListContent(
                     .padding(horizontal = 16.dp)
                     .offset(y = SEARCH_BAR_OFFSET.dp),
         )
-        when (val s = state) {
+        when (state) {
             is VisitListUiState.Loading ->
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -163,11 +154,11 @@ fun VisitListContent(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(text = stringResource(R.string.visit_error, s.message))
+                    Text(text = stringResource(R.string.visit_error, state.message))
                 }
 
             is VisitListUiState.Success -> {
-                val visits = s.visits.sortedBy { it.startsAt }
+                val visits = state.visits.sortedBy { it.startsAt }
                 val animalNames = animalState.animalNamesById()
                 val visitTypeLabels =
                     VisitDescription.entries.associateWith { description ->
@@ -264,10 +255,9 @@ fun VisitListContent(
         AnimalPickerDialog(
             animalState = animalState,
             onAnimalSelected = { animal ->
-                showAnimalPicker = false
                 onCreateVisit(animal.id)
             },
-            onDismiss = { showAnimalPicker = false },
+            onDismiss = { },
         )
     }
 }
@@ -328,19 +318,18 @@ private fun DateFilterButton(
 
     if (showDatePicker) {
         DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
+            onDismissRequest = { },
             confirmButton = {
                 TextButton(
                     onClick = {
                         onDateSelected(datePickerState.selectedDateMillis)
-                        showDatePicker = false
                     },
                 ) {
                     Text(stringResource(R.string.ok_button))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
+                TextButton(onClick = { }) {
                     Text(stringResource(R.string.cancel_button))
                 }
             },
@@ -350,7 +339,7 @@ private fun DateFilterButton(
     }
 
     OutlinedButton(
-        onClick = { showDatePicker = true },
+        onClick = { },
         modifier = modifier.height(52.dp),
         shape = RoundedCornerShape(16.dp),
         colors =
@@ -637,3 +626,10 @@ private val VisitDescription.titleRes: Int
             VisitDescription.SURGICAL_PROCEDURE -> R.string.visit_type_surgery
             VisitDescription.DENTAL_PROCEDURE -> R.string.visit_type_dental_procedure
         }
+private const val HEADER_ROUNDING = 32
+private const val HEADER_TOP_PADDING = 48
+private const val HEADER_BOTTOM_PADDING = 32
+private const val ADD_BUTTON_SIZE = 48
+private const val SEARCH_BAR_OFFSET = -24
+private val VisitDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+private val FilterDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")

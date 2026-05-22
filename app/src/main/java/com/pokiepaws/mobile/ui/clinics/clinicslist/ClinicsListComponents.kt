@@ -44,8 +44,6 @@ import com.pokiepaws.mobile.util.theme.PokieBlue
 import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieWhite
 
-private val ClinicIconBackground = Color(0xFFE3F6FC)
-
 @Composable
 fun ClinicSearchBar(
     query: String,
@@ -251,3 +249,4 @@ private fun BlueClinicIcon(
         )
     }
 }
+private val ClinicIconBackground = Color(0xFFE3F6FC)

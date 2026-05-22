@@ -14,7 +14,7 @@ data class OwnerSettingsUiState(
     val apartmentNumber: String = "",
     val city: String = "",
     val postalCode: String = "",
-    val country: String = "Polska",
+    val country: String = "",
     val currentPassword: String = "",
     val newPassword: String = "",
     val confirmNewPassword: String = "",
@@ -47,19 +47,19 @@ data class OwnerSettingsUiState(
     val canSaveAddress: Boolean
         get() =
             street.isNotBlank() &&
-                houseNumber.isNotBlank() &&
-                city.isNotBlank() &&
-                postalCode.isNotBlank() &&
-                postalCodeValidationError == null &&
-                country.isNotBlank()
+                    houseNumber.isNotBlank() &&
+                    city.isNotBlank() &&
+                    postalCode.isNotBlank() &&
+                    postalCodeValidationError == null &&
+                    country.isNotBlank()
 
     val canChangePassword: Boolean
         get() =
             currentPassword.isNotBlank() &&
-                newPassword.isNotBlank() &&
-                confirmNewPassword.isNotBlank() &&
-                passwordValidationErrors.isEmpty() &&
-                passwordsMatch
+                    newPassword.isNotBlank() &&
+                    confirmNewPassword.isNotBlank() &&
+                    passwordValidationErrors.isEmpty() &&
+                    passwordsMatch
 
     fun toOwnerPhoneDraft(): OwnerPhoneDraft =
         OwnerPhoneDraft(

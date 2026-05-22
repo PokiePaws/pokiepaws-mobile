@@ -5,7 +5,6 @@ import com.pokiepaws.mobile.data.local.TokenManager
 import com.pokiepaws.mobile.data.local.dao.OwnerProfileDao
 import com.pokiepaws.mobile.data.local.room.mappers.toDomain
 import com.pokiepaws.mobile.data.local.room.mappers.toEntity
-import com.pokiepaws.mobile.data.remote.dto.auth.ForgotPasswordRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.LoginRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.RefreshTokenRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.RegisterRequest
@@ -60,14 +59,7 @@ class AuthRepositoryImpl
             }
         }
 
-        override suspend fun forgotPassword(email: String) {
-            val response = authApiService.forgotPassword(ForgotPasswordRequest(email))
-            if (!response.isSuccessful) {
-                throw HttpException(response)
-            }
-        }
-
-        override suspend fun getCurrentOwnerProfile(): OwnerProfile =
+    override suspend fun getCurrentOwnerProfile(): OwnerProfile =
             runCatching {
                 authApiService.getCurrentOwnerProfile().toDomain()
             }.onSuccess { profile ->

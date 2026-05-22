@@ -51,7 +51,7 @@
     <string name="forgot_password_title">Reset password</string>
     <string name="forgot_password_description">Enter the email address connected with your account and we will send you a password reset link.</string>
     <string name="email_address_label">Email address</string>
-    <string name="email_example_placeholder">e.g. gabi@pokiepaws.pl</string>
+    <string name="email_example_placeholder">e.g. ownerx@pokiepaws.pl</string>
     <string name="forgot_password_server_format_message">Link sent. Check your email. The server returned an unexpected response format.</string>
     <string name="forgot_password_send_link">Send link</string>
     <string name="back_to_login">Back to login</string>
@@ -163,7 +163,7 @@
     <string name="upcoming_visit_empty_description">Schedule a visit in Clinics tab</string>
     <string name="upcoming_visit_fallback_day">Upcoming</string>
     <string name="upcoming_visit_details_hint">Tap to see details</string>
-    <string name="home_welcome">Welcome to PokiePaws 🐾</string>
+    <string name="home_welcome">Welcome to PokiePaws</string>
     <string name="home_upcoming_visit">Upcoming visit</string>
     <string name="home_quick_actions">Quick actions</string>
     <string name="home_schedule_visit">Schedule your visit</string>
@@ -174,12 +174,14 @@
     <string name="view_all">View all</string>
     <string name="add_action">Add</string>
     <string name="today_label">Today</string>
+    <string name="country">Poland</string>
     <string name="tomorrow_label">Tomorrow</string>
     <string name="register_title">Create account</string>
     <string name="register_description">Fill in your details to join us</string>
     <string name="register_account_data">Account data</string>
     <string name="register_personal_data">Personal data</string>
     <string name="register_address_data">Address</string>
+    <string name="clinics">Clinics</string>
     <string name="repeat_password_label">Repeat password</string>
     <string name="passwords_do_not_match">Passwords do not match</string>
     <string name="register_email_invalid">Enter a valid email address with @ and a domain.</string>

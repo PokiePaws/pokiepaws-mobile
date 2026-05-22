@@ -52,19 +52,6 @@ import com.pokiepaws.mobile.util.theme.PokieBlue
 import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieCream
 import com.pokiepaws.mobile.util.theme.PokieWhite
-
-private const val HEADER_ROUNDING = 32
-private const val HEADER_TOP_PADDING = 48
-private const val HEADER_BOTTOM_PADDING = 48
-private const val AVATAR_OFFSET = -48
-private const val CONTENT_OFFSET = -32
-private const val MENU_ANIMATION_DELAY = 100
-private const val CARD_ROUNDING = 24
-private const val ICON_BG_ROUNDING = 12
-private const val LOGOUT_COLOR = 0xFFEF4444
-private val SettingsIconTint = Color(0xFF6B7280)
-private val SettingsIconBg = Color(0xFFE5E7EB)
-
 @Composable
 fun ProfileContent(
     state: ProfileUiState,
@@ -314,7 +301,7 @@ private fun AnimatedMenuItem(
         label = "menuItemAlpha",
     )
 
-    LaunchedEffect(Unit) { visible = true }
+    LaunchedEffect(Unit) { }
 
     Card(
         modifier =
@@ -365,3 +352,14 @@ private fun AnimatedMenuItem(
         }
     }
 }
+private const val HEADER_ROUNDING = 32
+private const val HEADER_TOP_PADDING = 48
+private const val HEADER_BOTTOM_PADDING = 48
+private const val AVATAR_OFFSET = -48
+private const val CONTENT_OFFSET = -32
+private const val MENU_ANIMATION_DELAY = 100
+private const val CARD_ROUNDING = 24
+private const val ICON_BG_ROUNDING = 12
+private const val LOGOUT_COLOR = 0xFFEF4444
+private val SettingsIconTint = Color(0xFF6B7280)
+private val SettingsIconBg = Color(0xFFE5E7EB)

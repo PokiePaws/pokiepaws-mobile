@@ -73,16 +73,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-
-private const val TIME_LABEL_LENGTH = 5
-private const val SUMMARY_SLOT_LABEL_LENGTH = 17
-private const val HEADER_ROUNDING = 32
-private const val HEADER_TOP_PADDING = 48
-private const val HEADER_BOTTOM_PADDING = 32
-private const val SEARCH_BAR_OFFSET = -24
-private val CreateVisitIconBackground = Color(0xFFE3F6FC)
-private val VisitDateFormatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE
-
 @Composable
 fun CreateVisitContent(
     state: CreateVisitUiState,
@@ -532,18 +522,17 @@ private fun SlotStep(
 
     if (showDatePicker) {
         DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
+            onDismissRequest = { },
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis
                         ?.let(::localDateFromMillis)
                         ?.format(VisitDateFormatter)
                         ?.let(onDateSelected)
-                    showDatePicker = false
                 }) { Text(stringResource(R.string.ok_button)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
+                TextButton(onClick = { }) {
                     Text(stringResource(R.string.cancel_button))
                 }
             },
@@ -561,7 +550,7 @@ private fun SlotStep(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .clickable { showDatePicker = true },
+                    .clickable { },
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(6.dp),
             colors = CardDefaults.cardColors(containerColor = PokieWhite),
@@ -848,3 +837,11 @@ private val VisitDescription.titleRes: Int
             VisitDescription.SURGICAL_PROCEDURE -> R.string.visit_type_surgery
             VisitDescription.DENTAL_PROCEDURE -> R.string.visit_type_dental_procedure
         }
+private const val TIME_LABEL_LENGTH = 5
+private const val SUMMARY_SLOT_LABEL_LENGTH = 17
+private const val HEADER_ROUNDING = 32
+private const val HEADER_TOP_PADDING = 48
+private const val HEADER_BOTTOM_PADDING = 32
+private const val SEARCH_BAR_OFFSET = -24
+private val CreateVisitIconBackground = Color(0xFFE3F6FC)
+private val VisitDateFormatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE

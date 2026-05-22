@@ -25,8 +25,6 @@ import com.pokiepaws.mobile.domain.model.Animal
 import com.pokiepaws.mobile.domain.model.AnimalSpecies
 import com.pokiepaws.mobile.ui.clinics.clinicslist.ClinicSearchBar
 
-private const val SEARCH_BAR_OFFSET = -24
-
 @Composable
 fun AnimalListScreen(
     onAddAnimal: () -> Unit,
@@ -70,7 +68,7 @@ fun AnimalListScreen(
                         .offset(y = SEARCH_BAR_OFFSET.dp),
             )
 
-            when (val state = uiState) {
+            when (uiState) {
                 is AnimalListUiState.Loading -> {
                     androidx.compose.material3.CircularProgressIndicator(
                         modifier = Modifier.align(androidx.compose.ui.Alignment.CenterHorizontally),
@@ -80,14 +78,14 @@ fun AnimalListScreen(
 
                 is AnimalListUiState.Error -> {
                     ErrorView(
-                        message = state.message,
+                        message = uiState.message,
                         onRetry = { viewModel.loadAnimals() },
                     )
                 }
 
                 is AnimalListUiState.Success -> {
-                    val filteredAnimals = filterAnimalsBySearchQuery(state.animals, searchQuery)
-                    if (state.animals.isEmpty()) {
+                    val filteredAnimals = filterAnimalsBySearchQuery(uiState.animals, searchQuery)
+                    if (uiState.animals.isEmpty()) {
                         EmptyAnimalsView(onAddAnimal)
                     } else if (filteredAnimals.isEmpty()) {
                         EmptyAnimalsSearchView(searchQuery = searchQuery)
@@ -132,3 +130,4 @@ private val AnimalSpecies.searchTerms: List<String>
             AnimalSpecies.POULTRY -> listOf("poultry", "drob", "drób")
             AnimalSpecies.OTHER -> listOf("other", "inne")
         }
+private const val SEARCH_BAR_OFFSET = -24

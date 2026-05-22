@@ -3,7 +3,6 @@ package com.pokiepaws.mobile.notifications
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -37,7 +36,6 @@ class PokiePawsMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         Log.d(FCM_LOG_TAG, "Push notification received (Data payload keys: ${remoteMessage.data.keys})")
 
-        // Backend przesyła wszystko w mapie data (klucze "title" oraz "body")
         val title = remoteMessage.data["title"] ?: "PokiePaws"
         val message = remoteMessage.data["body"] ?: "Brak treści"
         val type = remoteMessage.data["type"]
@@ -84,7 +82,7 @@ class PokiePawsMessagingService : FirebaseMessagingService() {
         val channelId = "appointment_reminders"
         val notificationId = System.currentTimeMillis().toInt()
 
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         val channel =
             NotificationChannel(

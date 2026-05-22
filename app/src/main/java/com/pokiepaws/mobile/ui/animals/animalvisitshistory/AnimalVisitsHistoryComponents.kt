@@ -1,5 +1,6 @@
 package com.pokiepaws.mobile.ui.animals.animalvisitshistory
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -64,13 +65,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-
-private const val HEADER_ROUNDING = 32
-private const val HEADER_TOP_PADDING = 48
-private const val HEADER_BOTTOM_PADDING = 32
-private val VisitDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")
-private val FilterDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-
 @Composable
 fun AnimalVisitsHistoryContent(
     state: AnimalVisitsHistoryUiState,
@@ -155,7 +149,7 @@ private fun HistoryHeader(
 }
 
 @Composable
-private fun VisitsHistoryList(visits: List<Visit>) {
+private fun VisitsHistoryList(@SuppressLint("ComposeUnstableCollections") visits: List<Visit>) {
     var fromDateMillis by rememberSaveable { mutableStateOf<Long?>(null) }
     var toDateMillis by rememberSaveable { mutableStateOf<Long?>(null) }
     val fromDate = remember(fromDateMillis) { fromDateMillis?.toLocalDate() }
@@ -280,19 +274,18 @@ private fun DateFilterButton(
 
     if (showDatePicker) {
         DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
+            onDismissRequest = { },
             confirmButton = {
                 TextButton(
                     onClick = {
                         onDateSelected(datePickerState.selectedDateMillis)
-                        showDatePicker = false
                     },
                 ) {
                     Text(stringResource(R.string.ok_button))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
+                TextButton(onClick = { }) {
                     Text(stringResource(R.string.cancel_button))
                 }
             },
@@ -302,7 +295,7 @@ private fun DateFilterButton(
     }
 
     OutlinedButton(
-        onClick = { showDatePicker = true },
+        onClick = { },
         modifier = modifier.height(52.dp),
         shape = RoundedCornerShape(16.dp),
         colors =
@@ -493,3 +486,8 @@ private val VisitDescription.titleRes: Int
             VisitDescription.SURGICAL_PROCEDURE -> R.string.visit_type_surgery
             VisitDescription.DENTAL_PROCEDURE -> R.string.visit_type_dental_procedure
         }
+private const val HEADER_ROUNDING = 32
+private const val HEADER_TOP_PADDING = 48
+private const val HEADER_BOTTOM_PADDING = 32
+private val VisitDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")
+private val FilterDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")

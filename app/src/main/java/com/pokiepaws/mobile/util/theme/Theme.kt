@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.pokiepaws.mobile.util.theme
 
 import android.app.Activity

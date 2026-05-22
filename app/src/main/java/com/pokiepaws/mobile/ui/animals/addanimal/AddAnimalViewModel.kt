@@ -31,12 +31,8 @@ class AddAnimalViewModel
                         onSuccess()
                     }
                     .onFailure { error ->
-                        _uiState.value = AddAnimalUiState.Error(error.message ?: "Błąd podczas dodawania zwierzaka")
+                        _uiState.value = AddAnimalUiState.Error(error.message ?: "Error while adding an animal")
                     }
             }
-        }
-
-        fun resetState() {
-            _uiState.value = AddAnimalUiState.Idle
         }
     }

@@ -36,7 +36,7 @@ class AnimalListViewModel
 
 private fun Throwable.toLoadMessage(): String =
     when (this) {
-        is HttpException -> message ?: "Nie udało się załadować listy zwierząt"
-        is IOException -> message ?: "Błąd połączenia z serwerem"
-        else -> message ?: "Nie udało się załadować listy zwierząt"
+        is HttpException -> message ?: "The animal list could not be loaded"
+        is IOException -> message ?: "Server connection error"
+        else -> message ?: "The list of animals could not be loaded"
     }

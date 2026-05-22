@@ -50,7 +50,6 @@ import com.pokiepaws.mobile.ui.animals.animalcard.AnimalCardScreen
 import com.pokiepaws.mobile.ui.animals.animallist.AnimalListScreen
 import com.pokiepaws.mobile.ui.animals.animalvisitshistory.AnimalVisitsHistoryScreen
 import com.pokiepaws.mobile.ui.auth.emailverification.EmailVerificationScreen
-import com.pokiepaws.mobile.ui.auth.forgotpassword.ForgotPasswordScreen
 import com.pokiepaws.mobile.ui.auth.login.LoginScreen
 import com.pokiepaws.mobile.ui.auth.register.RegisterScreen
 import com.pokiepaws.mobile.ui.clinics.clinicslist.ClinicsListScreen
@@ -94,7 +93,7 @@ fun AppNavigation(
     }
 
     val dynamicStartDestination =
-        if (!tokenState.isNullOrBlank() && tokenState != "loading") Screen.Home.route else Screen.Login.route
+        if (!tokenState.isNullOrBlank()) Screen.Home.route else Screen.Login.route
 
     Scaffold(
         modifier = modifier,
@@ -170,15 +169,6 @@ fun AppNavigation(
                         navController.navigate(Screen.EmailVerification.createRoute(email))
                     },
                     onNavigateToLogin = { navController.popBackStack() },
-                )
-            }
-
-            composable("forgot_password") {
-                ForgotPasswordScreen(
-                    onNavigateBack = { navController.popBackStack() },
-                    onEmailSent = { email ->
-                        navController.navigate(Screen.EmailVerification.createRoute(email))
-                    },
                 )
             }
 
@@ -351,7 +341,7 @@ fun AppNavigation(
 
 private data class BottomNavItem(
     val screen: Screen,
-    @StringRes val labelRes: Int,
+    @param:StringRes val labelRes: Int,
     val icon: ImageVector,
 )
 

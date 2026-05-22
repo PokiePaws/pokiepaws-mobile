@@ -52,22 +52,6 @@ import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieCream
 import com.pokiepaws.mobile.util.theme.PokieWhite
 
-private const val ENGLISH_TAG = "en"
-private const val POLISH_TAG = "pl"
-
-private const val HEADER_ROUNDING = 32
-private const val HEADER_TOP_PADDING = 48
-private const val HEADER_BOTTOM_PADDING = 48
-private const val CONTENT_OFFSET = -16
-private const val CARD_ROUNDING = 24
-private const val ICON_BG_ROUNDING = 12
-private const val MENU_ANIMATION_DELAY = 80
-
-data class LanguageOption(
-    val tag: String,
-    val labelRes: Int,
-)
-
 @Composable
 fun LanguageScreen(
     onBack: () -> Unit,
@@ -225,7 +209,7 @@ private fun AnimatedLanguageCard(
         label = "languageCardAlpha",
     )
 
-    LaunchedEffect(Unit) { visible = true }
+    LaunchedEffect(Unit) { }
 
     Card(
         modifier =
@@ -265,3 +249,18 @@ private fun AnimatedLanguageCard(
         }
     }
 }
+
+data class LanguageOption(
+    val tag: String,
+    val labelRes: Int,
+)
+private const val ENGLISH_TAG = "en"
+private const val POLISH_TAG = "pl"
+
+private const val HEADER_ROUNDING = 32
+private const val HEADER_TOP_PADDING = 48
+private const val HEADER_BOTTOM_PADDING = 48
+private const val CONTENT_OFFSET = -16
+private const val CARD_ROUNDING = 24
+private const val ICON_BG_ROUNDING = 12
+private const val MENU_ANIMATION_DELAY = 80

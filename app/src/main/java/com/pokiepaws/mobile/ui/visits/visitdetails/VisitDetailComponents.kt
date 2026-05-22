@@ -57,13 +57,6 @@ import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieWhite
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
-private const val HEADER_ROUNDING = 32
-private const val HEADER_TOP_PADDING = 48
-private const val HEADER_BOTTOM_PADDING = 32
-private val AvatarBg = Color(0xFFF0F8FA)
-private val VisitDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-
 @Composable
 fun VisitDetailContent(
     state: VisitDetailUiState,
@@ -120,7 +113,7 @@ fun VisitDetailContent(
                 )
             }
         }
-        when (val s = state) {
+        when (state) {
             is VisitDetailUiState.Loading ->
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
@@ -129,14 +122,14 @@ fun VisitDetailContent(
             is VisitDetailUiState.Error ->
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = stringResource(R.string.visit_error, s.message),
+                        text = stringResource(R.string.visit_error, state.message),
                         color = MaterialTheme.colorScheme.error,
                     )
                 }
 
             is VisitDetailUiState.Success ->
                 VisitDetailsBody(
-                    visit = s.visit,
+                    visit = state.visit,
                     onCancelClick = { showCancelDialog = true },
                 )
         }
@@ -144,13 +137,12 @@ fun VisitDetailContent(
 
     if (showCancelDialog) {
         AlertDialog(
-            onDismissRequest = { showCancelDialog = false },
+            onDismissRequest = { },
             title = { Text(stringResource(R.string.visit_cancel_dialog_title)) },
             text = { Text(stringResource(R.string.visit_cancel_dialog_message)) },
             confirmButton = {
                 Button(
                     onClick = {
-                        showCancelDialog = false
                         onCancelVisit()
                     },
                     colors =
@@ -162,7 +154,7 @@ fun VisitDetailContent(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showCancelDialog = false }) {
+                TextButton(onClick = { }) {
                     Text(stringResource(R.string.close_button))
                 }
             },
@@ -363,3 +355,8 @@ private val VisitDescription.titleRes: Int
             VisitDescription.SURGICAL_PROCEDURE -> R.string.visit_type_surgery
             VisitDescription.DENTAL_PROCEDURE -> R.string.visit_type_dental_procedure
         }
+private const val HEADER_ROUNDING = 32
+private const val HEADER_TOP_PADDING = 48
+private const val HEADER_BOTTOM_PADDING = 32
+private val AvatarBg = Color(0xFFF0F8FA)
+private val VisitDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")

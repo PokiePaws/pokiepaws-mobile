@@ -5,7 +5,3 @@ import com.pokiepaws.mobile.domain.model.AppNotification
 
 @Immutable
 data class NotificationItems(val items: List<AppNotification>)
-
-data class NotificationUiState(
-    val notifications: List<AppNotification> = emptyList(),
-)

@@ -57,17 +57,6 @@ import com.pokiepaws.mobile.ui.settings.phone.PhoneSettingsSection
 import com.pokiepaws.mobile.util.theme.PokieBlue
 import com.pokiepaws.mobile.util.theme.PokieCream
 import com.pokiepaws.mobile.util.theme.PokieWhite
-
-private const val HEADER_ROUNDING = 32
-private const val HEADER_TOP_PADDING = 48
-private const val HEADER_BOTTOM_PADDING = 48
-private const val CONTENT_OFFSET = -16
-private const val CARD_ROUNDING = 24
-private const val ICON_BG_ROUNDING = 12
-private const val INDICATOR_SIZE = 18
-private const val INPUT_ROUNDING = 12
-private const val SECTION_DIVIDER_ALPHA = 0.7f
-
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
@@ -335,3 +324,12 @@ internal fun StatusText(
         }
     }
 }
+private const val HEADER_ROUNDING = 32
+private const val HEADER_TOP_PADDING = 48
+private const val HEADER_BOTTOM_PADDING = 48
+private const val CONTENT_OFFSET = -16
+private const val CARD_ROUNDING = 24
+private const val ICON_BG_ROUNDING = 12
+private const val INDICATOR_SIZE = 18
+private const val INPUT_ROUNDING = 12
+private const val SECTION_DIVIDER_ALPHA = 0.7f

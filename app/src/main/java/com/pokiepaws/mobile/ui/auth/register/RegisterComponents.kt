@@ -46,22 +46,6 @@ import com.pokiepaws.mobile.domain.validation.PasswordValidationError
 import com.pokiepaws.mobile.domain.validation.PostalCodeValidationError
 import com.pokiepaws.mobile.ui.settings.PasswordValidationErrors
 import com.pokiepaws.mobile.util.theme.PokieWhite
-
-private const val WEIGHT_POSTAL_CODE = 0.45f
-private const val WEIGHT_CITY = 0.55f
-private const val SECTION_DIVIDER_ALPHA = 0.7f
-private const val CARD_ELEVATION = 4
-private const val LOGO_SIZE = 140
-private const val CARD_ROUNDING = 24
-private const val INPUT_ROUNDING = 12
-private const val BUTTON_ROUNDING = 14
-private const val BUTTON_HEIGHT = 54
-private const val SPACING_LARGE = 48
-private const val SPACING_MEDIUM = 24
-private const val SPACING_SMALL = 8
-private const val FONT_SIZE_BUTTON = 16
-private const val FONT_SIZE_ERROR = 12
-
 @Composable
 internal fun RegisterContent(
     state: RegisterUiState,
@@ -419,3 +403,17 @@ private fun SectionLabel(
         HorizontalDivider(modifier = Modifier.weight(1f), thickness = 0.5.dp)
     }
 }
+private const val WEIGHT_POSTAL_CODE = 0.45f
+private const val WEIGHT_CITY = 0.55f
+private const val SECTION_DIVIDER_ALPHA = 0.7f
+private const val CARD_ELEVATION = 4
+private const val LOGO_SIZE = 140
+private const val CARD_ROUNDING = 24
+private const val INPUT_ROUNDING = 12
+private const val BUTTON_ROUNDING = 14
+private const val BUTTON_HEIGHT = 54
+private const val SPACING_LARGE = 48
+private const val SPACING_MEDIUM = 24
+private const val SPACING_SMALL = 8
+private const val FONT_SIZE_BUTTON = 16
+private const val FONT_SIZE_ERROR = 12

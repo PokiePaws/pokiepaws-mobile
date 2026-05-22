@@ -92,7 +92,7 @@ fun AddAnimalContent(
 
     if (showDatePicker) {
         DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
+            onDismissRequest = { },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -103,14 +103,13 @@ fun AddAnimalContent(
                                     .toLocalDate()
                             birthDate = date.format(formatter)
                         }
-                        showDatePicker = false
                     },
                 ) {
                     Text(stringResource(R.string.ok_button))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
+                TextButton(onClick = { }) {
                     Text(stringResource(R.string.cancel_button))
                 }
             },
@@ -123,12 +122,11 @@ fun AddAnimalContent(
         SpeciesPickerDialog(
             selectedSpecies = species,
             selectedCategory = speciesCategory,
-            onCategorySelected = { speciesCategory = it },
+            onCategorySelected = { },
             onSpeciesSelected = {
                 species = it
-                showSpeciesPicker = false
             },
-            onDismiss = { showSpeciesPicker = false },
+            onDismiss = { },
         )
     }
 
@@ -185,8 +183,7 @@ fun AddAnimalContent(
             SpeciesSelector(
                 selectedSpecies = species,
                 onClick = {
-                    speciesCategory = species.category
-                    showSpeciesPicker = true
+                    species.category
                 },
             )
             OutlinedTextField(
@@ -224,7 +221,7 @@ fun AddAnimalContent(
                         modifier =
                             Modifier
                                 .matchParentSize()
-                                .clickable { showDatePicker = true },
+                                .clickable { },
                     )
                 }
             }

@@ -2,9 +2,7 @@ package com.pokiepaws.mobile.data.remote.service
 
 import com.pokiepaws.mobile.data.remote.dto.auth.AuthResponse
 import com.pokiepaws.mobile.data.remote.dto.auth.DeviceTokenRequest
-import com.pokiepaws.mobile.data.remote.dto.auth.ForgotPasswordRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.LoginRequest
-import com.pokiepaws.mobile.data.remote.dto.auth.MessageResponse
 import com.pokiepaws.mobile.data.remote.dto.auth.RefreshTokenRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.RegisterRequest
 import com.pokiepaws.mobile.data.remote.dto.settings.ChangePasswordRequest
@@ -37,11 +35,6 @@ interface AuthApiService {
     suspend fun register(
         @Body request: RegisterRequest,
     ): Response<Unit>
-
-    @POST("api/auth/forgot-password")
-    suspend fun forgotPassword(
-        @Body request: ForgotPasswordRequest,
-    ): Response<MessageResponse>
 
     @GET("api/owners/me")
     suspend fun getCurrentOwnerProfile(): OwnerProfileResponse

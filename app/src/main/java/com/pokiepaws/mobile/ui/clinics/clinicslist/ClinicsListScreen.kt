@@ -18,16 +18,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.util.theme.PokieWhite
-
-private const val HEADER_ROUNDING = 32
-private const val HEADER_TOP_PADDING = 48
-private const val HEADER_BOTTOM_PADDING = 32
-private const val SEARCH_BAR_OFFSET = -24
 
 @Composable
 fun ClinicsListScreen(
@@ -46,7 +43,6 @@ fun ClinicsListScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surface),
     ) {
-        // Header
         Box(
             modifier =
                 Modifier
@@ -63,7 +59,7 @@ fun ClinicsListScreen(
                     .padding(horizontal = 24.dp),
         ) {
             Text(
-                text = "Kliniki",
+                text = stringResource(R.string.clinics),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = PokieWhite,
@@ -86,3 +82,8 @@ fun ClinicsListScreen(
         }
     }
 }
+
+private const val HEADER_ROUNDING = 32
+private const val HEADER_TOP_PADDING = 48
+private const val HEADER_BOTTOM_PADDING = 32
+private const val SEARCH_BAR_OFFSET = -24

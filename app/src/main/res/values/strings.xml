@@ -12,6 +12,12 @@
     <string name="profile_language">Language</string>
     <string name="profile_app_settings">App settings</string>
     <string name="profile_logout">Log out</string>
+    <string name="profile_delete_account">Delete account</string>
+    <string name="profile_delete_account_progress">Deleting account...</string>
+    <string name="profile_delete_account_dialog_title">Delete account?</string>
+    <string name="profile_delete_account_dialog_message">This will deactivate your account and remove local data from this device. This action cannot be undone in the app.</string>
+    <string name="profile_delete_account_confirm">Delete account</string>
+    <string name="profile_delete_account_cancel">Cancel</string>
 
     <string name="settings_language_title">App language</string>
     <string name="settings_language_description">Choose the language used by PokiePaws. System default follows your phone settings.</string>
@@ -24,6 +30,7 @@
     <string name="owner_settings_address_title">Address</string>
     <string name="owner_settings_password_title">Password change</string>
     <string name="owner_settings_travel_title">Travel</string>
+    <string name="owner_settings_account_title">Account</string>
     <string name="owner_settings_foreign_travel_planned">I plan foreign travel</string>
     <string name="owner_settings_foreign_travel_description">Treat rabies vaccination as required for animals that may cross borders.</string>
     <string name="owner_settings_street">Street</string>
@@ -43,6 +50,7 @@
     <string name="owner_settings_password_changed">Password changed</string>
 
     <string name="logo_content_description">PokiePaws Logo</string>
+    <string name="dr_tuptus_content_description">Dr Tuptus mascot</string>
     <string name="email_label">Email</string>
     <string name="password_label">Password</string>
     <string name="login_title">Log in</string>
@@ -51,7 +59,7 @@
     <string name="forgot_password_title">Reset password</string>
     <string name="forgot_password_description">Enter the email address connected with your account and we will send you a password reset link.</string>
     <string name="email_address_label">Email address</string>
-    <string name="email_example_placeholder">e.g. gabi@pokiepaws.pl</string>
+    <string name="email_example_placeholder">e.g. ownerx@pokiepaws.pl</string>
     <string name="forgot_password_server_format_message">Link sent. Check your email. The server returned an unexpected response format.</string>
     <string name="forgot_password_send_link">Send link</string>
     <string name="back_to_login">Back to login</string>
@@ -163,7 +171,7 @@
     <string name="upcoming_visit_empty_description">Schedule a visit in Clinics tab</string>
     <string name="upcoming_visit_fallback_day">Upcoming</string>
     <string name="upcoming_visit_details_hint">Tap to see details</string>
-    <string name="home_welcome">Welcome to PokiePaws 🐾</string>
+    <string name="home_welcome">Welcome to PokiePaws</string>
     <string name="home_upcoming_visit">Upcoming visit</string>
     <string name="home_quick_actions">Quick actions</string>
     <string name="home_schedule_visit">Schedule your visit</string>
@@ -174,12 +182,14 @@
     <string name="view_all">View all</string>
     <string name="add_action">Add</string>
     <string name="today_label">Today</string>
+    <string name="country">Poland</string>
     <string name="tomorrow_label">Tomorrow</string>
     <string name="register_title">Create account</string>
     <string name="register_description">Fill in your details to join us</string>
     <string name="register_account_data">Account data</string>
     <string name="register_personal_data">Personal data</string>
     <string name="register_address_data">Address</string>
+    <string name="clinics">Clinics</string>
     <string name="repeat_password_label">Repeat password</string>
     <string name="passwords_do_not_match">Passwords do not match</string>
     <string name="register_email_invalid">Enter a valid email address with @ and a domain.</string>

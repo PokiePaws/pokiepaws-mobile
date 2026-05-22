@@ -1,5 +1,6 @@
 package com.pokiepaws.mobile.ui.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +35,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -48,11 +51,6 @@ import com.pokiepaws.mobile.util.theme.PokieWhite
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
-private val APPOINTMENT_ICON_BG = Color(0xFFE3F6FC)
-private val APPOINTMENT_CARD_BG = Color(0xFFF0F8FA)
-private const val CORNER_RADIUS_HEADER = 18
-private const val SECTION_SPACING = 24
 
 @Composable
 fun HomeScreenContent(
@@ -76,6 +74,13 @@ fun HomeScreenContent(
                     .verticalScroll(scrollState),
         ) {
             HomeHeader(onNavigateToNotifications)
+
+            DrTuptusImage(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 18.dp, bottom = 10.dp),
+            )
 
             Column(modifier = Modifier.padding(horizontal = 36.dp)) {
                 SectionHeader(
@@ -137,6 +142,24 @@ private fun HomeHeader(onNotificationsClick: () -> Unit) {
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun DrTuptusImage(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center,
+    ) {
+        Image(
+            painter = painterResource(R.drawable.dr_tuptus),
+            contentDescription = stringResource(R.string.dr_tuptus_content_description),
+            contentScale = ContentScale.Fit,
+            modifier =
+                Modifier
+                    .fillMaxWidth(WIDTH)
+                    .height(170.dp),
+        )
     }
 }
 
@@ -352,3 +375,10 @@ private fun formatDayLabel(date: LocalDate): String {
         else -> date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
     }
 }
+
+private val APPOINTMENT_ICON_BG = Color(0xFFE3F6FC)
+private val APPOINTMENT_CARD_BG = Color(0xFFF0F8FA)
+private const val CORNER_RADIUS_HEADER = 18
+private const val SECTION_SPACING = 24
+
+private const val WIDTH = 0.72f

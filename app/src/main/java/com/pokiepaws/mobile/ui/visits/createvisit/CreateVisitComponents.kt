@@ -74,15 +74,6 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
-private const val TIME_LABEL_LENGTH = 5
-private const val SUMMARY_SLOT_LABEL_LENGTH = 17
-private const val HEADER_ROUNDING = 32
-private const val HEADER_TOP_PADDING = 48
-private const val HEADER_BOTTOM_PADDING = 32
-private const val SEARCH_BAR_OFFSET = -24
-private val CreateVisitIconBackground = Color(0xFFE3F6FC)
-private val VisitDateFormatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE
-
 @Composable
 fun CreateVisitContent(
     state: CreateVisitUiState,
@@ -848,3 +839,11 @@ private val VisitDescription.titleRes: Int
             VisitDescription.SURGICAL_PROCEDURE -> R.string.visit_type_surgery
             VisitDescription.DENTAL_PROCEDURE -> R.string.visit_type_dental_procedure
         }
+private const val TIME_LABEL_LENGTH = 5
+private const val SUMMARY_SLOT_LABEL_LENGTH = 17
+private const val HEADER_ROUNDING = 32
+private const val HEADER_TOP_PADDING = 48
+private const val HEADER_BOTTOM_PADDING = 32
+private const val SEARCH_BAR_OFFSET = -24
+private val CreateVisitIconBackground = Color(0xFFE3F6FC)
+private val VisitDateFormatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE

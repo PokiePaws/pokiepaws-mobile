@@ -2,9 +2,7 @@ package com.pokiepaws.mobile.data.remote.service
 
 import com.pokiepaws.mobile.data.remote.dto.auth.AuthResponse
 import com.pokiepaws.mobile.data.remote.dto.auth.DeviceTokenRequest
-import com.pokiepaws.mobile.data.remote.dto.auth.ForgotPasswordRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.LoginRequest
-import com.pokiepaws.mobile.data.remote.dto.auth.MessageResponse
 import com.pokiepaws.mobile.data.remote.dto.auth.RefreshTokenRequest
 import com.pokiepaws.mobile.data.remote.dto.auth.RegisterRequest
 import com.pokiepaws.mobile.data.remote.dto.settings.ChangePasswordRequest
@@ -13,6 +11,7 @@ import com.pokiepaws.mobile.data.remote.dto.settings.UpdateOwnerAddressRequest
 import com.pokiepaws.mobile.data.remote.dto.settings.UpdateOwnerPhoneNumberRequest
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
@@ -38,11 +37,6 @@ interface AuthApiService {
         @Body request: RegisterRequest,
     ): Response<Unit>
 
-    @POST("api/auth/forgot-password")
-    suspend fun forgotPassword(
-        @Body request: ForgotPasswordRequest,
-    ): Response<MessageResponse>
-
     @GET("api/owners/me")
     suspend fun getCurrentOwnerProfile(): OwnerProfileResponse
 
@@ -65,4 +59,7 @@ interface AuthApiService {
     suspend fun registerDeviceToken(
         @Body request: DeviceTokenRequest,
     ): Response<Unit>
+
+    @DELETE("api/owners/me")
+    suspend fun deleteCurrentOwnerAccount(): Response<Unit>
 }

@@ -48,7 +48,29 @@ class OwnerSettingsViewModel
                 OwnerSettingsEvent.SavePhone -> savePhone()
                 OwnerSettingsEvent.SaveAddress -> saveAddress()
                 OwnerSettingsEvent.ChangePassword -> changePassword()
+                OwnerSettingsEvent.ClearDeleteAccountError -> clearDeleteAccountError()
                 is OwnerSettingsEvent.ForeignTravelPlannedChanged -> setForeignTravelPlanned(event.value)
+            }
+        }
+
+        fun deleteAccount(onDeleted: () -> Unit) {
+            viewModelScope.launch {
+                updateState {
+                    it.copy(
+                        isDeletingAccount = true,
+                        deleteAccountError = null,
+                    )
+                }
+                runCatching { authRepository.deleteAccount() }
+                    .onSuccess { onDeleted() }
+                    .onFailure { error ->
+                        updateState {
+                            it.copy(
+                                isDeletingAccount = false,
+                                deleteAccountError = error.message ?: "Could not delete account",
+                            )
+                        }
+                    }
             }
         }
 
@@ -163,6 +185,10 @@ class OwnerSettingsViewModel
             viewModelScope.launch {
                 appSettingsRepository.setForeignTravelPlanned(value)
             }
+        }
+
+        private fun clearDeleteAccountError() {
+            updateState { it.copy(deleteAccountError = null) }
         }
 
         private fun loadOwnerProfile() {

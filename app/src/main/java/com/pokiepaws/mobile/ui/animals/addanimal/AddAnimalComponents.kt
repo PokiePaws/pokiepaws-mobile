@@ -70,6 +70,7 @@ fun AddAnimalContent(
     var species by remember { mutableStateOf(AnimalSpecies.DOG) }
     var breed by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("MALE") }
+    var color by remember { mutableStateOf("") }
     var birthDate by remember { mutableStateOf("") }
     var microchipNumber by remember { mutableStateOf("") }
     var weight by remember { mutableStateOf("") }
@@ -126,6 +127,7 @@ fun AddAnimalContent(
             onCategorySelected = { speciesCategory = it },
             onSpeciesSelected = {
                 species = it
+                speciesCategory = it.category
                 showSpeciesPicker = false
             },
             onDismiss = { showSpeciesPicker = false },
@@ -197,6 +199,18 @@ fun AddAnimalContent(
                 shape = RoundedCornerShape(12.dp),
                 singleLine = true,
             )
+            GenderSelector(
+                selectedGender = gender,
+                onGenderSelected = { gender = it },
+            )
+            OutlinedTextField(
+                value = color,
+                onValueChange = { color = it },
+                label = { Text(stringResource(R.string.animal_color_label)) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                singleLine = true,
+            )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -256,7 +270,7 @@ fun AddAnimalContent(
                             species = species,
                             breed = breed.ifBlank { null },
                             gender = gender,
-                            color = null,
+                            color = color.ifBlank { null },
                             birthDate = birthDate.ifBlank { null },
                             microchipNumber = microchipNumber.ifBlank { null },
                             weight = weight.toDoubleOrNull(),
@@ -278,6 +292,43 @@ fun AddAnimalContent(
                     text = stringResource(R.string.animal_save_button),
                     fontSize = 16.sp,
                     color = PokieWhite,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun GenderSelector(
+    selectedGender: String,
+    onGenderSelected: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val genderOptions =
+        listOf(
+            "MALE" to R.string.animal_gender_male,
+            "FEMALE" to R.string.animal_gender_female,
+            "HERMAPHRODITE" to R.string.animal_gender_hermaphrodite,
+        )
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.animal_gender_label),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            genderOptions.forEach { (value, labelRes) ->
+                FilterChip(
+                    selected = selectedGender == value,
+                    onClick = { onGenderSelected(value) },
+                    label = { Text(stringResource(labelRes)) },
                 )
             }
         }

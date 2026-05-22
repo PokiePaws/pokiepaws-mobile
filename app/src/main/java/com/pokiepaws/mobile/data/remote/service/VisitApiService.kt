@@ -14,12 +14,6 @@ interface VisitApiService {
     @GET("api/owners/me/visits/upcoming")
     suspend fun getUpcomingOwnerVisits(): List<VisitResponse>
 
-    @GET("api/owners/me/visits")
-    suspend fun getMyVisitsInRange(
-        @Query("from") from: String,
-        @Query("to") to: String,
-    ): List<VisitResponse>
-
     @GET("api/animals/{animalId}/visits")
     suspend fun getVisitsByAnimal(
         @Path("animalId") animalId: Long,

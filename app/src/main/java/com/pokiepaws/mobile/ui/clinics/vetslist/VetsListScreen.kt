@@ -23,11 +23,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.ui.clinics.clinicslist.ClinicSearchBar
 
-private const val HEADER_ROUNDING = 32
-private const val HEADER_TOP_PADDING = 48
-private const val HEADER_BOTTOM_PADDING = 32
-private const val SEARCH_BAR_OFFSET = -24
-
 @Composable
 fun VetsListScreen(
     clinicId: Long,
@@ -82,3 +77,8 @@ fun VetsListScreen(
         )
     }
 }
+
+private const val HEADER_ROUNDING = 32
+private const val HEADER_TOP_PADDING = 48
+private const val HEADER_BOTTOM_PADDING = 32
+private const val SEARCH_BAR_OFFSET = -24

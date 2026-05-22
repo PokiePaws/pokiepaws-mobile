@@ -8,9 +8,6 @@ import com.pokiepaws.mobile.domain.validation.validateEmail
 import com.pokiepaws.mobile.domain.validation.validatePassword
 import com.pokiepaws.mobile.domain.validation.validatePostalCode
 
-internal const val POLAND_COUNTRY_NAME = "Polska"
-internal const val POLAND_DIAL_CODE = "+48"
-
 data class RegisterUiState(
     val email: String = "",
     val password: String = "",
@@ -102,3 +99,6 @@ sealed interface RegisterEffect {
 
     data object NavigateToLogin : RegisterEffect
 }
+
+internal const val POLAND_COUNTRY_NAME = "Polska"
+internal const val POLAND_DIAL_CODE = "+48"

@@ -43,8 +43,6 @@ import com.pokiepaws.mobile.util.theme.PokieBlue
 import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieWhite
 
-private val VetIconBackground = Color(0xFFE3F6FC)
-
 @Composable
 fun BackHeader(
     onBack: () -> Unit,
@@ -235,3 +233,5 @@ private fun BlueVetIcon(
         )
     }
 }
+
+private val VetIconBackground = Color(0xFFE3F6FC)

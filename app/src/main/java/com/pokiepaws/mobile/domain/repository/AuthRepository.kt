@@ -17,8 +17,6 @@ interface AuthRepository {
 
     suspend fun register(registration: RegistrationDraft)
 
-    suspend fun forgotPassword(email: String)
-
     suspend fun getCurrentOwnerProfile(): OwnerProfile
 
     suspend fun updateOwnerPhone(phone: OwnerPhoneDraft)
@@ -31,4 +29,6 @@ interface AuthRepository {
     )
 
     suspend fun logout()
+
+    suspend fun deleteAccount()
 }

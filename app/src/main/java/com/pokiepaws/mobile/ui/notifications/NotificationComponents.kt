@@ -57,26 +57,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-private const val ANIMATION_DELAY_PER_ITEM_MS = 80
-private const val ITEM_ANIMATION_DURATION = 300
-private const val INITIAL_OFFSET_X = -20f
-private const val CARD_ROUNDING = 16
-private const val ICON_BG_SIZE = 48
-private const val ICON_SIZE = 24
-private const val INDICATOR_WIDTH = 4
-private const val HEADER_ROUNDING = 32
-private const val HEADER_TOP_PADDING = 48
-private const val HEADER_BOTTOM_PADDING = 48
-
-private val ReminderIconTint = Color(0xFF3B82F6)
-private val ReminderIconBg = Color(0xFFDBEAFE)
-private val VaccineIconTint = Color(0xFFF97316)
-private val VaccineIconBg = Color(0xFFFFEDD5)
-private val SuccessIconTint = Color(0xFF22C55E)
-private val SuccessIconBg = Color(0xFFDCFCE7)
-private val DefaultIconBg = Color(0xFFE3F6FC)
-private val DefaultIconTint = Color(0xFF7FCEDF)
-
 private data class NotifStyle(
     val iconVector: ImageVector,
     val iconTint: Color,
@@ -391,3 +371,23 @@ private fun NotificationBody(
 }
 
 private fun formatTimestamp(timestamp: Long): String = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(timestamp))
+
+private const val ANIMATION_DELAY_PER_ITEM_MS = 80
+private const val ITEM_ANIMATION_DURATION = 300
+private const val INITIAL_OFFSET_X = -20f
+private const val CARD_ROUNDING = 16
+private const val ICON_BG_SIZE = 48
+private const val ICON_SIZE = 24
+private const val INDICATOR_WIDTH = 4
+private const val HEADER_ROUNDING = 32
+private const val HEADER_TOP_PADDING = 48
+private const val HEADER_BOTTOM_PADDING = 48
+
+private val ReminderIconTint = Color(0xFF3B82F6)
+private val ReminderIconBg = Color(0xFFDBEAFE)
+private val VaccineIconTint = Color(0xFFF97316)
+private val VaccineIconBg = Color(0xFFFFEDD5)
+private val SuccessIconTint = Color(0xFF22C55E)
+private val SuccessIconBg = Color(0xFFDCFCE7)
+private val DefaultIconBg = Color(0xFFE3F6FC)
+private val DefaultIconTint = Color(0xFF7FCEDF)

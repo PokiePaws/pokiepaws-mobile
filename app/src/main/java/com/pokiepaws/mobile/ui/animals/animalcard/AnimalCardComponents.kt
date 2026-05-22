@@ -52,8 +52,6 @@ import java.time.Period
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
-private val DateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-
 @Composable
 fun AnimalDetailsContent(
     animal: Animal,
@@ -406,3 +404,5 @@ fun calculateAgeLabel(birthDate: String): String {
         noData
     }
 }
+
+private val DateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")

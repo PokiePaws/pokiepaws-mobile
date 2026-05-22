@@ -30,7 +30,6 @@ class MainActivity : AppCompatActivity() {
 
     private val notificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) {
-            // Permission result only controls system notification display on Android 13+.
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {

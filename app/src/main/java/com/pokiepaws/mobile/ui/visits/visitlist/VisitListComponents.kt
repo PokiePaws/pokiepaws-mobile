@@ -70,20 +70,13 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
-private const val HEADER_ROUNDING = 32
-private const val HEADER_TOP_PADDING = 48
-private const val HEADER_BOTTOM_PADDING = 32
-private const val ADD_BUTTON_SIZE = 48
-private const val SEARCH_BAR_OFFSET = -24
-private val VisitDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-private val FilterDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-
 @Composable
 fun VisitListContent(
     state: VisitListUiState,
     animalState: AnimalListUiState,
     onVisitClick: (Long) -> Unit,
     onCreateVisit: (Long) -> Unit,
+    onRefreshAnimals: () -> Unit,
     onCancelVisit: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -125,7 +118,10 @@ fun VisitListContent(
                     color = PokieWhite,
                 )
                 IconButton(
-                    onClick = { showAnimalPicker = true },
+                    onClick = {
+                        onRefreshAnimals()
+                        showAnimalPicker = true
+                    },
                     modifier =
                         Modifier
                             .size(ADD_BUTTON_SIZE.dp)
@@ -149,7 +145,7 @@ fun VisitListContent(
                     .padding(horizontal = 16.dp)
                     .offset(y = SEARCH_BAR_OFFSET.dp),
         )
-        when (val s = state) {
+        when (state) {
             is VisitListUiState.Loading ->
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -163,11 +159,11 @@ fun VisitListContent(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(text = stringResource(R.string.visit_error, s.message))
+                    Text(text = stringResource(R.string.visit_error, state.message))
                 }
 
             is VisitListUiState.Success -> {
-                val visits = s.visits.sortedBy { it.startsAt }
+                val visits = state.visits.sortedBy { it.startsAt }
                 val animalNames = animalState.animalNamesById()
                 val visitTypeLabels =
                     VisitDescription.entries.associateWith { description ->
@@ -199,7 +195,10 @@ fun VisitListContent(
                                 color = PokieBlueDark,
                             )
                             TextButton(
-                                onClick = { showAnimalPicker = true },
+                                onClick = {
+                                    onRefreshAnimals()
+                                    showAnimalPicker = true
+                                },
                                 modifier = Modifier.padding(top = 8.dp),
                             ) {
                                 Text(stringResource(R.string.visit_book_first))
@@ -637,3 +636,10 @@ private val VisitDescription.titleRes: Int
             VisitDescription.SURGICAL_PROCEDURE -> R.string.visit_type_surgery
             VisitDescription.DENTAL_PROCEDURE -> R.string.visit_type_dental_procedure
         }
+private const val HEADER_ROUNDING = 32
+private const val HEADER_TOP_PADDING = 48
+private const val HEADER_BOTTOM_PADDING = 32
+private const val ADD_BUTTON_SIZE = 48
+private const val SEARCH_BAR_OFFSET = -24
+private val VisitDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+private val FilterDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")

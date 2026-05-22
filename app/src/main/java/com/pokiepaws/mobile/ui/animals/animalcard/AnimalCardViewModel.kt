@@ -30,7 +30,7 @@ class AnimalCardViewModel
                     val animal = repository.getAnimals().find { it.id == animalId }
                     val travel = appSettingsRepository.foreignTravelPlanned.first()
                     when {
-                        animal == null -> AnimalCardUiState.Error("Nie znaleziono zwierzaka")
+                        animal == null -> AnimalCardUiState.Error("Animal not found")
                         else -> AnimalCardUiState.Success(animal, travel)
                     }
                 }.onSuccess { state -> _uiState.value = state }
@@ -41,7 +41,7 @@ class AnimalCardViewModel
 
 private fun Throwable.toLoadMessage(): String =
     when (this) {
-        is HttpException -> message ?: "Nie udało się załadować szczegółów zwierzaka"
-        is IOException -> message ?: "Błąd połączenia z serwerem"
-        else -> message ?: "Nie udało się załadować szczegółów zwierzaka"
+        is HttpException -> message ?: "Unable to load animal details"
+        is IOException -> message ?: "Server connection error"
+        else -> message ?: "Unable to load animal details"
     }

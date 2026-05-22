@@ -41,10 +41,6 @@ class TokenManager
                 preferences[refreshTokenKey]?.decryptToken()
             }
 
-        suspend fun saveToken(token: String) {
-            saveTokens(accessToken = token, refreshToken = null)
-        }
-
         suspend fun saveTokens(
             accessToken: String,
             refreshToken: String?,

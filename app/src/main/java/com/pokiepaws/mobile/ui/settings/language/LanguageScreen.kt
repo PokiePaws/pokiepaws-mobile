@@ -209,7 +209,9 @@ private fun AnimatedLanguageCard(
         label = "languageCardAlpha",
     )
 
-    LaunchedEffect(Unit) { }
+    LaunchedEffect(Unit) {
+        visible = true
+    }
 
     Card(
         modifier =

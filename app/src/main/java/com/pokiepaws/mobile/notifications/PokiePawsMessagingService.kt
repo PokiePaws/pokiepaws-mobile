@@ -34,14 +34,16 @@ class PokiePawsMessagingService : FirebaseMessagingService() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        Log.d(FCM_LOG_TAG, "Push notification received (Data payload keys: ${remoteMessage.data.keys})")
+        Log.d(
+            FCM_LOG_TAG,
+            "Push notification received (Data payload keys: ${remoteMessage.data.keys}, " +
+                "has notification payload: ${remoteMessage.notification != null})",
+        )
 
-        val title = remoteMessage.data["title"] ?: "PokiePaws"
-        val message = remoteMessage.data["body"] ?: "Brak treści"
-        val type = remoteMessage.data["type"]
+        val payload = remoteMessage.toAppNotificationPayload()
 
-        showNotification(title, message)
-        saveToDatabase(title, message, type)
+        showNotification(payload.title, payload.message)
+        saveToDatabase(payload.title, payload.message, payload.type)
     }
 
     private fun saveToDatabase(
@@ -112,10 +114,39 @@ class PokiePawsMessagingService : FirebaseMessagingService() {
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentTitle(title)
                 .setContentText(message)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
 
         notificationManager.notify(notificationId, notificationBuilder.build())
     }
+
+    private fun RemoteMessage.toAppNotificationPayload(): AppNotificationPayload {
+        val data = data
+        val notification = notification
+        val title =
+            data.firstNotBlank("title", "notificationTitle", "notification_title", "subject")
+                ?: notification?.title?.takeIf { it.isNotBlank() }
+                ?: "PokiePaws"
+        val message =
+            data.firstNotBlank("body", "message", "content", "text", "notificationBody", "notification_body")
+                ?: notification?.body?.takeIf { it.isNotBlank() }
+                ?: "Brak treści"
+
+        return AppNotificationPayload(
+            title = title,
+            message = message,
+            type = data.firstNotBlank("type", "notificationType", "notification_type"),
+        )
+    }
+
+    private fun Map<String, String>.firstNotBlank(vararg keys: String): String? =
+        keys.firstNotNullOfOrNull { key -> this[key]?.takeIf { it.isNotBlank() } }
+
+    private data class AppNotificationPayload(
+        val title: String,
+        val message: String,
+        val type: String?,
+    )
 }

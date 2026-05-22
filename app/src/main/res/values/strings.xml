@@ -12,6 +12,12 @@
     <string name="profile_language">Language</string>
     <string name="profile_app_settings">App settings</string>
     <string name="profile_logout">Log out</string>
+    <string name="profile_delete_account">Delete account</string>
+    <string name="profile_delete_account_progress">Deleting account...</string>
+    <string name="profile_delete_account_dialog_title">Delete account?</string>
+    <string name="profile_delete_account_dialog_message">This will deactivate your account and remove local data from this device. This action cannot be undone in the app.</string>
+    <string name="profile_delete_account_confirm">Delete account</string>
+    <string name="profile_delete_account_cancel">Cancel</string>
 
     <string name="settings_language_title">App language</string>
     <string name="settings_language_description">Choose the language used by PokiePaws. System default follows your phone settings.</string>
@@ -24,6 +30,7 @@
     <string name="owner_settings_address_title">Address</string>
     <string name="owner_settings_password_title">Password change</string>
     <string name="owner_settings_travel_title">Travel</string>
+    <string name="owner_settings_account_title">Account</string>
     <string name="owner_settings_foreign_travel_planned">I plan foreign travel</string>
     <string name="owner_settings_foreign_travel_description">Treat rabies vaccination as required for animals that may cross borders.</string>
     <string name="owner_settings_street">Street</string>
@@ -43,6 +50,7 @@
     <string name="owner_settings_password_changed">Password changed</string>
 
     <string name="logo_content_description">PokiePaws Logo</string>
+    <string name="dr_tuptus_content_description">Dr Tuptus mascot</string>
     <string name="email_label">Email</string>
     <string name="password_label">Password</string>
     <string name="login_title">Log in</string>

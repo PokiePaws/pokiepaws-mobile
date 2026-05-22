@@ -29,4 +29,6 @@ interface AuthRepository {
     )
 
     suspend fun logout()
+
+    suspend fun deleteAccount()
 }

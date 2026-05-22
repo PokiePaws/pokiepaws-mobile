@@ -76,6 +76,7 @@ fun VisitListContent(
     animalState: AnimalListUiState,
     onVisitClick: (Long) -> Unit,
     onCreateVisit: (Long) -> Unit,
+    onRefreshAnimals: () -> Unit,
     onCancelVisit: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -117,7 +118,10 @@ fun VisitListContent(
                     color = PokieWhite,
                 )
                 IconButton(
-                    onClick = { showAnimalPicker = true },
+                    onClick = {
+                        onRefreshAnimals()
+                        showAnimalPicker = true
+                    },
                     modifier =
                         Modifier
                             .size(ADD_BUTTON_SIZE.dp)
@@ -191,7 +195,10 @@ fun VisitListContent(
                                 color = PokieBlueDark,
                             )
                             TextButton(
-                                onClick = { showAnimalPicker = true },
+                                onClick = {
+                                    onRefreshAnimals()
+                                    showAnimalPicker = true
+                                },
                                 modifier = Modifier.padding(top = 8.dp),
                             ) {
                                 Text(stringResource(R.string.visit_book_first))
@@ -256,9 +263,10 @@ fun VisitListContent(
         AnimalPickerDialog(
             animalState = animalState,
             onAnimalSelected = { animal ->
+                showAnimalPicker = false
                 onCreateVisit(animal.id)
             },
-            onDismiss = { },
+            onDismiss = { showAnimalPicker = false },
         )
     }
 }
@@ -319,18 +327,19 @@ private fun DateFilterButton(
 
     if (showDatePicker) {
         DatePickerDialog(
-            onDismissRequest = { },
+            onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(
                     onClick = {
                         onDateSelected(datePickerState.selectedDateMillis)
+                        showDatePicker = false
                     },
                 ) {
                     Text(stringResource(R.string.ok_button))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { }) {
+                TextButton(onClick = { showDatePicker = false }) {
                     Text(stringResource(R.string.cancel_button))
                 }
             },
@@ -340,7 +349,7 @@ private fun DateFilterButton(
     }
 
     OutlinedButton(
-        onClick = { },
+        onClick = { showDatePicker = true },
         modifier = modifier.height(52.dp),
         shape = RoundedCornerShape(16.dp),
         colors =

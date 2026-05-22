@@ -2,6 +2,7 @@ package com.pokiepaws.mobile.ui.settings
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -20,9 +21,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.FlightTakeoff
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -34,9 +38,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,10 +69,12 @@ import com.pokiepaws.mobile.util.theme.PokieWhite
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
+    onAccountDeleted: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: OwnerSettingsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
+    var showDeleteAccountDialog by rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier =
@@ -88,9 +98,30 @@ fun SettingsScreen(
             TravelSection(state = state, onEvent = viewModel::onEvent)
             Spacer(modifier = Modifier.height(16.dp))
             PasswordSettingsSection(state = state, onEvent = viewModel::onEvent)
+            Spacer(modifier = Modifier.height(16.dp))
+            AccountSection(
+                state = state,
+                onDeleteAccountClick = { showDeleteAccountDialog = true },
+            )
             ErrorText(state.errorMessage)
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+
+    if (showDeleteAccountDialog) {
+        DeleteAccountDialog(
+            isDeleting = state.isDeletingAccount,
+            onConfirm = {
+                showDeleteAccountDialog = false
+                viewModel.deleteAccount(onAccountDeleted)
+            },
+            onDismiss = {
+                if (!state.isDeletingAccount) {
+                    showDeleteAccountDialog = false
+                    viewModel.onEvent(OwnerSettingsEvent.ClearDeleteAccountError)
+                }
+            },
+        )
     }
 }
 
@@ -164,6 +195,131 @@ private fun TravelSection(
             )
         }
     }
+}
+
+@Composable
+private fun AccountSection(
+    state: OwnerSettingsUiState,
+    onDeleteAccountClick: () -> Unit,
+) {
+    SettingsSectionCard(
+        icon = Icons.Default.DeleteOutline,
+        titleRes = R.string.owner_settings_account_title,
+    ) {
+        DeleteAccountButton(
+            isDeleting = state.isDeletingAccount,
+            onClick = onDeleteAccountClick,
+        )
+
+        if (state.deleteAccountError != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = state.deleteAccountError,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+    }
+}
+
+@Composable
+private fun DeleteAccountButton(
+    isDeleting: Boolean,
+    onClick: () -> Unit,
+) {
+    Card(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(
+                    enabled = !isDeleting,
+                    onClick = onClick,
+                ),
+        shape = RoundedCornerShape(INPUT_ROUNDING.dp),
+        colors = CardDefaults.cardColors(containerColor = DeleteIconBg),
+        elevation = CardDefaults.cardElevation(0.dp),
+    ) {
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier =
+                    Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(ICON_BG_ROUNDING.dp))
+                        .background(PokieWhite),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (isDeleting) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = DeleteColor,
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.DeleteOutline,
+                        contentDescription = null,
+                        tint = DeleteColor,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text =
+                    if (isDeleting) {
+                        stringResource(R.string.profile_delete_account_progress)
+                    } else {
+                        stringResource(R.string.profile_delete_account)
+                    },
+                modifier = Modifier.weight(1f),
+                fontWeight = FontWeight.Bold,
+                color = DeleteColor,
+            )
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = DeleteColor.copy(alpha = 0.5f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun DeleteAccountDialog(
+    isDeleting: Boolean,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(R.string.profile_delete_account_dialog_title)) },
+        text = { Text(text = stringResource(R.string.profile_delete_account_dialog_message)) },
+        confirmButton = {
+            TextButton(
+                enabled = !isDeleting,
+                onClick = onConfirm,
+            ) {
+                Text(
+                    text = stringResource(R.string.profile_delete_account_confirm),
+                    color = DeleteColor,
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                enabled = !isDeleting,
+                onClick = onDismiss,
+            ) {
+                Text(text = stringResource(R.string.profile_delete_account_cancel))
+            }
+        },
+    )
 }
 
 @Composable
@@ -335,3 +491,5 @@ private const val ICON_BG_ROUNDING = 12
 private const val INDICATOR_SIZE = 18
 private const val INPUT_ROUNDING = 12
 private const val SECTION_DIVIDER_ALPHA = 0.7f
+private val DeleteColor = Color(0xFFEF4444)
+private val DeleteIconBg = Color(0xFFFEE2E2)

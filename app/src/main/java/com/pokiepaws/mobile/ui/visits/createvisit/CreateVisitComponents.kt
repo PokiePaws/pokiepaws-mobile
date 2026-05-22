@@ -523,17 +523,18 @@ private fun SlotStep(
 
     if (showDatePicker) {
         DatePickerDialog(
-            onDismissRequest = { },
+            onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis
                         ?.let(::localDateFromMillis)
                         ?.format(VisitDateFormatter)
                         ?.let(onDateSelected)
+                    showDatePicker = false
                 }) { Text(stringResource(R.string.ok_button)) }
             },
             dismissButton = {
-                TextButton(onClick = { }) {
+                TextButton(onClick = { showDatePicker = false }) {
                     Text(stringResource(R.string.cancel_button))
                 }
             },
@@ -551,7 +552,7 @@ private fun SlotStep(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .clickable { },
+                    .clickable { showDatePicker = true },
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(6.dp),
             colors = CardDefaults.cardColors(containerColor = PokieWhite),

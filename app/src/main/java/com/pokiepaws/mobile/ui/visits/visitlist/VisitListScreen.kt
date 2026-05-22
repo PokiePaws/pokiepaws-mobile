@@ -26,6 +26,7 @@ fun VisitListScreen(
         animalState = animalState,
         onVisitClick = onVisitClick,
         onCreateVisit = onCreateVisit,
+        onRefreshAnimals = animalViewModel::loadAnimals,
         onCancelVisit = viewModel::cancelVisit,
         modifier = modifier,
     )

@@ -28,6 +28,8 @@ data class OwnerSettingsUiState(
     val addressSaved: Boolean = false,
     val passwordChanged: Boolean = false,
     val foreignTravelPlanned: Boolean = false,
+    val isDeletingAccount: Boolean = false,
+    val deleteAccountError: String? = null,
     val errorMessage: String? = null,
 ) {
     val passwordValidationErrors: List<PasswordValidationError>
@@ -111,4 +113,6 @@ sealed interface OwnerSettingsEvent {
     data object SaveAddress : OwnerSettingsEvent
 
     data object ChangePassword : OwnerSettingsEvent
+
+    data object ClearDeleteAccountError : OwnerSettingsEvent
 }

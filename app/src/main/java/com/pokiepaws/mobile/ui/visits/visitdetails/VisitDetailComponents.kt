@@ -138,7 +138,7 @@ fun VisitDetailContent(
 
     if (showCancelDialog) {
         AlertDialog(
-            onDismissRequest = { },
+            onDismissRequest = { showCancelDialog = false },
             title = { Text(stringResource(R.string.visit_cancel_dialog_title)) },
             text = { Text(stringResource(R.string.visit_cancel_dialog_message)) },
             confirmButton = {
@@ -155,7 +155,7 @@ fun VisitDetailContent(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { }) {
+                TextButton(onClick = { showCancelDialog = false }) {
                     Text(stringResource(R.string.close_button))
                 }
             },

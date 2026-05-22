@@ -109,6 +109,15 @@ class AuthRepositoryImpl
             localDataCleaner.clearSensitiveData()
             tokenManager.clearToken()
         }
+
+        override suspend fun deleteAccount() {
+            val response = authApiService.deleteCurrentOwnerAccount()
+            if (!response.isSuccessful) {
+                throw HttpException(response)
+            }
+            localDataCleaner.clearSensitiveData()
+            tokenManager.clearToken()
+        }
     }
 
 private fun RegistrationDraft.toRequest(): RegisterRequest =

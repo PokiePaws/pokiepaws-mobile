@@ -277,18 +277,19 @@ private fun DateFilterButton(
 
     if (showDatePicker) {
         DatePickerDialog(
-            onDismissRequest = { },
+            onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(
                     onClick = {
                         onDateSelected(datePickerState.selectedDateMillis)
+                        showDatePicker = false
                     },
                 ) {
                     Text(stringResource(R.string.ok_button))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { }) {
+                TextButton(onClick = { showDatePicker = false }) {
                     Text(stringResource(R.string.cancel_button))
                 }
             },
@@ -298,7 +299,7 @@ private fun DateFilterButton(
     }
 
     OutlinedButton(
-        onClick = { },
+        onClick = { showDatePicker = true },
         modifier = modifier.height(52.dp),
         shape = RoundedCornerShape(16.dp),
         colors =

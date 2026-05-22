@@ -302,7 +302,9 @@ private fun AnimatedMenuItem(
         label = "menuItemAlpha",
     )
 
-    LaunchedEffect(Unit) { }
+    LaunchedEffect(Unit) {
+        visible = true
+    }
 
     Card(
         modifier =

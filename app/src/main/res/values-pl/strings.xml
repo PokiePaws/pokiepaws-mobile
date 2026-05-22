@@ -12,6 +12,12 @@
     <string name="profile_language">Język</string>
     <string name="profile_app_settings">Ustawienia aplikacji</string>
     <string name="profile_logout">Wyloguj się</string>
+    <string name="profile_delete_account">Usu&#324; konto</string>
+    <string name="profile_delete_account_progress">Usuwanie konta...</string>
+    <string name="profile_delete_account_dialog_title">Usun&#261;&#263; konto?</string>
+    <string name="profile_delete_account_dialog_message">Ta operacja dezaktywuje konto i usunie dane lokalne z telefonu. Nie b&#281;dzie mo&#380;na cofn&#261;&#263; tej akcji w aplikacji.</string>
+    <string name="profile_delete_account_confirm">Usu&#324; konto</string>
+    <string name="profile_delete_account_cancel">Anuluj</string>
 
     <string name="settings_language_title">Język aplikacji</string>
     <string name="settings_language_description">Wybierz język używany w PokiePaws. Domyślny systemowy korzysta z ustawień telefonu.</string>
@@ -24,6 +30,7 @@
     <string name="owner_settings_address_title">Adres zamieszkania</string>
     <string name="owner_settings_password_title">Zmiana hasła</string>
     <string name="owner_settings_travel_title">Podróż</string>
+    <string name="owner_settings_account_title">Konto</string>
     <string name="owner_settings_foreign_travel_planned">Planuję podróż zagraniczną</string>
     <string name="owner_settings_foreign_travel_description">Traktuj szczepienie przeciw wściekliźnie jako wymagane dla zwierząt przekraczających granicę.</string>
     <string name="owner_settings_street">Ulica</string>
@@ -43,6 +50,7 @@
     <string name="owner_settings_password_changed">Hasło zmienione</string>
 
     <string name="logo_content_description">Logo PokiePaws</string>
+    <string name="dr_tuptus_content_description">Maskotka Dr Tuptus</string>
     <string name="email_label">Email</string>
     <string name="password_label">Hasło</string>
     <string name="login_title">Zaloguj się</string>

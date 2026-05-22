@@ -12,6 +12,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
@@ -21,8 +22,6 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Response
-import okhttp3.Route
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.util.concurrent.TimeUnit
@@ -43,15 +42,12 @@ object NetworkModule {
             "/api/auth/forgot-password",
             "/api/auth/refresh",
             "/api/auth/logout",
+            "/api/auth/device-token",
         )
-
     private val certificatePinner =
         CertificatePinner.Builder()
-            .add(
-                API_HOST,
-                "sha256/XyDIIRSt8/nOJDY3pudOaQ9hmMlboj0SRIMciM18ie4=",
-                "sha256/XyDIIRSt8/nOJDY3pudOaQ9hmMlboj0SRIMciM18ie4=",
-            )
+            .add(API_HOST, "sha256/XyDIIRSt8/nOJDY3pudOaQ9hmMlboj0SRIMciM18ie4=")
+            .add(API_HOST, "sha256/C5+JDF7AtHft87cx+/Y8QC569bZiwWpB4aZglAtMIeM=")
             .build()
 
     @Provides
@@ -71,7 +67,7 @@ object NetworkModule {
         return OkHttpClient.Builder()
             .certificatePinner(certificatePinner)
             .addInterceptor { chain ->
-                val token = runBlocking { tokenManager.token.first() }
+                val token = runBlocking(Dispatchers.IO) { tokenManager.token.first() }
                 val originalRequest = chain.request()
                 val isPublicAuthRequest = originalRequest.url.encodedPath in publicAuthPaths
 
@@ -83,18 +79,6 @@ object NetworkModule {
                 chain.proceed(requestBuilder.build())
             }
             .authenticator(refreshTokenAuthenticator(tokenManager, json))
-            .addInterceptor(
-                HttpLoggingInterceptor().apply {
-                    redactHeader("Authorization")
-                    redactHeader("Cookie")
-                    level =
-                        if (BuildConfig.DEBUG) {
-                            HttpLoggingInterceptor.Level.BASIC
-                        } else {
-                            HttpLoggingInterceptor.Level.NONE
-                        }
-                },
-            )
             .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .writeTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
@@ -105,62 +89,52 @@ object NetworkModule {
         tokenManager: TokenManager,
         json: Json,
     ): Authenticator =
-        object : Authenticator {
-            override fun authenticate(
-                route: Route?,
-                response: Response,
-            ): okhttp3.Request? {
-                val shouldTryRefresh =
-                    response.code == HTTP_UNAUTHORIZED && response.responseCount < MAX_AUTH_RETRIES
+        Authenticator { _, response ->
+            if (response.code != HTTP_UNAUTHORIZED || response.responseCount >= MAX_AUTH_RETRIES) {
+                return@Authenticator null
+            }
 
-                val resultRequest: okhttp3.Request? =
-                    if (!shouldTryRefresh) {
-                        null
-                    } else {
-                        val refreshToken = runBlocking { tokenManager.refreshToken.first() }
+            val refreshToken = runBlocking(Dispatchers.IO) { tokenManager.refreshToken.first() }
+            if (refreshToken.isNullOrBlank()) return@Authenticator null
 
-                        if (refreshToken.isNullOrBlank()) {
-                            null
-                        } else {
-                            val refreshedAccessToken: String? =
-                                synchronized(this) {
-                                    runBlocking {
-                                        runCatching {
-                                            val authApi =
-                                                Retrofit.Builder()
-                                                    .baseUrl(normalizedBaseUrl())
-                                                    .client(OkHttpClient.Builder().build())
-                                                    .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
-                                                    .build()
-                                                    .create(AuthApiService::class.java)
-
-                                            val authResponse = authApi.refresh(RefreshTokenRequest(refreshToken))
-                                            val accessToken = requireNotNull(authResponse.resolvedToken)
-
-                                            tokenManager.saveTokens(
-                                                accessToken = accessToken,
-                                                refreshToken = authResponse.resolvedRefreshToken,
-                                            )
-                                            accessToken
-                                        }.getOrElse {
-                                            tokenManager.clearToken()
-                                            null
-                                        }
-                                    }
-                                }
-
-                            if (refreshedAccessToken == null) {
-                                null
-                            } else {
-                                response.request
-                                    .newBuilder()
-                                    .header("Authorization", "Bearer $refreshedAccessToken")
+            synchronized(this) {
+                val refreshedAccessToken =
+                    runBlocking(Dispatchers.IO) {
+                        runCatching {
+                            val authClient =
+                                OkHttpClient.Builder()
+                                    .certificatePinner(certificatePinner)
                                     .build()
-                            }
+
+                            val authApi =
+                                Retrofit.Builder()
+                                    .baseUrl(normalizedBaseUrl())
+                                    .client(authClient)
+                                    .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+                                    .build()
+                                    .create(AuthApiService::class.java)
+
+                            val authResponse = authApi.refresh(RefreshTokenRequest(refreshToken))
+                            val accessToken = requireNotNull(authResponse.resolvedToken)
+
+                            tokenManager.saveTokens(
+                                accessToken = accessToken,
+                                refreshToken = authResponse.resolvedRefreshToken,
+                            )
+                            accessToken
+                        }.getOrElse {
+                            tokenManager.clearToken()
+                            null
                         }
                     }
 
-                return resultRequest
+                if (refreshedAccessToken != null) {
+                    response.request.newBuilder()
+                        .header("Authorization", "Bearer $refreshedAccessToken")
+                        .build()
+                } else {
+                    null
+                }
             }
         }
 

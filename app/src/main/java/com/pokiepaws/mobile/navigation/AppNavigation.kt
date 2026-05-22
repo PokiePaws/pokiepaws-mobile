@@ -329,7 +329,14 @@ fun AppNavigation(
             }
 
             composable(Screen.Settings.route) {
-                SettingsScreen(onBack = { navController.popBackStack() })
+                SettingsScreen(
+                    onBack = { navController.popBackStack() },
+                    onAccountDeleted = {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
+                )
             }
 
             composable(Screen.Language.route) {

@@ -15,6 +15,7 @@ tasks.register("qualityCheck") {
     description = "Runs ktlint, detekt, Android Lint, and Konsist architecture tests."
 
     dependsOn(
+        ":app:ktlintFormat",
         ":app:ktlintCheck",
         ":app:detekt",
         ":app:lintDebug",
@@ -29,13 +30,6 @@ tasks.register("projectRebuild") {
     dependsOn(
         ":app:clean",
     )
-}
-
-tasks.register("qualityFormat") {
-    group = "formatting"
-    description = "Formats Kotlin code with ktlint."
-
-    dependsOn(":app:ktlintFormat")
 }
 
 tasks.register("registerTest") {

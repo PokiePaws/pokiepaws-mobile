@@ -2,13 +2,20 @@ package com.pokiepaws.mobile.domain.repository
 
 import com.pokiepaws.mobile.domain.model.CreateVisitDraft
 import com.pokiepaws.mobile.domain.model.Visit
+import kotlinx.coroutines.flow.Flow
 
 interface VisitRepository {
-    suspend fun getUpcoming(): List<Visit>
+    fun getUpcoming(): Flow<List<Visit>>
 
-    suspend fun getById(visitId: Long): Visit
+    fun getById(visitId: Long): Flow<Visit?>
 
-    suspend fun getByAnimal(animalId: Long): List<Visit>
+    fun getByAnimal(animalId: Long): Flow<List<Visit>>
+
+    suspend fun syncUpcoming()
+
+    suspend fun syncById(visitId: Long)
+
+    suspend fun syncByAnimal(animalId: Long)
 
     suspend fun getAvailableSlots(
         clinicId: Long,

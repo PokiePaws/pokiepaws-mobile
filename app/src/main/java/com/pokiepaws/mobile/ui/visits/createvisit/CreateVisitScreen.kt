@@ -17,8 +17,6 @@ fun CreateVisitScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(Unit) { viewModel.loadClinics() }
-
     LaunchedEffect(state.success) {
         if (state.success) onSuccess()
     }

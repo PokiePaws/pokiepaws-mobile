@@ -41,7 +41,7 @@ fun AnimalListScreen(
 
     LaunchedEffect(addedAnimalName) {
         val animalName = addedAnimalName ?: return@LaunchedEffect
-        viewModel.loadAnimals()
+        viewModel.syncAnimals()
         snackbarHostState.showSnackbar(String.format(animalAddedMessage, animalName))
         onAddedAnimalMessageShown()
     }
@@ -79,7 +79,7 @@ fun AnimalListScreen(
                 is AnimalListUiState.Error -> {
                     ErrorView(
                         message = uiState.message,
-                        onRetry = { viewModel.loadAnimals() },
+                        onRetry = { viewModel.syncAnimals() },
                     )
                 }
 

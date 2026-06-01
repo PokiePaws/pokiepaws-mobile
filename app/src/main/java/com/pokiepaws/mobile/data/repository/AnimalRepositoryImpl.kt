@@ -8,7 +8,8 @@ import com.pokiepaws.mobile.data.remote.service.AnimalApiService
 import com.pokiepaws.mobile.domain.model.Animal
 import com.pokiepaws.mobile.domain.model.AnimalDraft
 import com.pokiepaws.mobile.domain.repository.AnimalRepository
-import java.io.IOException
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import com.pokiepaws.mobile.data.remote.dto.animal.toDomain as responseToDomain
 
@@ -18,15 +19,21 @@ class AnimalRepositoryImpl
         private val apiService: AnimalApiService,
         private val animalDao: AnimalDao,
     ) : AnimalRepository {
-        override suspend fun getAnimals(): List<Animal> {
-            return runCatching {
+        override fun getAnimals(): Flow<List<Animal>> {
+            return animalDao.getAnimals().map { entities ->
+                entities.map { it.toDomain() }
+            }
+        }
+
+        override fun getAnimal(id: Long): Flow<Animal?> {
+            return animalDao.getAnimal(id).map { it?.toDomain() }
+        }
+
+        override suspend fun syncAnimals() {
+            runCatching {
                 apiService.getMyAnimals().map { it.responseToDomain() }
             }.onSuccess { animals ->
-                animalDao.clear()
-                animalDao.upsertAnimals(animals.map { it.toEntity() })
-            }.getOrElse { error ->
-                val cached = animalDao.getAnimals().map { it.toDomain() }
-                if (cached.isNotEmpty() && error is IOException) cached else throw error
+                animalDao.replaceAll(animals.map { it.toEntity() })
             }
         }
 
@@ -37,8 +44,7 @@ class AnimalRepositoryImpl
 
         override suspend fun deleteAnimal(id: Long) {
             apiService.deleteAnimal(id)
-            animalDao.clear()
-            animalDao.upsertAnimals(apiService.getMyAnimals().map { it.responseToDomain().toEntity() })
+            syncAnimals()
         }
     }
 

@@ -2,6 +2,7 @@ package com.pokiepaws.mobile.navigation
 
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -25,9 +26,13 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -65,10 +70,12 @@ import com.pokiepaws.mobile.ui.visits.visitlist.VisitListScreen
 import com.pokiepaws.mobile.util.theme.PokieBlue
 import com.pokiepaws.mobile.util.theme.PokieBlueLight
 import com.pokiepaws.mobile.util.theme.PokieWhite
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private const val ADDED_ANIMAL_NAME_KEY = "added_animal_name"
 private const val NAVIGATION_ANIMATION_DURATION_MS = 300
+private const val STARTUP_RELOAD_DELAY_MS = 450L
 
 @Composable
 fun AppNavigation(
@@ -78,17 +85,20 @@ fun AppNavigation(
 ) {
     val scope = rememberCoroutineScope()
     val tokenState by authRepository.token.collectAsState(initial = "loading")
+    var startupGateOpen by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(tokenState) {
+        if (tokenState != "loading" && !startupGateOpen) {
+            delay(STARTUP_RELOAD_DELAY_MS)
+            startupGateOpen = true
+        }
+    }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    if (tokenState == "loading") {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
-        ) {
-            CircularProgressIndicator(color = PokieBlue)
-        }
+    if (!startupGateOpen) {
+        StartupReloadView()
         return
     }
 
@@ -342,6 +352,22 @@ fun AppNavigation(
             composable(Screen.Language.route) {
                 LanguageScreen(onBack = { navController.popBackStack() })
             }
+        }
+    }
+}
+
+@Composable
+private fun StartupReloadView() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        AnimatedVisibility(
+            visible = true,
+            enter = fadeIn(animationSpec = navigationTween()),
+            exit = fadeOut(animationSpec = navigationTween()),
+        ) {
+            CircularProgressIndicator(color = PokieBlue)
         }
     }
 }

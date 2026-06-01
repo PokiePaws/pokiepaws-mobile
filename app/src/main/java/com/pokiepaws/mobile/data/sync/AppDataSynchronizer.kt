@@ -44,22 +44,24 @@ class AppDataSynchronizer
 
             runCatching {
                 val animals = api.animalApiService.getMyAnimals().map { it.animalResponseToDomain() }
-                dao.animalDao.clear()
-                dao.animalDao.upsertAnimals(animals.map { it.toEntity() })
+                dao.animalDao.replaceAll(animals.map { it.toEntity() })
 
                 val clinics = api.clinicApiService.getAll().map { it.toDomain() }
-                dao.clinicDao.clear()
-                dao.clinicDao.upsertClinics(clinics.map { it.toEntity() })
+                dao.clinicDao.replaceAll(clinics.map { it.toEntity() })
 
                 val upcomingVisits = api.visitApiService.getUpcomingOwnerVisits().map { it.toDomain() }
-                dao.visitDao.clearScope(UPCOMING_VISITS_SCOPE)
-                dao.visitDao.upsertVisits(upcomingVisits.map { it.toEntity(UPCOMING_VISITS_SCOPE) })
+                dao.visitDao.replaceScope(
+                    scope = UPCOMING_VISITS_SCOPE,
+                    visits = upcomingVisits.map { it.toEntity(UPCOMING_VISITS_SCOPE) },
+                )
 
                 animals.forEach { animal ->
                     val scope = animalVisitsScope(animal.id)
                     val visits = api.visitApiService.getVisitsByAnimal(animal.id).map { it.toDomain() }
-                    dao.visitDao.clearScope(scope)
-                    dao.visitDao.upsertVisits(visits.map { it.toEntity(scope) })
+                    dao.visitDao.replaceScope(
+                        scope = scope,
+                        visits = visits.map { it.toEntity(scope) },
+                    )
                 }
             }
         }

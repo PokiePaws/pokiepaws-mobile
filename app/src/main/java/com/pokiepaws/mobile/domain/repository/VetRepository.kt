@@ -1,7 +1,10 @@
 package com.pokiepaws.mobile.domain.repository
 
 import com.pokiepaws.mobile.domain.model.Vet
+import kotlinx.coroutines.flow.Flow
 
-fun interface VetRepository {
-    suspend fun getByClinic(clinicId: Long): List<Vet>
+interface VetRepository {
+    fun getByClinic(clinicId: Long): Flow<List<Vet>>
+
+    suspend fun syncByClinic(clinicId: Long)
 }

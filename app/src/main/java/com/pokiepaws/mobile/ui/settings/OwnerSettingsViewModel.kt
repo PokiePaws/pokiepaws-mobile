@@ -2,6 +2,7 @@ package com.pokiepaws.mobile.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pokiepaws.mobile.domain.connectivity.ConnectivityObserver
 import com.pokiepaws.mobile.domain.model.OwnerProfile
 import com.pokiepaws.mobile.domain.repository.AppSettingsRepository
 import com.pokiepaws.mobile.domain.repository.AuthRepository
@@ -19,13 +20,46 @@ class OwnerSettingsViewModel
     constructor(
         private val authRepository: AuthRepository,
         private val appSettingsRepository: AppSettingsRepository,
+        private val connectivityObserver: ConnectivityObserver,
     ) : ViewModel() {
-        private val _uiState = MutableStateFlow(OwnerSettingsUiState())
+        private val _uiState = MutableStateFlow(OwnerSettingsUiState(isOnline = connectivityObserver.isOnline.value))
         val uiState: StateFlow<OwnerSettingsUiState> = _uiState.asStateFlow()
 
         init {
-            observeAppSettings()
-            loadOwnerProfile()
+            observeStateChanges()
+            syncOwnerProfile()
+        }
+
+        private fun observeStateChanges() {
+            viewModelScope.launch {
+                connectivityObserver.isOnline.collect { online ->
+                    updateState { it.copy(isOnline = online) }
+                }
+            }
+            viewModelScope.launch {
+                authRepository.observeProfile().collect { profile ->
+                    profile?.let { p ->
+                        updateState { current -> current.withOwnerProfile(p) }
+                    }
+                }
+            }
+            viewModelScope.launch {
+                appSettingsRepository.foreignTravelPlanned.collect { value ->
+                    updateState { it.copy(foreignTravelPlanned = value) }
+                }
+            }
+        }
+
+        private fun syncOwnerProfile() {
+            viewModelScope.launch {
+                updateState { it.copy(errorMessage = null) }
+                runCatching { authRepository.syncProfile() }
+                    .onFailure { error ->
+                        updateState {
+                            it.copy(errorMessage = error.message ?: "Server connection error")
+                        }
+                    }
+            }
         }
 
         fun onEvent(event: OwnerSettingsEvent) {
@@ -54,6 +88,11 @@ class OwnerSettingsViewModel
         }
 
         fun deleteAccount(onDeleted: () -> Unit) {
+            if (!connectivityObserver.isOnline.value) {
+                updateState { it.copy(deleteAccountError = ONLINE_ACTION_REQUIRED_MESSAGE) }
+                return
+            }
+
             viewModelScope.launch {
                 updateState {
                     it.copy(
@@ -109,6 +148,10 @@ class OwnerSettingsViewModel
 
         private fun savePhone() {
             val current = _uiState.value
+            if (!connectivityObserver.isOnline.value) {
+                updateState { it.copy(errorMessage = ONLINE_ACTION_REQUIRED_MESSAGE) }
+                return
+            }
             if (!current.canSavePhone) return
 
             viewModelScope.launch {
@@ -130,6 +173,10 @@ class OwnerSettingsViewModel
 
         private fun saveAddress() {
             val current = _uiState.value
+            if (!connectivityObserver.isOnline.value) {
+                updateState { it.copy(errorMessage = ONLINE_ACTION_REQUIRED_MESSAGE) }
+                return
+            }
             if (!current.canSaveAddress) return
 
             viewModelScope.launch {
@@ -151,6 +198,10 @@ class OwnerSettingsViewModel
 
         private fun changePassword() {
             val current = _uiState.value
+            if (!connectivityObserver.isOnline.value) {
+                updateState { it.copy(errorMessage = ONLINE_ACTION_REQUIRED_MESSAGE) }
+                return
+            }
             if (!current.canChangePassword) return
 
             viewModelScope.launch {
@@ -182,6 +233,11 @@ class OwnerSettingsViewModel
         }
 
         private fun setForeignTravelPlanned(value: Boolean) {
+            if (!connectivityObserver.isOnline.value) {
+                updateState { it.copy(errorMessage = ONLINE_ACTION_REQUIRED_MESSAGE) }
+                return
+            }
+
             viewModelScope.launch {
                 appSettingsRepository.setForeignTravelPlanned(value)
             }
@@ -191,35 +247,12 @@ class OwnerSettingsViewModel
             updateState { it.copy(deleteAccountError = null) }
         }
 
-        private fun loadOwnerProfile() {
-            viewModelScope.launch {
-                updateState { it.copy(errorMessage = null) }
-                runCatching { authRepository.getCurrentOwnerProfile() }
-                    .onSuccess { profile ->
-                        updateState { current ->
-                            current.withOwnerProfile(profile)
-                        }
-                    }
-                    .onFailure { error ->
-                        updateState {
-                            it.copy(errorMessage = error.message ?: "Server connection error")
-                        }
-                    }
-            }
-        }
-
-        private fun observeAppSettings() {
-            viewModelScope.launch {
-                appSettingsRepository.foreignTravelPlanned.collect { value ->
-                    updateState { it.copy(foreignTravelPlanned = value) }
-                }
-            }
-        }
-
         private fun updateState(transform: (OwnerSettingsUiState) -> OwnerSettingsUiState) {
             _uiState.update(transform)
         }
     }
+
+private const val ONLINE_ACTION_REQUIRED_MESSAGE = "Ta akcja wymaga połączenia z internetem"
 
 private fun OwnerSettingsUiState.withOwnerProfile(profile: OwnerProfile): OwnerSettingsUiState =
     copy(

@@ -80,6 +80,7 @@
     <string name="animal_added_success">Zwierzę %1$s zostało dodane</string>
     <string name="error_title">Wystąpił błąd</string>
     <string name="retry_button">Spróbuj ponownie</string>
+    <string name="online_action_required">Ta akcja wymaga połączenia z internetem.</string>
     <string name="animal_species_label">Gatunek</string>
     <string name="animal_species_picker_title">Wybierz gatunek</string>
     <string name="animal_species_category_domestic">Zwierzęta domowe</string>

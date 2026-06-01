@@ -37,6 +37,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -78,6 +79,7 @@ fun VisitListContent(
     onCreateVisit: (Long) -> Unit,
     onRefreshAnimals: () -> Unit,
     onCancelVisit: (Long) -> Unit,
+    isOnline: Boolean,
     modifier: Modifier = Modifier,
 ) {
     var showAnimalPicker by remember { mutableStateOf(false) }
@@ -122,6 +124,7 @@ fun VisitListContent(
                         onRefreshAnimals()
                         showAnimalPicker = true
                     },
+                    enabled = isOnline,
                     modifier =
                         Modifier
                             .size(ADD_BUTTON_SIZE.dp)
@@ -145,6 +148,11 @@ fun VisitListContent(
                     .padding(horizontal = 16.dp)
                     .offset(y = SEARCH_BAR_OFFSET.dp),
         )
+        if (!isOnline) {
+            Snackbar(modifier = Modifier.padding(horizontal = 16.dp)) {
+                Text(stringResource(R.string.online_action_required))
+            }
+        }
         when (state) {
             is VisitListUiState.Loading ->
                 Box(
@@ -199,6 +207,7 @@ fun VisitListContent(
                                     onRefreshAnimals()
                                     showAnimalPicker = true
                                 },
+                                enabled = isOnline,
                                 modifier = Modifier.padding(top = 8.dp),
                             ) {
                                 Text(stringResource(R.string.visit_book_first))
@@ -251,6 +260,7 @@ fun VisitListContent(
                                     animalName = animalNames[v.animalId],
                                     onClick = { onVisitClick(v.id) },
                                     onCancel = onCancelVisit,
+                                    isOnline = isOnline,
                                 )
                             }
                         }
@@ -453,6 +463,7 @@ private fun VisitCard(
     animalName: String?,
     onClick: () -> Unit,
     onCancel: (Long) -> Unit,
+    isOnline: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -531,6 +542,7 @@ private fun VisitCard(
                     Button(
                         onClick = { onCancel(visit.id) },
                         modifier = Modifier.padding(top = 6.dp),
+                        enabled = isOnline,
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
                         colors =
                             ButtonDefaults.buttonColors(

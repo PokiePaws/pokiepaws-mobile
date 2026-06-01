@@ -17,17 +17,22 @@ fun VisitListScreen(
     animalViewModel: AnimalListViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
+    val isOnline by viewModel.isOnline.collectAsState()
     val animalState by animalViewModel.uiState.collectAsState()
 
-    LaunchedEffect(viewModel) { viewModel.loadUpcoming() }
+    LaunchedEffect(Unit) {
+        viewModel.syncUpcoming()
+        animalViewModel.syncAnimals()
+    }
 
     VisitListContent(
         state = state,
         animalState = animalState,
         onVisitClick = onVisitClick,
         onCreateVisit = onCreateVisit,
-        onRefreshAnimals = animalViewModel::loadAnimals,
+        onRefreshAnimals = { animalViewModel.syncAnimals() },
         onCancelVisit = viewModel::cancelVisit,
+        isOnline = isOnline,
         modifier = modifier,
     )
 }

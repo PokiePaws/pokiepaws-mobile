@@ -7,10 +7,8 @@ import com.pokiepaws.mobile.domain.repository.AppSettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
-import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,22 +24,17 @@ class AnimalCardViewModel
         fun loadAnimal(animalId: Long) {
             viewModelScope.launch {
                 _uiState.value = AnimalCardUiState.Loading
-                runCatching {
-                    val animal = repository.getAnimals().find { it.id == animalId }
-                    val travel = appSettingsRepository.foreignTravelPlanned.first()
-                    when {
-                        animal == null -> AnimalCardUiState.Error("Animal not found")
-                        else -> AnimalCardUiState.Success(animal, travel)
+
+                repository.getAnimal(animalId)
+                    .combine(appSettingsRepository.foreignTravelPlanned) { animal, travel ->
+                        when {
+                            animal == null -> AnimalCardUiState.Error("Animal not found")
+                            else -> AnimalCardUiState.Success(animal, travel)
+                        }
                     }
-                }.onSuccess { state -> _uiState.value = state }
-                    .onFailure { error -> _uiState.value = AnimalCardUiState.Error(error.toLoadMessage()) }
+                    .collect { state ->
+                        _uiState.value = state
+                    }
             }
         }
-    }
-
-private fun Throwable.toLoadMessage(): String =
-    when (this) {
-        is HttpException -> message ?: "Unable to load animal details"
-        is IOException -> message ?: "Server connection error"
-        else -> message ?: "Unable to load animal details"
     }

@@ -7,7 +7,8 @@ import com.pokiepaws.mobile.data.remote.dto.vet.VetListResponse
 import com.pokiepaws.mobile.data.remote.service.VetApiService
 import com.pokiepaws.mobile.domain.model.Vet
 import com.pokiepaws.mobile.domain.repository.VetRepository
-import java.io.IOException
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class VetRepositoryImpl
@@ -16,16 +17,21 @@ class VetRepositoryImpl
         private val api: VetApiService,
         private val vetDao: VetDao,
     ) : VetRepository {
-        override suspend fun getByClinic(clinicId: Long): List<Vet> =
+        override fun getByClinic(clinicId: Long): Flow<List<Vet>> =
+            vetDao.getByClinic(clinicId).map { entities ->
+                entities.map { it.toDomain() }
+            }
+
+        override suspend fun syncByClinic(clinicId: Long) {
             runCatching {
                 api.getByClinicList(clinicId).map { it.toDomain() }
             }.onSuccess { vets ->
-                vetDao.clearClinic(clinicId)
-                vetDao.upsertVets(vets.map { it.toEntity(clinicId) })
-            }.getOrElse { error ->
-                val cached = vetDao.getByClinic(clinicId).map { it.toDomain() }
-                if (cached.isNotEmpty() && error is IOException) cached else throw error
+                vetDao.replaceClinic(
+                    clinicId = clinicId,
+                    vets = vets.map { it.toEntity(clinicId) },
+                )
             }
+        }
     }
 
 private fun VetListResponse.toDomain(): Vet =

@@ -5,11 +5,12 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.pokiepaws.mobile.data.local.room.entities.OwnerProfileEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface OwnerProfileDao {
     @Query("SELECT * FROM owner_profile LIMIT 1")
-    suspend fun getProfile(): OwnerProfileEntity?
+    fun getProfile(): Flow<OwnerProfileEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertProfile(profile: OwnerProfileEntity)

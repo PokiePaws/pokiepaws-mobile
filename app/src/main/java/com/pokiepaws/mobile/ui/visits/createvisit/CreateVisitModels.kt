@@ -18,6 +18,7 @@ data class SlotItems(val items: List<String>)
 data class CreateVisitUiState(
     val step: CreateVisitStep = CreateVisitStep.SELECT_CLINIC,
     val isLoading: Boolean = false,
+    val isOnline: Boolean = true,
     val clinics: List<Clinic> = emptyList(),
     val vets: List<Vet> = emptyList(),
     val selectedClinic: Clinic? = null,

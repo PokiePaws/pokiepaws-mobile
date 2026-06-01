@@ -1,5 +1,6 @@
 package com.pokiepaws.mobile.ui.clinics.vetslist
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pokiepaws.mobile.domain.repository.VetRepository
@@ -8,6 +9,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val LOG_TAG = "VetsListViewModel"
 
 @HiltViewModel
 class VetsListViewModel
@@ -21,9 +24,20 @@ class VetsListViewModel
         fun load(clinicId: Long) {
             viewModelScope.launch {
                 _uiState.value = VetsUiState.Loading
-                runCatching { vetRepository.getByClinic(clinicId) }
-                    .onSuccess { vets -> _uiState.value = VetsUiState.Success(vets) }
-                    .onFailure { _uiState.value = VetsUiState.Error(it.message ?: "Load vets failed") }
+
+                vetRepository.getByClinic(clinicId).collect { vets ->
+                    _uiState.value = VetsUiState.Success(vets)
+                }
+            }
+            syncVets(clinicId)
+        }
+
+        private fun syncVets(clinicId: Long) {
+            viewModelScope.launch {
+                runCatching { vetRepository.syncByClinic(clinicId) }
+                    .onFailure { error ->
+                        Log.w(LOG_TAG, "Failed to sync vets: ${error.message ?: "unknown error"}", error)
+                    }
             }
         }
     }

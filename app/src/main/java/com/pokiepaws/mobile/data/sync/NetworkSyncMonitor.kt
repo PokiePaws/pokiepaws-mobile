@@ -10,6 +10,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,6 +23,7 @@ class NetworkSyncMonitor
         private val synchronizer: AppDataSynchronizer,
     ) {
         private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+        private val syncMutex = Mutex()
         private var registered = false
 
         fun start() {
@@ -38,13 +41,21 @@ class NetworkSyncMonitor
                 request,
                 object : ConnectivityManager.NetworkCallback() {
                     override fun onAvailable(network: Network) {
-                        scope.launch { synchronizer.syncReadableCache() }
+                        launchSync()
                     }
                 },
             )
 
             if (connectivityManager.activeNetwork != null) {
-                scope.launch { synchronizer.syncReadableCache() }
+                launchSync()
+            }
+        }
+
+        private fun launchSync() {
+            scope.launch {
+                syncMutex.withLock {
+                    synchronizer.syncReadableCache()
+                }
             }
         }
     }

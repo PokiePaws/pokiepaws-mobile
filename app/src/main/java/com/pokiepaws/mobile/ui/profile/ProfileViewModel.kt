@@ -21,14 +21,14 @@ class ProfileViewModel
         val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
         init {
-            loadProfile()
+            observeProfile()
+            syncProfile()
         }
 
-        fun loadProfile() {
+        private fun observeProfile() {
             viewModelScope.launch {
-                _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-                runCatching { authRepository.getCurrentOwnerProfile() }
-                    .onSuccess { profile ->
+                authRepository.observeProfile().collect { profile ->
+                    if (profile != null) {
                         _uiState.update {
                             it.copy(
                                 displayName = profile.displayName.ifBlank { profile.email },
@@ -38,6 +38,14 @@ class ProfileViewModel
                             )
                         }
                     }
+                }
+            }
+        }
+
+        fun syncProfile() {
+            viewModelScope.launch {
+                _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+                runCatching { authRepository.syncProfile() }
                     .onFailure { error ->
                         _uiState.update {
                             it.copy(
@@ -47,5 +55,9 @@ class ProfileViewModel
                         }
                     }
             }
+        }
+
+        fun loadProfile() {
+            syncProfile()
         }
     }

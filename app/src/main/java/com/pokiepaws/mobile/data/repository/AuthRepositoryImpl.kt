@@ -21,8 +21,8 @@ import com.pokiepaws.mobile.domain.model.RegistrationDraft
 import com.pokiepaws.mobile.domain.repository.AuthRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import retrofit2.HttpException
-import java.io.IOException
 import javax.inject.Inject
 
 class AuthRepositoryImpl
@@ -34,6 +34,16 @@ class AuthRepositoryImpl
         private val ownerProfileDao: OwnerProfileDao,
     ) : AuthRepository {
         override val token: Flow<String?> = tokenManager.token
+
+        override fun observeProfile(): Flow<OwnerProfile?> = ownerProfileDao.getProfile().map { it?.toDomain() }
+
+        override suspend fun syncProfile() {
+            runCatching {
+                authApiService.getCurrentOwnerProfile().toDomain()
+            }.onSuccess { profile ->
+                ownerProfileDao.upsertProfile(profile.toEntity())
+            }
+        }
 
         override suspend fun login(
             email: String,
@@ -58,16 +68,6 @@ class AuthRepositoryImpl
                 throw HttpException(response)
             }
         }
-
-        override suspend fun getCurrentOwnerProfile(): OwnerProfile =
-            runCatching {
-                authApiService.getCurrentOwnerProfile().toDomain()
-            }.onSuccess { profile ->
-                ownerProfileDao.upsertProfile(profile.toEntity())
-            }.getOrElse { error ->
-                val cached = ownerProfileDao.getProfile()?.toDomain()
-                if (cached != null && error is IOException) cached else throw error
-            }
 
         override suspend fun updateOwnerPhone(phone: OwnerPhoneDraft) {
             val response = authApiService.updateOwnerPhone(phone.toRequest())

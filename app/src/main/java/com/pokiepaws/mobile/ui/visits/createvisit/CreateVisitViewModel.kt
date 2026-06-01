@@ -2,6 +2,7 @@ package com.pokiepaws.mobile.ui.visits.createvisit
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pokiepaws.mobile.domain.connectivity.ConnectivityObserver
 import com.pokiepaws.mobile.domain.model.Clinic
 import com.pokiepaws.mobile.domain.model.CreateVisitDraft
 import com.pokiepaws.mobile.domain.model.CreateVisitStep
@@ -26,24 +27,39 @@ class CreateVisitViewModel
         private val clinicRepository: ClinicRepository,
         private val vetRepository: VetRepository,
         private val visitRepository: VisitRepository,
+        private val connectivityObserver: ConnectivityObserver,
     ) : ViewModel() {
-        private val _uiState = MutableStateFlow(CreateVisitUiState())
+        private val _uiState = MutableStateFlow(CreateVisitUiState(isOnline = connectivityObserver.isOnline.value))
         val uiState: StateFlow<CreateVisitUiState> = _uiState.asStateFlow()
 
-        fun loadClinics() {
-            if (_uiState.value.clinics.isEmpty()) {
-                viewModelScope.launch {
-                    _uiState.update { it.copy(isLoading = true, error = null) }
-                    runCatching { clinicRepository.getClinics() }
-                        .onSuccess { clinics ->
-                            _uiState.update { it.copy(isLoading = false, clinics = clinics) }
-                        }
-                        .onFailure { error ->
-                            _uiState.update {
-                                it.copy(isLoading = false, error = error.message ?: "Nie udalo sie zaladowac gabinetow")
-                            }
-                        }
+        init {
+            observeInitialData()
+            syncClinics()
+        }
+
+        private fun observeInitialData() {
+            viewModelScope.launch {
+                connectivityObserver.isOnline.collect { online ->
+                    _uiState.update { it.copy(isOnline = online) }
                 }
+            }
+            viewModelScope.launch {
+                clinicRepository.getClinics().collect { clinics ->
+                    _uiState.update { it.copy(clinics = clinics) }
+                }
+            }
+        }
+
+        private fun syncClinics() {
+            viewModelScope.launch {
+                _uiState.update { it.copy(isLoading = true, error = null) }
+                runCatching { clinicRepository.syncClinics() }
+                    .onSuccess { _uiState.update { it.copy(isLoading = false) } }
+                    .onFailure { error ->
+                        _uiState.update {
+                            it.copy(isLoading = false, error = error.message ?: "Nie udalo sie zaladowac gabinetow")
+                        }
+                    }
             }
         }
 
@@ -60,7 +76,29 @@ class CreateVisitViewModel
                     error = null,
                 )
             }
-            loadVets(clinic.id)
+            observeVets(clinic.id)
+            syncVets(clinic.id)
+        }
+
+        private fun observeVets(clinicId: Long) {
+            viewModelScope.launch {
+                vetRepository.getByClinic(clinicId).collect { vets ->
+                    _uiState.update { it.copy(vets = vets) }
+                }
+            }
+        }
+
+        private fun syncVets(clinicId: Long) {
+            viewModelScope.launch {
+                _uiState.update { it.copy(isLoading = true, error = null) }
+                runCatching { vetRepository.syncByClinic(clinicId) }
+                    .onSuccess { _uiState.update { it.copy(isLoading = false) } }
+                    .onFailure { error ->
+                        _uiState.update {
+                            it.copy(isLoading = false, error = error.message ?: "Nie udalo sie zaladowac weterynarzy")
+                        }
+                    }
+            }
         }
 
         fun selectVet(vet: Vet) {
@@ -77,6 +115,11 @@ class CreateVisitViewModel
         }
 
         fun selectDate(date: String) {
+            if (!connectivityObserver.isOnline.value) {
+                _uiState.update { it.copy(error = ONLINE_ACTION_REQUIRED_MESSAGE) }
+                return
+            }
+
             val parsedDate = parseVisitDate(date)
             val clinic = _uiState.value.selectedClinic
             val vet = _uiState.value.selectedVet
@@ -136,6 +179,11 @@ class CreateVisitViewModel
         }
 
         fun confirm(animalId: Long) {
+            if (!connectivityObserver.isOnline.value) {
+                _uiState.update { it.copy(error = ONLINE_ACTION_REQUIRED_MESSAGE) }
+                return
+            }
+
             val request = _uiState.value.toCreateVisitDraft(animalId)
 
             if (request == null) {
@@ -184,22 +232,9 @@ class CreateVisitViewModel
         fun clearError() {
             _uiState.update { it.copy(error = null) }
         }
-
-        private fun loadVets(clinicId: Long) {
-            viewModelScope.launch {
-                _uiState.update { it.copy(isLoading = true, error = null) }
-                runCatching { vetRepository.getByClinic(clinicId) }
-                    .onSuccess { vets ->
-                        _uiState.update { it.copy(isLoading = false, vets = vets) }
-                    }
-                    .onFailure { error ->
-                        _uiState.update {
-                            it.copy(isLoading = false, error = error.message ?: "Nie udalo sie zaladowac weterynarzy")
-                        }
-                    }
-            }
-        }
     }
+
+private const val ONLINE_ACTION_REQUIRED_MESSAGE = "Ta akcja wymaga połączenia z internetem"
 
 private fun parseVisitDate(date: String): LocalDate? = runCatching { LocalDate.parse(date) }.getOrNull()
 

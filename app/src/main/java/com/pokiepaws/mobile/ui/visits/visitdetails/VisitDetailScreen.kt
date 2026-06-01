@@ -15,11 +15,13 @@ fun VisitDetailScreen(
     viewModel: VisitDetailViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
+    val isOnline by viewModel.isOnline.collectAsState()
 
     LaunchedEffect(visitId) { viewModel.load(visitId) }
 
     VisitDetailContent(
         state = state,
+        isOnline = isOnline,
         onBack = onBack,
         onCancelVisit = { viewModel.cancel(visitId, onDone = onBack) },
         modifier = modifier,

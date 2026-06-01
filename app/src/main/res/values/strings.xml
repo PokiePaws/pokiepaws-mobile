@@ -80,6 +80,7 @@
     <string name="animal_added_success">Animal %1$s has been added</string>
     <string name="error_title">An error occurred</string>
     <string name="retry_button">Try again</string>
+    <string name="online_action_required">This action requires an internet connection.</string>
     <string name="animal_species_label">Species</string>
     <string name="animal_species_picker_title">Choose species</string>
     <string name="animal_species_category_domestic">Domestic animals</string>

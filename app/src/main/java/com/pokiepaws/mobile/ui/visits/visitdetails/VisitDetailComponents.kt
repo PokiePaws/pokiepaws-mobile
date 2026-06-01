@@ -61,6 +61,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun VisitDetailContent(
     state: VisitDetailUiState,
+    isOnline: Boolean,
     onBack: () -> Unit,
     onCancelVisit: () -> Unit,
     modifier: Modifier = Modifier,
@@ -131,6 +132,7 @@ fun VisitDetailContent(
             is VisitDetailUiState.Success ->
                 VisitDetailsBody(
                     visit = state.visit,
+                    isOnline = isOnline,
                     onCancelClick = { showCancelDialog = true },
                 )
         }
@@ -166,6 +168,7 @@ fun VisitDetailContent(
 @Composable
 private fun VisitDetailsBody(
     visit: Visit,
+    isOnline: Boolean,
     onCancelClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -253,6 +256,7 @@ private fun VisitDetailsBody(
             Button(
                 onClick = onCancelClick,
                 modifier = Modifier.fillMaxWidth(),
+                enabled = isOnline,
                 shape = RoundedCornerShape(16.dp),
                 colors =
                     ButtonDefaults.buttonColors(

@@ -7,7 +7,8 @@ import com.pokiepaws.mobile.data.remote.dto.clinic.ClinicResponse
 import com.pokiepaws.mobile.data.remote.service.ClinicApiService
 import com.pokiepaws.mobile.domain.model.Clinic
 import com.pokiepaws.mobile.domain.repository.ClinicRepository
-import java.io.IOException
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class ClinicRepositoryImpl
@@ -16,16 +17,18 @@ class ClinicRepositoryImpl
         private val api: ClinicApiService,
         private val clinicDao: ClinicDao,
     ) : ClinicRepository {
-        override suspend fun getClinics(): List<Clinic> =
+        override fun getClinics(): Flow<List<Clinic>> =
+            clinicDao.getClinics().map { entities ->
+                entities.map { it.toDomain() }
+            }
+
+        override suspend fun syncClinics() {
             runCatching {
                 api.getAll().map { it.toDomain() }
             }.onSuccess { clinics ->
-                clinicDao.clear()
-                clinicDao.upsertClinics(clinics.map { it.toEntity() })
-            }.getOrElse { error ->
-                val cached = clinicDao.getClinics().map { it.toDomain() }
-                if (cached.isNotEmpty() && error is IOException) cached else throw error
+                clinicDao.replaceAll(clinics.map { it.toEntity() })
             }
+        }
     }
 
 private fun ClinicResponse.toDomain(): Clinic =

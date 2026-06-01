@@ -47,6 +47,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -91,6 +92,10 @@ fun SettingsScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 24.dp),
         ) {
+            ErrorText(
+                message = if (state.isOnline) null else stringResource(R.string.online_action_required),
+                modifier = Modifier.padding(bottom = 8.dp),
+            )
             PhoneSettingsSection(state = state, onEvent = viewModel::onEvent)
             Spacer(modifier = Modifier.height(16.dp))
             AddressSettingsSection(state = state, onEvent = viewModel::onEvent)
@@ -111,6 +116,7 @@ fun SettingsScreen(
     if (showDeleteAccountDialog) {
         DeleteAccountDialog(
             isDeleting = state.isDeletingAccount,
+            isOnline = state.isOnline,
             onConfirm = {
                 showDeleteAccountDialog = false
                 viewModel.deleteAccount(onAccountDeleted)
@@ -192,6 +198,7 @@ private fun TravelSection(
             Switch(
                 checked = state.foreignTravelPlanned,
                 onCheckedChange = { onEvent(OwnerSettingsEvent.ForeignTravelPlannedChanged(it)) },
+                enabled = state.isOnline,
             )
         }
     }
@@ -208,6 +215,7 @@ private fun AccountSection(
     ) {
         DeleteAccountButton(
             isDeleting = state.isDeletingAccount,
+            enabled = state.isOnline,
             onClick = onDeleteAccountClick,
         )
 
@@ -225,14 +233,16 @@ private fun AccountSection(
 @Composable
 private fun DeleteAccountButton(
     isDeleting: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit,
 ) {
     Card(
         modifier =
             Modifier
                 .fillMaxWidth()
+                .alpha(if (enabled) 1f else DISABLED_ACTION_ALPHA)
                 .clickable(
-                    enabled = !isDeleting,
+                    enabled = enabled && !isDeleting,
                     onClick = onClick,
                 ),
         shape = RoundedCornerShape(INPUT_ROUNDING.dp),
@@ -293,6 +303,7 @@ private fun DeleteAccountButton(
 @Composable
 private fun DeleteAccountDialog(
     isDeleting: Boolean,
+    isOnline: Boolean,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -302,7 +313,7 @@ private fun DeleteAccountDialog(
         text = { Text(text = stringResource(R.string.profile_delete_account_dialog_message)) },
         confirmButton = {
             TextButton(
-                enabled = !isDeleting,
+                enabled = !isDeleting && isOnline,
                 onClick = onConfirm,
             ) {
                 Text(
@@ -491,5 +502,6 @@ private const val ICON_BG_ROUNDING = 12
 private const val INDICATOR_SIZE = 18
 private const val INPUT_ROUNDING = 12
 private const val SECTION_DIVIDER_ALPHA = 0.7f
+private const val DISABLED_ACTION_ALPHA = 0.5f
 private val DeleteColor = Color(0xFFEF4444)
 private val DeleteIconBg = Color(0xFFFEE2E2)

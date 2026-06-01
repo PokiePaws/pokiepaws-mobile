@@ -1,15 +1,22 @@
 package com.pokiepaws.mobile.ui.animals.animallist
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pokiepaws.mobile.domain.repository.AnimalRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
+
+private const val LOG_TAG = "AnimalListViewModel"
 
 @HiltViewModel
 class AnimalListViewModel
@@ -17,19 +24,26 @@ class AnimalListViewModel
     constructor(
         private val repository: AnimalRepository,
     ) : ViewModel() {
-        private val _uiState = MutableStateFlow<AnimalListUiState>(AnimalListUiState.Loading)
-        val uiState: StateFlow<AnimalListUiState> = _uiState
+        val uiState: StateFlow<AnimalListUiState> =
+            repository.getAnimals()
+                .map { animals -> AnimalListUiState.Success(animals) as AnimalListUiState }
+                .onStart {
+                    emit(AnimalListUiState.Loading)
+                    syncAnimals()
+                }
+                .catch { error -> emit(AnimalListUiState.Error(error.toLoadMessage())) }
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(5000),
+                    initialValue = AnimalListUiState.Loading,
+                )
 
-        init {
-            loadAnimals()
-        }
-
-        fun loadAnimals() {
+        fun syncAnimals() {
             viewModelScope.launch {
-                _uiState.value = AnimalListUiState.Loading
-                runCatching { repository.getAnimals() }
-                    .onSuccess { animals -> _uiState.value = AnimalListUiState.Success(animals) }
-                    .onFailure { error -> _uiState.value = AnimalListUiState.Error(error.toLoadMessage()) }
+                runCatching { repository.syncAnimals() }
+                    .onFailure { error ->
+                        Log.w(LOG_TAG, "Failed to sync animals: ${error.message ?: "unknown error"}", error)
+                    }
             }
         }
     }

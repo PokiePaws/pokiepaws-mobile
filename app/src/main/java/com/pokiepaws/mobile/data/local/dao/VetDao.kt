@@ -4,12 +4,14 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import com.pokiepaws.mobile.data.local.room.entities.VetEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface VetDao {
     @Query("SELECT * FROM vets WHERE clinicId = :clinicId ORDER BY lastName COLLATE NOCASE, firstName COLLATE NOCASE")
-    suspend fun getByClinic(clinicId: Long): List<VetEntity>
+    fun getByClinic(clinicId: Long): Flow<List<VetEntity>>
 
     @Query("DELETE FROM vets WHERE clinicId = :clinicId")
     suspend fun clearClinic(clinicId: Long)
@@ -19,4 +21,13 @@ interface VetDao {
 
     @Query("DELETE FROM vets")
     suspend fun clear()
+
+    @Transaction
+    suspend fun replaceClinic(
+        clinicId: Long,
+        vets: List<VetEntity>,
+    ) {
+        clearClinic(clinicId)
+        upsertVets(vets)
+    }
 }

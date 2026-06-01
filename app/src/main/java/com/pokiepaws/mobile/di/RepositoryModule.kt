@@ -1,5 +1,6 @@
 package com.pokiepaws.mobile.di
 
+import com.pokiepaws.mobile.data.remote.AndroidConnectivityObserver
 import com.pokiepaws.mobile.data.repository.AnimalRepositoryImpl
 import com.pokiepaws.mobile.data.repository.AppSettingsRepositoryImpl
 import com.pokiepaws.mobile.data.repository.AuthRepositoryImpl
@@ -7,6 +8,7 @@ import com.pokiepaws.mobile.data.repository.ClinicRepositoryImpl
 import com.pokiepaws.mobile.data.repository.NotificationRepositoryImpl
 import com.pokiepaws.mobile.data.repository.VetRepositoryImpl
 import com.pokiepaws.mobile.data.repository.VisitRepositoryImpl
+import com.pokiepaws.mobile.domain.connectivity.ConnectivityObserver
 import com.pokiepaws.mobile.domain.repository.AnimalRepository
 import com.pokiepaws.mobile.domain.repository.AppSettingsRepository
 import com.pokiepaws.mobile.domain.repository.AuthRepository
@@ -24,6 +26,10 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 @Suppress("unused")
 interface RepositoryModule {
+    @Binds
+    @Singleton
+    fun bindConnectivityObserver(androidConnectivityObserver: AndroidConnectivityObserver): ConnectivityObserver
+
     @Binds
     @Singleton
     fun bindAnimalRepository(animalRepositoryImpl: AnimalRepositoryImpl): AnimalRepository

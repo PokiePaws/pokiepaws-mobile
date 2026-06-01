@@ -32,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -61,6 +62,8 @@ import java.time.format.DateTimeFormatter
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddAnimalContent(
+    uiState: AddAnimalUiState,
+    isOnline: Boolean,
     onBack: () -> Unit,
     onAnimalAdded: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -261,6 +264,15 @@ fun AddAnimalContent(
                 shape = RoundedCornerShape(12.dp),
             )
             Spacer(modifier = Modifier.height(16.dp))
+            if (!isOnline) {
+                Snackbar(modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.online_action_required))
+                }
+            } else if (uiState is AddAnimalUiState.Error) {
+                Snackbar(modifier = Modifier.fillMaxWidth()) {
+                    Text(uiState.message)
+                }
+            }
             Button(
                 onClick = {
                     val animalName = name.trim()
@@ -286,7 +298,7 @@ fun AddAnimalContent(
                         .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = PokieBlue),
-                enabled = name.isNotBlank(),
+                enabled = name.isNotBlank() && isOnline && uiState !is AddAnimalUiState.Loading,
             ) {
                 Text(
                     text = stringResource(R.string.animal_save_button),

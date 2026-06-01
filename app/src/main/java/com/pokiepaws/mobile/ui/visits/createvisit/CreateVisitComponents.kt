@@ -149,7 +149,7 @@ fun CreateVisitContent(
                 )
 
                 ErrorSnackbar(
-                    error = state.error,
+                    error = state.error ?: if (!state.isOnline) stringResource(R.string.online_action_required) else null,
                     onDismiss = onClearError,
                     modifier = Modifier.align(Alignment.BottomCenter),
                 )
@@ -199,6 +199,7 @@ private fun CreateVisitStepContent(
                 selectedDate = state.selectedDate,
                 slots = SlotItems(state.availableSlots),
                 isLoading = state.isLoading,
+                isOnline = state.isOnline,
                 onDateSelected = onSelectDate,
                 onSlotSelected = onSelectSlot,
             )
@@ -210,6 +211,7 @@ private fun CreateVisitStepContent(
                 onDescriptionChange = onDescriptionChange,
                 onConfirm = onConfirm,
                 isLoading = state.isLoading,
+                isOnline = state.isOnline,
             )
     }
 }
@@ -501,6 +503,7 @@ private fun SlotStep(
     selectedDate: String?,
     slots: SlotItems,
     isLoading: Boolean,
+    isOnline: Boolean,
     onDateSelected: (String) -> Unit,
     onSlotSelected: (String) -> Unit,
 ) {
@@ -552,7 +555,7 @@ private fun SlotStep(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .clickable { showDatePicker = true },
+                    .clickable(enabled = isOnline) { showDatePicker = true },
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(6.dp),
             colors = CardDefaults.cardColors(containerColor = PokieWhite),
@@ -602,7 +605,7 @@ private fun SlotStep(
                     items(slots.items) { slot ->
                         val time = slot.substringAfter("T").take(TIME_LABEL_LENGTH)
                         Card(
-                            onClick = { onSlotSelected(slot) },
+                            onClick = { if (isOnline) onSlotSelected(slot) },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.cardColors(containerColor = PokieWhite),
@@ -650,6 +653,7 @@ private fun ConfirmStep(
     onDescriptionChange: (VisitDescription) -> Unit,
     onConfirm: () -> Unit,
     isLoading: Boolean,
+    isOnline: Boolean,
 ) {
     Column(
         modifier =
@@ -710,7 +714,7 @@ private fun ConfirmStep(
         Button(
             onClick = onConfirm,
             modifier = Modifier.fillMaxWidth().height(52.dp),
-            enabled = !isLoading,
+            enabled = !isLoading && isOnline,
             shape = RoundedCornerShape(16.dp),
             colors =
                 ButtonDefaults.buttonColors(

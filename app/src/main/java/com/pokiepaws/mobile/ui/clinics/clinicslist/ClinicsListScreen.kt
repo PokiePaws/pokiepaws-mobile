@@ -35,7 +35,7 @@ fun ClinicsListScreen(
     val state by viewModel.uiState.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) { viewModel.load() }
+    LaunchedEffect(Unit) { viewModel.sync() }
 
     Column(
         modifier =

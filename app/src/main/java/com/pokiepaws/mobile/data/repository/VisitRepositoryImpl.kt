@@ -10,7 +10,8 @@ import com.pokiepaws.mobile.domain.model.CreateVisitDraft
 import com.pokiepaws.mobile.domain.model.Visit
 import com.pokiepaws.mobile.domain.model.VisitDescription
 import com.pokiepaws.mobile.domain.repository.VisitRepository
-import java.io.IOException
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class VisitRepositoryImpl
@@ -19,11 +20,48 @@ class VisitRepositoryImpl
         private val api: VisitApiService,
         private val visitDao: VisitDao,
     ) : VisitRepository {
-        override suspend fun getUpcoming(): List<Visit> =
-            getNetworkFirstVisits(
-                scope = UPCOMING_VISITS_SCOPE,
-                fetch = { api.getUpcomingOwnerVisits().map { it.toDomain() } },
-            )
+        override fun getUpcoming(): Flow<List<Visit>> =
+            visitDao.getVisits(UPCOMING_VISITS_SCOPE).map { entities ->
+                entities.map { it.toDomain() }
+            }
+
+        override fun getById(visitId: Long): Flow<Visit?> = visitDao.getVisit(visitId).map { it?.toDomain() }
+
+        override fun getByAnimal(animalId: Long): Flow<List<Visit>> =
+            visitDao.getVisits(animalVisitsScope(animalId)).map { entities ->
+                entities.map { it.toDomain() }
+            }
+
+        override suspend fun syncUpcoming() {
+            runCatching {
+                api.getUpcomingOwnerVisits().map { it.toDomain() }
+            }.onSuccess { visits ->
+                visitDao.replaceScope(
+                    scope = UPCOMING_VISITS_SCOPE,
+                    visits = visits.map { it.toEntity(UPCOMING_VISITS_SCOPE) },
+                )
+            }
+        }
+
+        override suspend fun syncById(visitId: Long) {
+            runCatching {
+                api.getVisitById(visitId).toDomain()
+            }.onSuccess { visit ->
+                visitDao.upsertVisits(listOf(visit.toEntity(DETAIL_VISITS_SCOPE)))
+            }
+        }
+
+        override suspend fun syncByAnimal(animalId: Long) {
+            val scope = animalVisitsScope(animalId)
+            runCatching {
+                api.getVisitsByAnimal(animalId).map { it.toDomain() }
+            }.onSuccess { visits ->
+                visitDao.replaceScope(
+                    scope = scope,
+                    visits = visits.map { it.toEntity(scope) },
+                )
+            }
+        }
 
         override suspend fun cancel(visitId: Long): Visit =
             api.cancelVisit(visitId).toDomain().also { visit ->
@@ -34,22 +72,6 @@ class VisitRepositoryImpl
                     ),
                 )
             }
-
-        override suspend fun getById(visitId: Long): Visit =
-            runCatching {
-                api.getVisitById(visitId).toDomain()
-            }.onSuccess { visit ->
-                visitDao.upsertVisits(listOf(visit.toEntity(DETAIL_VISITS_SCOPE)))
-            }.getOrElse { error ->
-                val cached = visitDao.getVisit(visitId)?.toDomain()
-                if (cached != null && error is IOException) cached else throw error
-            }
-
-        override suspend fun getByAnimal(animalId: Long): List<Visit> =
-            getNetworkFirstVisits(
-                scope = animalVisitsScope(animalId),
-                fetch = { api.getVisitsByAnimal(animalId).map { it.toDomain() } },
-            )
 
         override suspend fun getAvailableSlots(
             clinicId: Long,
@@ -70,20 +92,6 @@ class VisitRepositoryImpl
                         createdVisit.toEntity(animalVisitsScope(createdVisit.animalId)),
                     ),
                 )
-            }
-
-        private suspend fun getNetworkFirstVisits(
-            scope: String,
-            fetch: suspend () -> List<Visit>,
-        ): List<Visit> =
-            runCatching {
-                fetch()
-            }.onSuccess { visits ->
-                visitDao.clearScope(scope)
-                visitDao.upsertVisits(visits.map { it.toEntity(scope) })
-            }.getOrElse { error ->
-                val cached = visitDao.getVisits(scope).map { it.toDomain() }
-                if (cached.isNotEmpty() && error is IOException) cached else throw error
             }
     }
 

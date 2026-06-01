@@ -1,5 +1,6 @@
 package com.pokiepaws.mobile.ui.animals.animalvisitshistory
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pokiepaws.mobile.domain.repository.VisitRepository
@@ -8,9 +9,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
-import java.io.IOException
 import javax.inject.Inject
+
+private const val LOG_TAG = "AnimalVisitsHistoryVM"
 
 @HiltViewModel
 class AnimalVisitsHistoryViewModel
@@ -24,20 +25,20 @@ class AnimalVisitsHistoryViewModel
         fun loadVisits(animalId: Long) {
             viewModelScope.launch {
                 _uiState.value = AnimalVisitsHistoryUiState.Loading
-                runCatching { visitRepository.getByAnimal(animalId) }
-                    .onSuccess { visits ->
-                        _uiState.value = AnimalVisitsHistoryUiState.Success(visits)
-                    }
+
+                visitRepository.getByAnimal(animalId).collect { visits ->
+                    _uiState.value = AnimalVisitsHistoryUiState.Success(visits)
+                }
+            }
+            syncVisits(animalId)
+        }
+
+        private fun syncVisits(animalId: Long) {
+            viewModelScope.launch {
+                runCatching { visitRepository.syncByAnimal(animalId) }
                     .onFailure { error ->
-                        _uiState.value = AnimalVisitsHistoryUiState.Error(error.toLoadMessage())
+                        Log.w(LOG_TAG, "Failed to sync visit history: ${error.message ?: "unknown error"}", error)
                     }
             }
         }
-    }
-
-private fun Throwable.toLoadMessage(): String =
-    when (this) {
-        is HttpException -> message ?: "Failed to load visit history"
-        is IOException -> message ?: "Server connection error"
-        else -> message ?: "Failed to load visit history"
     }

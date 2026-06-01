@@ -10,14 +10,16 @@ import kotlinx.coroutines.flow.Flow
 interface AuthRepository {
     val token: Flow<String?>
 
+    fun observeProfile(): Flow<OwnerProfile?>
+
+    suspend fun syncProfile()
+
     suspend fun login(
         email: String,
         password: String,
     ): AuthSession
 
     suspend fun register(registration: RegistrationDraft)
-
-    suspend fun getCurrentOwnerProfile(): OwnerProfile
 
     suspend fun updateOwnerPhone(phone: OwnerPhoneDraft)
 

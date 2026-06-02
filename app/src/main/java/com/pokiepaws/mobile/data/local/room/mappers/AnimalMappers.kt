@@ -15,6 +15,7 @@ fun AnimalEntity.toDomain(): Animal =
         microchipNumber = microchipNumber,
         weight = weight,
         birthDate = birthDate,
+        rabiesVaccinationDate = rabiesVaccinationDate,
         nextRabiesVaccinationDate = nextRabiesVaccinationDate,
         notes = notes,
     )
@@ -30,6 +31,7 @@ fun Animal.toEntity(): AnimalEntity =
         microchipNumber = microchipNumber,
         weight = weight,
         birthDate = birthDate,
+        rabiesVaccinationDate = rabiesVaccinationDate,
         nextRabiesVaccinationDate = nextRabiesVaccinationDate,
         notes = notes,
     )

@@ -10,6 +10,7 @@ data class Animal(
     val microchipNumber: String? = null,
     val weight: Double? = null,
     val birthDate: String? = null,
+    val rabiesVaccinationDate: String? = null,
     val nextRabiesVaccinationDate: String? = null,
     val notes: String? = null,
 )

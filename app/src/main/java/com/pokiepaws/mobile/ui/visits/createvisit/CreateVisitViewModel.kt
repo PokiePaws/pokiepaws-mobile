@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -148,10 +149,11 @@ class CreateVisitViewModel
                             date = date,
                         )
                     }.onSuccess { slots ->
+                        val availableFutureSlots = slots.futureSlots()
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
-                                availableSlots = slots,
+                                availableSlots = availableFutureSlots,
                                 error = null,
                             )
                         }
@@ -169,6 +171,11 @@ class CreateVisitViewModel
         }
 
         fun selectSlot(slot: String) {
+            if (!slot.isFutureSlot()) {
+                _uiState.update { it.copy(error = "Wybrana godzina juz minela. Wybierz najblizszy dostepny termin.") }
+                return
+            }
+
             _uiState.update {
                 it.copy(step = CreateVisitStep.CONFIRM, selectedSlot = slot, error = null)
             }
@@ -185,8 +192,17 @@ class CreateVisitViewModel
             }
 
             val request = _uiState.value.toCreateVisitDraft(animalId)
+            val selectedSlot = _uiState.value.selectedSlot
 
-            if (request == null) {
+            if (selectedSlot != null && !selectedSlot.isFutureSlot()) {
+                _uiState.update {
+                    it.copy(
+                        step = CreateVisitStep.SELECT_SLOT,
+                        selectedSlot = null,
+                        error = "Wybrana godzina juz minela. Wybierz najblizszy dostepny termin.",
+                    )
+                }
+            } else if (request == null) {
                 _uiState.update { it.copy(error = "Uzupelnij wszystkie dane wizyty") }
             } else {
                 viewModelScope.launch {
@@ -237,6 +253,19 @@ class CreateVisitViewModel
 private const val ONLINE_ACTION_REQUIRED_MESSAGE = "Ta akcja wymaga połączenia z internetem"
 
 private fun parseVisitDate(date: String): LocalDate? = runCatching { LocalDate.parse(date) }.getOrNull()
+
+private fun List<String>.futureSlots(): List<String> =
+    filter { it.isFutureSlot() }
+        .sortedBy { it.toSlotDateTimeOrNull() }
+
+private fun String.isFutureSlot(now: LocalDateTime = LocalDateTime.now()): Boolean {
+    return toSlotDateTimeOrNull()?.isAfter(now) == true
+}
+
+private fun String.toSlotDateTimeOrNull(): LocalDateTime? =
+    runCatching { LocalDateTime.parse(this) }
+        .recoverCatching { LocalDateTime.parse(substringBefore("+")) }
+        .getOrNull()
 
 private fun CreateVisitUiState.toCreateVisitDraft(animalId: Long): CreateVisitDraft? {
     val clinic = selectedClinic

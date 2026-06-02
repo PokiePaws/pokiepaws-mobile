@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pokiepaws.mobile.ui.common.SecureScreen
 
 @Composable
 fun AnimalVisitsHistoryScreen(
@@ -14,6 +15,8 @@ fun AnimalVisitsHistoryScreen(
     modifier: Modifier = Modifier,
     viewModel: AnimalVisitsHistoryViewModel = hiltViewModel(),
 ) {
+    SecureScreen()
+
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(animalId) {

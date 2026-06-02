@@ -63,6 +63,10 @@ import com.pokiepaws.mobile.domain.model.VisitDescription
 import com.pokiepaws.mobile.ui.animals.addanimal.animalSpeciesLabel
 import com.pokiepaws.mobile.ui.animals.animallist.AnimalListUiState
 import com.pokiepaws.mobile.ui.clinics.clinicslist.ClinicSearchBar
+import com.pokiepaws.mobile.ui.visits.isCancelledVisitStatus
+import com.pokiepaws.mobile.ui.visits.isScheduledVisitStatus
+import com.pokiepaws.mobile.ui.visits.localizedVisitStatusLabel
+import com.pokiepaws.mobile.ui.visits.visitStatusSearchText
 import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieWhite
 import java.time.Instant
@@ -485,7 +489,7 @@ private fun VisitCard(
                         .background(PokieBlueDark.copy(alpha = 0.08f)),
                 contentAlignment = Alignment.Center,
             ) {
-                if (visit.status == "CANCELLED") {
+                if (visit.status.isCancelledVisitStatus()) {
                     Icon(
                         imageVector = Icons.Default.Cancel,
                         contentDescription = stringResource(R.string.visit_cancelled_content_description),
@@ -527,18 +531,18 @@ private fun VisitCard(
                     color = Color.Gray,
                 )
                 Text(
-                    text = stringResource(R.string.visit_card_status, visit.status),
+                    text = stringResource(R.string.visit_card_status, localizedVisitStatusLabel(visit.status)),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(top = 4.dp),
                     color =
-                        if (visit.status == "SCHEDULED") {
+                        if (visit.status.isScheduledVisitStatus()) {
                             MaterialTheme.colorScheme.primary
                         } else {
                             MaterialTheme.colorScheme.onSurfaceVariant
                         },
                 )
-                if (visit.status == "SCHEDULED") {
+                if (visit.status.isScheduledVisitStatus()) {
                     Button(
                         onClick = { onCancel(visit.id) },
                         modifier = Modifier.padding(top = 6.dp),
@@ -602,7 +606,7 @@ private fun List<Visit>.filterBySearchQuery(
         animalName.lowercase().contains(q) ||
             visitTypeLabel.contains(q) ||
             visit.description.name.lowercase().contains(q) ||
-            visit.status.lowercase().contains(q) ||
+            visitStatusSearchText(visit.status).contains(q) ||
             dateLabel.lowercase().contains(q) ||
             visit.startsAt.lowercase().contains(q)
     }

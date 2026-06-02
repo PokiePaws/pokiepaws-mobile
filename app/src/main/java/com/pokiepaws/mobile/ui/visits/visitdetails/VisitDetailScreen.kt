@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pokiepaws.mobile.ui.common.SecureScreen
 
 @Composable
 fun VisitDetailScreen(
@@ -14,6 +15,8 @@ fun VisitDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: VisitDetailViewModel = hiltViewModel(),
 ) {
+    SecureScreen()
+
     val state by viewModel.uiState.collectAsState()
     val isOnline by viewModel.isOnline.collectAsState()
 

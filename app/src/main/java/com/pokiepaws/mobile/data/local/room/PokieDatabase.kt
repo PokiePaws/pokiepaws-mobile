@@ -6,12 +6,15 @@ import com.pokiepaws.mobile.data.local.dao.AnimalDao
 import com.pokiepaws.mobile.data.local.dao.ClinicDao
 import com.pokiepaws.mobile.data.local.dao.NotificationDao
 import com.pokiepaws.mobile.data.local.dao.OwnerProfileDao
+import com.pokiepaws.mobile.data.local.dao.PrescriptionDao
 import com.pokiepaws.mobile.data.local.dao.VetDao
 import com.pokiepaws.mobile.data.local.dao.VisitDao
 import com.pokiepaws.mobile.data.local.room.entities.AnimalEntity
 import com.pokiepaws.mobile.data.local.room.entities.ClinicEntity
 import com.pokiepaws.mobile.data.local.room.entities.NotificationEntity
 import com.pokiepaws.mobile.data.local.room.entities.OwnerProfileEntity
+import com.pokiepaws.mobile.data.local.room.entities.PrescriptionEntity
+import com.pokiepaws.mobile.data.local.room.entities.PrescriptionItemEntity
 import com.pokiepaws.mobile.data.local.room.entities.VetEntity
 import com.pokiepaws.mobile.data.local.room.entities.VisitEntity
 
@@ -23,8 +26,10 @@ import com.pokiepaws.mobile.data.local.room.entities.VisitEntity
         VisitEntity::class,
         VetEntity::class,
         OwnerProfileEntity::class,
+        PrescriptionEntity::class,
+        PrescriptionItemEntity::class,
     ],
-    version = 3,
+    version = 5,
 )
 abstract class PokieDatabase : RoomDatabase() {
     abstract fun notificationDao(): NotificationDao
@@ -38,4 +43,6 @@ abstract class PokieDatabase : RoomDatabase() {
     abstract fun vetDao(): VetDao
 
     abstract fun ownerProfileDao(): OwnerProfileDao
+
+    abstract fun prescriptionDao(): PrescriptionDao
 }

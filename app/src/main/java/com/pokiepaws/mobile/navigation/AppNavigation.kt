@@ -120,11 +120,7 @@ fun AppNavigation(
                         NavigationBarItem(
                             selected = isSelected,
                             onClick = {
-                                navController.navigate(item.screen.route) {
-                                    popUpTo(Screen.Home.route) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
+                                navController.navigateToBottomScreen(item.screen)
                             },
                             icon = {
                                 Icon(
@@ -199,8 +195,11 @@ fun AppNavigation(
 
             composable(Screen.Home.route) {
                 HomeScreen(
-                    onNavigateToAppointments = { navController.navigate(Screen.AppointmentList.route) },
+                    onNavigateToAppointments = { navController.navigateToBottomScreen(Screen.AppointmentList) },
                     onNavigateToNotifications = { navController.navigate(Screen.Notifications.route) },
+                    onVisitClick = { visitId ->
+                        navController.navigate(Screen.AppointmentDetail.createRoute(visitId))
+                    },
                 )
             }
 
@@ -388,6 +387,14 @@ private val bottomNavItems =
     )
 
 private val bottomNavRoutes = bottomNavItems.map { it.screen.route }.toSet()
+
+private fun NavHostController.navigateToBottomScreen(screen: Screen) {
+    navigate(screen.route) {
+        popUpTo(Screen.Home.route) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
 
 private fun <T> navigationTween() =
     tween<T>(

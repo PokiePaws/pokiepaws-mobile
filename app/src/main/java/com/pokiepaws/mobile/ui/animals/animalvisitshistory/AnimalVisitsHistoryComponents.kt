@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Healing
 import androidx.compose.material.icons.filled.MedicalServices
@@ -55,8 +56,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pokiepaws.mobile.R
-import com.pokiepaws.mobile.domain.model.Visit
-import com.pokiepaws.mobile.domain.model.VisitDescription
+import com.pokiepaws.mobile.domain.model.Prescription
+import com.pokiepaws.mobile.domain.model.PrescriptionItem
+import com.pokiepaws.mobile.ui.visits.localizedVisitStatusLabel
 import com.pokiepaws.mobile.util.theme.PokieBlue
 import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieWhite
@@ -102,7 +104,7 @@ fun AnimalVisitsHistoryContent(
                 }
 
             is AnimalVisitsHistoryUiState.Success ->
-                VisitsHistoryList(visits = state.visits)
+                VisitsHistoryList(items = state.items)
         }
     }
 }
@@ -151,17 +153,17 @@ private fun HistoryHeader(
 
 @Composable
 private fun VisitsHistoryList(
-    @SuppressLint("ComposeUnstableCollections") visits: List<Visit>,
+    @SuppressLint("ComposeUnstableCollections") items: List<AnimalVisitHistoryItem>,
 ) {
     var fromDateMillis by rememberSaveable { mutableStateOf<Long?>(null) }
     var toDateMillis by rememberSaveable { mutableStateOf<Long?>(null) }
     val fromDate = remember(fromDateMillis) { fromDateMillis?.toLocalDate() }
     val toDate = remember(toDateMillis) { toDateMillis?.toLocalDate() }
-    val sortedVisits =
-        remember(visits, fromDate, toDate) {
-            visits
+    val sortedItems =
+        remember(items, fromDate, toDate) {
+            items
                 .filterByDateRange(fromDate = fromDate, toDate = toDate)
-                .sortedByDescending { it.startsAt }
+                .sortedByDescending { it.visit.startsAt }
         }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -176,10 +178,10 @@ private fun VisitsHistoryList(
             },
         )
 
-        if (sortedVisits.isEmpty()) {
+        if (sortedItems.isEmpty()) {
             EmptyHistoryState(
                 message =
-                    if (visits.isEmpty()) {
+                    if (items.isEmpty()) {
                         stringResource(R.string.animal_visits_history_empty)
                     } else {
                         stringResource(R.string.animal_visits_history_empty_range)
@@ -194,10 +196,10 @@ private fun VisitsHistoryList(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             items(
-                items = sortedVisits,
-                key = { it.id },
-            ) { visit ->
-                VisitHistoryCard(visit = visit)
+                items = sortedItems,
+                key = { it.visit.id },
+            ) { item ->
+                VisitHistoryCard(item = item)
             }
         }
     }
@@ -322,9 +324,11 @@ private fun DateFilterButton(
 
 @Composable
 private fun VisitHistoryCard(
-    visit: Visit,
+    item: AnimalVisitHistoryItem,
     modifier: Modifier = Modifier,
 ) {
+    val visit = item.visit
+
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -352,7 +356,7 @@ private fun VisitHistoryCard(
                     )
                 }
                 Text(
-                    text = visit.status,
+                    text = localizedVisitStatusLabel(visit.status),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.primary,
@@ -383,15 +387,61 @@ private fun VisitHistoryCard(
                     value = it,
                 )
             }
-            HistoryInfoRow(
-                icon = Icons.Default.Recommend,
-                label = stringResource(R.string.animal_visits_history_prescriptions),
-                value =
-                    visit.recommendations?.takeIf { it.isNotBlank() }
-                        ?: stringResource(R.string.animal_visits_history_no_prescriptions),
-            )
+            PrescriptionHistorySection(prescription = item.prescription)
         }
     }
+}
+
+@Composable
+private fun PrescriptionHistorySection(prescription: Prescription?) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (prescription == null) {
+            HistoryInfoRow(
+                icon = Icons.AutoMirrored.Filled.ReceiptLong,
+                label = stringResource(R.string.visit_prescription_title),
+                value = stringResource(R.string.visit_prescription_empty),
+            )
+            return@Column
+        }
+
+        prescription.creationDate?.takeIf { it.isNotBlank() }?.let { date ->
+            HistoryInfoRow(
+                icon = Icons.AutoMirrored.Filled.ReceiptLong,
+                label = stringResource(R.string.visit_prescription_creation_date),
+                value = date.toDisplayDate(),
+            )
+        }
+        prescription.recommendationDate?.takeIf { it.isNotBlank() }?.let { date ->
+            HistoryInfoRow(
+                icon = Icons.Default.Recommend,
+                label = stringResource(R.string.visit_prescription_recommendation_date),
+                value = date.toDisplayDate(),
+            )
+        }
+        prescription.items.forEach { prescriptionItem ->
+            PrescriptionItemHistoryRow(item = prescriptionItem)
+        }
+    }
+}
+
+@Composable
+private fun PrescriptionItemHistoryRow(item: PrescriptionItem) {
+    val details =
+        listOfNotNull(
+            item.quantityPackages?.let { "${stringResource(R.string.visit_prescription_quantity)}: $it" },
+            item.dosage?.takeIf { it.isNotBlank() }?.let {
+                "${stringResource(R.string.visit_prescription_dosage)}: $it"
+            },
+            item.treatmentTime?.takeIf { it.isNotBlank() }?.let {
+                "${stringResource(R.string.visit_prescription_treatment_time)}: $it"
+            },
+        ).joinToString(separator = "\n")
+
+    HistoryInfoRow(
+        icon = Icons.Default.MedicalServices,
+        label = item.productName?.takeIf { it.isNotBlank() } ?: stringResource(R.string.visit_prescription_unknown_product),
+        value = details.ifBlank { stringResource(R.string.visit_prescription_unknown_product) },
+    )
 }
 
 @Composable
@@ -450,12 +500,12 @@ private fun VisitIcon(
     }
 }
 
-private fun List<Visit>.filterByDateRange(
+private fun List<AnimalVisitHistoryItem>.filterByDateRange(
     fromDate: LocalDate?,
     toDate: LocalDate?,
-): List<Visit> =
-    filter { visit ->
-        val visitDate = visit.startsAt.toLocalDateOrNull()
+): List<AnimalVisitHistoryItem> =
+    filter { item ->
+        val visitDate = item.visit.startsAt.toLocalDateOrNull()
         visitDate != null &&
             (fromDate == null || !visitDate.isBefore(fromDate)) &&
             (toDate == null || !visitDate.isAfter(toDate))
@@ -478,17 +528,22 @@ private fun String.toVisitDateLabel(): String =
         .recoverCatching { substringBefore("T").split("-").let { "${it[2]}-${it[1]}-${it[0]}" } }
         .getOrDefault(this)
 
-private val VisitDescription.titleRes: Int
+private fun String.toDisplayDate(): String =
+    runCatching { substringBefore("T").split("-").let { "${it[2]}-${it[1]}-${it[0]}" } }
+        .getOrDefault(this)
+
+private val com.pokiepaws.mobile.domain.model.VisitDescription.titleRes: Int
     get() =
         when (this) {
-            VisitDescription.CHECKUP -> R.string.visit_type_checkup
-            VisitDescription.VACCINATION -> R.string.visit_type_vaccination
-            VisitDescription.EMERGENCY -> R.string.visit_type_emergency
-            VisitDescription.PREVENTIVE_CARE -> R.string.visit_type_prevention
-            VisitDescription.SPECIALIST_CONSULTATION -> R.string.visit_type_specialist_consultation
-            VisitDescription.DIAGNOSTIC_EXAM -> R.string.visit_type_diagnostic_exam
-            VisitDescription.SURGICAL_PROCEDURE -> R.string.visit_type_surgery
-            VisitDescription.DENTAL_PROCEDURE -> R.string.visit_type_dental_procedure
+            com.pokiepaws.mobile.domain.model.VisitDescription.CHECKUP -> R.string.visit_type_checkup
+            com.pokiepaws.mobile.domain.model.VisitDescription.VACCINATION -> R.string.visit_type_vaccination
+            com.pokiepaws.mobile.domain.model.VisitDescription.EMERGENCY -> R.string.visit_type_emergency
+            com.pokiepaws.mobile.domain.model.VisitDescription.PREVENTIVE_CARE -> R.string.visit_type_prevention
+            com.pokiepaws.mobile.domain.model.VisitDescription.SPECIALIST_CONSULTATION ->
+                R.string.visit_type_specialist_consultation
+            com.pokiepaws.mobile.domain.model.VisitDescription.DIAGNOSTIC_EXAM -> R.string.visit_type_diagnostic_exam
+            com.pokiepaws.mobile.domain.model.VisitDescription.SURGICAL_PROCEDURE -> R.string.visit_type_surgery
+            com.pokiepaws.mobile.domain.model.VisitDescription.DENTAL_PROCEDURE -> R.string.visit_type_dental_procedure
         }
 private const val HEADER_ROUNDING = 32
 private const val HEADER_TOP_PADDING = 48

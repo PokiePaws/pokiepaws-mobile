@@ -11,6 +11,7 @@ fun HomeScreen(
     onNavigateToNotifications: () -> Unit,
     modifier: Modifier = Modifier,
     onNavigateToAppointments: () -> Unit = {},
+    onVisitClick: (Long) -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -20,5 +21,7 @@ fun HomeScreen(
         onNavigateToNotifications = onNavigateToNotifications,
         modifier = modifier,
         onNavigateToAppointments = onNavigateToAppointments,
+        onVisitClick = onVisitClick,
+        animalNamesById = state.animalNamesById,
     )
 }

@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.model.Prescription
 import com.pokiepaws.mobile.domain.model.PrescriptionItem
+import com.pokiepaws.mobile.ui.visits.localizedVisitStatusLabel
 import com.pokiepaws.mobile.util.theme.PokieBlue
 import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieWhite
@@ -355,7 +356,7 @@ private fun VisitHistoryCard(
                     )
                 }
                 Text(
-                    text = visit.status,
+                    text = localizedVisitStatusLabel(visit.status),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.primary,

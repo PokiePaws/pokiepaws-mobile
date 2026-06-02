@@ -178,7 +178,7 @@
     <string name="upcoming_visit_fallback_day">Nadchodząca</string>
     <string name="upcoming_visit_details_hint">Dotknij, aby zobaczyć szczegóły</string>
     <string name="home_welcome">Witaj w PokiePaws</string>
-    <string name="home_upcoming_visit">Nadchodząca wizyta</string>
+    <string name="home_upcoming_visit">Nadchodz&#261;ce wizyty</string>
     <string name="home_quick_actions">Szybkie akcje</string>
     <string name="home_schedule_visit">Umów wizytę</string>
     <string name="home_add_animal">Dodaj zwierzę</string>
@@ -248,6 +248,10 @@
     <string name="visit_card_animal_title">%1$s - wizyta #%2$d</string>
     <string name="visit_card_date">Data: %1$s</string>
     <string name="visit_card_status">Status: %1$s</string>
+    <string name="visit_status_scheduled">Zaplanowana</string>
+    <string name="visit_status_confirmed">Potwierdzona</string>
+    <string name="visit_status_cancelled">Anulowana</string>
+    <string name="visit_status_completed">Zako&#324;czona</string>
     <string name="visit_search_placeholder">Szukaj po dacie, statusie lub zwierzęciu</string>
     <string name="visits_no_results">Brak wizyt dla "%1$s"</string>
     <string name="visits_no_results_filtered">Brak wizyt w wybranym zakresie dat</string>

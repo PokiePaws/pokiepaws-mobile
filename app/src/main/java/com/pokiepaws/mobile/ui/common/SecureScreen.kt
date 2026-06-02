@@ -44,8 +44,7 @@ private object SecureWindowFlag {
     }
 }
 
-private fun android.view.Window.hasSecureFlag(): Boolean =
-    attributes.flags.and(WindowManager.LayoutParams.FLAG_SECURE) != 0
+private fun android.view.Window.hasSecureFlag(): Boolean = attributes.flags.and(WindowManager.LayoutParams.FLAG_SECURE) != 0
 
 private tailrec fun Context.findActivity(): Activity? =
     when (this) {

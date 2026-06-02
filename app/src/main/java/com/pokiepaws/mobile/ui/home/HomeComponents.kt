@@ -44,6 +44,8 @@ import androidx.compose.ui.unit.sp
 import com.pokiepaws.mobile.R
 import com.pokiepaws.mobile.domain.model.Visit
 import com.pokiepaws.mobile.domain.model.VisitDescription
+import com.pokiepaws.mobile.ui.visits.isUpcomingVisitStatus
+import com.pokiepaws.mobile.ui.visits.localizedVisitStatusLabel
 import com.pokiepaws.mobile.ui.visits.visitlist.VisitListUiState
 import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieRed
@@ -58,6 +60,8 @@ fun HomeScreenContent(
     onNavigateToNotifications: () -> Unit,
     modifier: Modifier = Modifier,
     onNavigateToAppointments: () -> Unit = {},
+    onVisitClick: (Long) -> Unit = {},
+    animalNamesById: HomeAnimalNames = HomeAnimalNames(),
 ) {
     val scrollState = rememberScrollState()
 
@@ -91,7 +95,8 @@ fun HomeScreenContent(
 
                 UpcomingVisitCard(
                     visitState = visitState,
-                    onClick = onNavigateToAppointments,
+                    animalNamesById = animalNamesById,
+                    onVisitClick = onVisitClick,
                 )
 
                 Spacer(modifier = Modifier.height(SECTION_SPACING.dp))
@@ -192,14 +197,14 @@ fun SectionHeader(
 @Composable
 fun UpcomingVisitCard(
     visitState: VisitListUiState,
-    onClick: () -> Unit,
+    animalNamesById: HomeAnimalNames,
+    onVisitClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
         modifier =
             modifier
-                .fillMaxWidth()
-                .clickable { onClick() },
+                .fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = PokieWhite),
         elevation = CardDefaults.cardElevation(4.dp),
@@ -247,8 +252,11 @@ fun UpcomingVisitCard(
             }
 
             is VisitListUiState.Success -> {
-                val next = visitState.visits.minByOrNull { it.startsAt }
-                if (next == null) {
+                val upcomingVisits =
+                    visitState.visits
+                        .filter { it.status.isUpcomingVisitStatus() }
+                        .sortedBy { it.startsAt }
+                if (upcomingVisits.isEmpty()) {
                     Row(
                         modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -269,7 +277,18 @@ fun UpcomingVisitCard(
                         }
                     }
                 } else {
-                    UpcomingVisitContent(visit = next)
+                    Column {
+                        upcomingVisits.forEachIndexed { index, visit ->
+                            UpcomingVisitContent(
+                                visit = visit,
+                                animalName = animalNamesById.items[visit.animalId],
+                                onClick = { onVisitClick(visit.id) },
+                            )
+                            if (index < upcomingVisits.lastIndex) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -277,7 +296,11 @@ fun UpcomingVisitCard(
 }
 
 @Composable
-private fun UpcomingVisitContent(visit: Visit) {
+private fun UpcomingVisitContent(
+    visit: Visit,
+    animalName: String?,
+    onClick: () -> Unit,
+) {
     val dateTime = parseIsoLocalDateTimeOrNull(visit.startsAt)
     val dayLabel =
         dateTime?.let { formatDayLabel(it.toLocalDate()) }
@@ -285,7 +308,10 @@ private fun UpcomingVisitContent(visit: Visit) {
     val timeLabel = dateTime?.format(DateTimeFormatter.ofPattern("HH:mm")) ?: "--:--"
 
     Row(
-        modifier = Modifier.padding(16.dp),
+        modifier =
+            Modifier
+                .clickable(onClick = onClick)
+                .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         VisitIcon(icon = Icons.Default.CalendarMonth)
@@ -294,9 +320,16 @@ private fun UpcomingVisitContent(visit: Visit) {
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = visit.status.replace('_', ' '),
+                text = localizedVisitStatusLabel(visit.status),
                 fontWeight = FontWeight.Bold,
                 color = PokieBlueDark,
+            )
+            Text(
+                text = animalName ?: stringResource(R.string.animal_unknown_name),
+                color = PokieBlueDark,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
             )
             Text(
                 text = stringResource(visit.description.titleRes),

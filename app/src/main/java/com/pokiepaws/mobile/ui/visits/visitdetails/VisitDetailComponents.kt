@@ -57,6 +57,9 @@ import com.pokiepaws.mobile.domain.model.Prescription
 import com.pokiepaws.mobile.domain.model.PrescriptionItem
 import com.pokiepaws.mobile.domain.model.Visit
 import com.pokiepaws.mobile.domain.model.VisitDescription
+import com.pokiepaws.mobile.ui.visits.isCancelledVisitStatus
+import com.pokiepaws.mobile.ui.visits.isScheduledVisitStatus
+import com.pokiepaws.mobile.ui.visits.localizedVisitStatusLabel
 import com.pokiepaws.mobile.util.theme.PokieBlueDark
 import com.pokiepaws.mobile.util.theme.PokieWhite
 import java.time.LocalDateTime
@@ -203,7 +206,7 @@ private fun VisitDetailsBody(
                 verticalAlignment = Alignment.Top,
             ) {
                 BlueIconBox(
-                    icon = if (visit.status == "CANCELLED") Icons.Default.Cancel else Icons.Default.CalendarMonth,
+                    icon = if (visit.status.isCancelledVisitStatus()) Icons.Default.Cancel else Icons.Default.CalendarMonth,
                     modifier = Modifier.size(72.dp),
                 )
 
@@ -217,7 +220,7 @@ private fun VisitDetailsBody(
                         color = PokieBlueDark,
                     )
                     Spacer(modifier = Modifier.height(6.dp))
-                    InfoRow(icon = Icons.Default.MedicalServices, text = visit.status)
+                    InfoRow(icon = Icons.Default.MedicalServices, text = localizedVisitStatusLabel(visit.status))
                     InfoRow(icon = Icons.Default.CalendarMonth, text = visit.startsAt.toVisitDateLabel())
                     InfoRow(
                         icon = Icons.Default.Schedule,
@@ -276,7 +279,7 @@ private fun VisitDetailsBody(
             error = prescriptionError,
         )
 
-        if (visit.status == "SCHEDULED") {
+        if (visit.status.isScheduledVisitStatus()) {
             Spacer(modifier = Modifier.height(4.dp))
             Button(
                 onClick = onCancelClick,

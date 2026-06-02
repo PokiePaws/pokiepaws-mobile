@@ -110,6 +110,7 @@
     <string name="animal_microchip_label">Mikrochip</string>
     <string name="animal_prophylaxis_title">Profilaktyka</string>
     <string name="animal_rabies_vaccination_label">Szczepienie przeciw wściekliźnie</string>
+    <string name="animal_rabies_last_vaccination_label">Ostatnie szczepienie</string>
     <string name="animal_rabies_next_due_label">Następny termin</string>
     <string name="animal_rabies_status_label">Status</string>
     <string name="animal_rabies_required_by_law">Wymagane prawem</string>
@@ -263,9 +264,19 @@
     <string name="visit_cancel_dialog_title">Anuluj wizytę</string>
     <string name="visit_cancel_dialog_message">Czy na pewno chcesz anulować tę wizytę?</string>
     <string name="close_button">Zamknij</string>
+    <string name="visit_start_time">Godzina rozpocz&#281;cia: %1$s</string>
     <string name="visit_medical_data_title">Dane medyczne</string>
     <string name="visit_disease_label">Choroba</string>
     <string name="visit_diagnosis_label">Diagnoza</string>
     <string name="visit_recommendations_label">Zalecenia</string>
+    <string name="visit_prescription_title">Recepta</string>
+    <string name="visit_prescription_empty">Do tej wizyty nie dodano jeszcze recepty.</string>
+    <string name="visit_prescription_error">Nie uda&#322;o si&#281; wczyta&#263; recepty: %1$s</string>
+    <string name="visit_prescription_creation_date">Wystawiono</string>
+    <string name="visit_prescription_recommendation_date">Data zalece&#324;</string>
+    <string name="visit_prescription_unknown_product">Lek</string>
+    <string name="visit_prescription_quantity">Opakowania</string>
+    <string name="visit_prescription_dosage">Dawkowanie</string>
+    <string name="visit_prescription_treatment_time">Czas leczenia</string>
 
 </resources>

@@ -110,6 +110,7 @@
     <string name="animal_microchip_label">Microchip</string>
     <string name="animal_prophylaxis_title">Prevention</string>
     <string name="animal_rabies_vaccination_label">Rabies vaccination</string>
+    <string name="animal_rabies_last_vaccination_label">Last vaccination</string>
     <string name="animal_rabies_next_due_label">Next due date</string>
     <string name="animal_rabies_status_label">Status</string>
     <string name="animal_rabies_required_by_law">Required by law</string>
@@ -259,8 +260,18 @@
     <string name="visit_cancel_dialog_title">Cancel visit</string>
     <string name="visit_cancel_dialog_message">Are you sure you want to cancel this visit?</string>
     <string name="close_button">Close</string>
+    <string name="visit_start_time">Start time: %1$s</string>
     <string name="visit_medical_data_title">Medical data</string>
     <string name="visit_disease_label">Disease</string>
     <string name="visit_diagnosis_label">Diagnosis</string>
     <string name="visit_recommendations_label">Recommendations</string>
+    <string name="visit_prescription_title">Prescription</string>
+    <string name="visit_prescription_empty">No prescription has been added to this visit yet.</string>
+    <string name="visit_prescription_error">Could not load prescription: %1$s</string>
+    <string name="visit_prescription_creation_date">Created</string>
+    <string name="visit_prescription_recommendation_date">Recommendation date</string>
+    <string name="visit_prescription_unknown_product">Medicine</string>
+    <string name="visit_prescription_quantity">Packages</string>
+    <string name="visit_prescription_dosage">Dosage</string>
+    <string name="visit_prescription_treatment_time">Treatment time</string>
 </resources>

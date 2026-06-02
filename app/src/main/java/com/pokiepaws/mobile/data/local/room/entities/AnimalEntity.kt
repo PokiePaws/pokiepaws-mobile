@@ -14,6 +14,7 @@ data class AnimalEntity(
     val microchipNumber: String?,
     val weight: Double?,
     val birthDate: String?,
+    val rabiesVaccinationDate: String?,
     val nextRabiesVaccinationDate: String?,
     val notes: String?,
 )

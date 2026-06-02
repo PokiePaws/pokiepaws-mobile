@@ -1,17 +1,24 @@
 package com.pokiepaws.mobile.data.repository
 
+import com.pokiepaws.mobile.data.local.dao.PrescriptionDao
 import com.pokiepaws.mobile.data.local.dao.VisitDao
 import com.pokiepaws.mobile.data.local.room.mappers.toDomain
 import com.pokiepaws.mobile.data.local.room.mappers.toEntity
+import com.pokiepaws.mobile.data.local.room.mappers.toItemEntities
 import com.pokiepaws.mobile.data.remote.dto.visit.CreateVisitRequest
+import com.pokiepaws.mobile.data.remote.dto.visit.PrescriptionResponse
 import com.pokiepaws.mobile.data.remote.dto.visit.VisitResponse
+import com.pokiepaws.mobile.data.remote.dto.visit.toDomain
 import com.pokiepaws.mobile.data.remote.service.VisitApiService
 import com.pokiepaws.mobile.domain.model.CreateVisitDraft
+import com.pokiepaws.mobile.domain.model.Prescription
 import com.pokiepaws.mobile.domain.model.Visit
 import com.pokiepaws.mobile.domain.model.VisitDescription
 import com.pokiepaws.mobile.domain.repository.VisitRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import retrofit2.HttpException
+import retrofit2.Response
 import javax.inject.Inject
 
 class VisitRepositoryImpl
@@ -19,6 +26,7 @@ class VisitRepositoryImpl
     constructor(
         private val api: VisitApiService,
         private val visitDao: VisitDao,
+        private val prescriptionDao: PrescriptionDao,
     ) : VisitRepository {
         override fun getUpcoming(): Flow<List<Visit>> =
             visitDao.getVisits(UPCOMING_VISITS_SCOPE).map { entities ->
@@ -31,6 +39,8 @@ class VisitRepositoryImpl
             visitDao.getVisits(animalVisitsScope(animalId)).map { entities ->
                 entities.map { it.toDomain() }
             }
+
+        override fun observePrescription(visitId: Long): Flow<Prescription?> = prescriptionDao.getByVisit(visitId).map { it?.toDomain() }
 
         override suspend fun syncUpcoming() {
             runCatching {
@@ -61,6 +71,21 @@ class VisitRepositoryImpl
                     visits = visits.map { it.toEntity(scope) },
                 )
             }
+        }
+
+        override suspend fun syncPrescription(visitId: Long) {
+            val prescription = api.getPrescription(visitId).toPrescriptionOrNull()
+            prescriptionDao.replaceForVisit(
+                visitId = visitId,
+                prescription = prescription?.toEntity(),
+                items = prescription?.toItemEntities().orEmpty(),
+            )
+        }
+
+        private fun Response<PrescriptionResponse>.toPrescriptionOrNull(): Prescription? {
+            if (code() == HTTP_NOT_FOUND || code() == HTTP_NO_CONTENT) return null
+            if (!isSuccessful) throw HttpException(this)
+            return body()?.toDomain()
         }
 
         override suspend fun cancel(visitId: Long): Visit =
@@ -97,6 +122,8 @@ class VisitRepositoryImpl
 
 private const val UPCOMING_VISITS_SCOPE = "upcoming"
 private const val DETAIL_VISITS_SCOPE = "detail"
+private const val HTTP_NOT_FOUND = 404
+private const val HTTP_NO_CONTENT = 204
 
 private fun animalVisitsScope(animalId: Long): String = "animal:$animalId"
 

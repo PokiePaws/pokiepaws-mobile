@@ -15,6 +15,8 @@ data class AnimalResponse(
     val microchipNumber: String? = null,
     val weight: Double? = null,
     val birthDate: String? = null,
+    val rabiesVaccinationDate: String? = null,
+    val rabiesVaccinationDueDate: String? = null,
     val nextRabiesVaccinationDate: String? = null,
     val rabiesVaccinationNextDueDate: String? = null,
     val rabiesNextDueDate: String? = null,
@@ -32,8 +34,10 @@ fun AnimalResponse.toDomain(): Animal {
         microchipNumber = this.microchipNumber,
         weight = this.weight,
         birthDate = this.birthDate,
+        rabiesVaccinationDate = this.rabiesVaccinationDate,
         nextRabiesVaccinationDate =
-            nextRabiesVaccinationDate
+            rabiesVaccinationDueDate
+                ?: nextRabiesVaccinationDate
                 ?: rabiesVaccinationNextDueDate
                 ?: rabiesNextDueDate,
         notes = this.notes,

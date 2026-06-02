@@ -21,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Healing
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.Recommend
 import androidx.compose.material.icons.filled.Schedule
@@ -51,6 +52,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pokiepaws.mobile.R
+import com.pokiepaws.mobile.domain.model.Clinic
+import com.pokiepaws.mobile.domain.model.Prescription
+import com.pokiepaws.mobile.domain.model.PrescriptionItem
 import com.pokiepaws.mobile.domain.model.Visit
 import com.pokiepaws.mobile.domain.model.VisitDescription
 import com.pokiepaws.mobile.util.theme.PokieBlueDark
@@ -132,6 +136,10 @@ fun VisitDetailContent(
             is VisitDetailUiState.Success ->
                 VisitDetailsBody(
                     visit = state.visit,
+                    clinic = state.clinic,
+                    prescription = state.prescription,
+                    isPrescriptionLoading = state.isPrescriptionLoading,
+                    prescriptionError = state.prescriptionError,
                     isOnline = isOnline,
                     onCancelClick = { showCancelDialog = true },
                 )
@@ -168,6 +176,10 @@ fun VisitDetailContent(
 @Composable
 private fun VisitDetailsBody(
     visit: Visit,
+    clinic: Clinic?,
+    prescription: Prescription?,
+    isPrescriptionLoading: Boolean,
+    prescriptionError: String?,
     isOnline: Boolean,
     onCancelClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -206,8 +218,15 @@ private fun VisitDetailsBody(
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     InfoRow(icon = Icons.Default.MedicalServices, text = visit.status)
-                    InfoRow(icon = Icons.Default.Schedule, text = visit.startsAt.toVisitDateLabel())
-                    InfoRow(icon = Icons.Default.CalendarMonth, text = visit.endsAt.toVisitDateLabel())
+                    InfoRow(icon = Icons.Default.CalendarMonth, text = visit.startsAt.toVisitDateLabel())
+                    InfoRow(
+                        icon = Icons.Default.Schedule,
+                        text = stringResource(R.string.visit_start_time, visit.startsAt.toVisitTimeLabel()),
+                    )
+                    clinic?.let {
+                        InfoRow(icon = Icons.Default.MedicalServices, text = it.clinicName)
+                        InfoRow(icon = Icons.Default.Home, text = it.toAddressLabel())
+                    }
                 }
             }
         }
@@ -251,6 +270,12 @@ private fun VisitDetailsBody(
                 }
             }
         }
+        PrescriptionSection(
+            prescription = prescription,
+            isLoading = isPrescriptionLoading,
+            error = prescriptionError,
+        )
+
         if (visit.status == "SCHEDULED") {
             Spacer(modifier = Modifier.height(4.dp))
             Button(
@@ -268,6 +293,114 @@ private fun VisitDetailsBody(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+@Composable
+private fun PrescriptionSection(
+    prescription: Prescription?,
+    isLoading: Boolean,
+    error: String?,
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.visit_prescription_title),
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = PokieBlueDark,
+            modifier = Modifier.padding(horizontal = 4.dp),
+        )
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = PokieWhite),
+            elevation = CardDefaults.cardElevation(4.dp),
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                when {
+                    isLoading -> CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                    !error.isNullOrBlank() ->
+                        Text(
+                            text = stringResource(R.string.visit_prescription_error, error),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    prescription == null ->
+                        Text(
+                            text = stringResource(R.string.visit_prescription_empty),
+                            color = Color.Gray,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    else -> PrescriptionContent(prescription)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PrescriptionContent(prescription: Prescription) {
+    prescription.creationDate?.let { date ->
+        MedicalSection(
+            icon = Icons.Default.CalendarMonth,
+            label = stringResource(R.string.visit_prescription_creation_date),
+            value = date.toDisplayDate(),
+        )
+    }
+    prescription.recommendationDate?.let { date ->
+        MedicalSection(
+            icon = Icons.Default.Schedule,
+            label = stringResource(R.string.visit_prescription_recommendation_date),
+            value = date.toDisplayDate(),
+        )
+    }
+    prescription.items.forEach { item ->
+        PrescriptionItemSection(item)
+    }
+}
+
+@Composable
+private fun PrescriptionItemSection(item: PrescriptionItem) {
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Default.MedicalServices,
+                contentDescription = null,
+                tint = PokieBlueDark,
+                modifier = Modifier.size(16.dp),
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = item.productName ?: stringResource(R.string.visit_prescription_unknown_product),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = PokieBlueDark,
+            )
+        }
+        PrescriptionItemDetail(label = stringResource(R.string.visit_prescription_quantity), value = item.quantityPackages?.toString())
+        PrescriptionItemDetail(label = stringResource(R.string.visit_prescription_dosage), value = item.dosage)
+        PrescriptionItemDetail(label = stringResource(R.string.visit_prescription_treatment_time), value = item.treatmentTime)
+    }
+}
+
+@Composable
+private fun PrescriptionItemDetail(
+    label: String,
+    value: String?,
+) {
+    if (!value.isNullOrBlank()) {
+        Text(
+            text = "$label: $value",
+            fontSize = 13.sp,
+            color = Color.Gray,
+            modifier = Modifier.padding(start = 22.dp, top = 2.dp),
+        )
     }
 }
 
@@ -348,6 +481,18 @@ private fun String.toVisitDateLabel(): String =
         .recoverCatching { substringBefore("T").split("-").let { "${it[2]}-${it[1]}-${it[0]}" } }
         .getOrDefault(this)
 
+private fun String.toVisitTimeLabel(): String =
+    runCatching { LocalDateTime.parse(this).format(VisitTimeFormatter) }
+        .recoverCatching { substringAfter("T").take(VISIT_TIME_LENGTH) }
+        .getOrDefault(this)
+
+private fun String.toDisplayDate(): String =
+    runCatching {
+        split("-").let { "${it[2]}-${it[1]}-${it[0]}" }
+    }.getOrDefault(this)
+
+private fun Clinic.toAddressLabel(): String = "$street $houseNumber, $postalCode $city"
+
 private val VisitDescription.titleRes: Int
     get() =
         when (this) {
@@ -363,5 +508,7 @@ private val VisitDescription.titleRes: Int
 private const val HEADER_ROUNDING = 32
 private const val HEADER_TOP_PADDING = 48
 private const val HEADER_BOTTOM_PADDING = 32
+private const val VISIT_TIME_LENGTH = 5
 private val AvatarBg = Color(0xFFF0F8FA)
 private val VisitDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+private val VisitTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")

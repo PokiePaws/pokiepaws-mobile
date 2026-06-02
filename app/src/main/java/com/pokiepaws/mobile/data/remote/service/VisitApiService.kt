@@ -2,6 +2,7 @@ package com.pokiepaws.mobile.data.remote.service
 
 import com.pokiepaws.mobile.data.remote.dto.visit.AvailableSlotsResponse
 import com.pokiepaws.mobile.data.remote.dto.visit.CreateVisitRequest
+import com.pokiepaws.mobile.data.remote.dto.visit.PrescriptionResponse
 import com.pokiepaws.mobile.data.remote.dto.visit.VisitResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -35,6 +36,11 @@ interface VisitApiService {
     suspend fun getVisitById(
         @Path("id") visitId: Long,
     ): VisitResponse
+
+    @GET("api/visits/{id}/prescription")
+    suspend fun getPrescription(
+        @Path("id") visitId: Long,
+    ): retrofit2.Response<PrescriptionResponse>
 
     @PATCH("api/visits/{id}/cancel")
     suspend fun cancelVisit(

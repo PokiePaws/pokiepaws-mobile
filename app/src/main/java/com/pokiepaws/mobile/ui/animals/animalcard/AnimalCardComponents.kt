@@ -265,6 +265,11 @@ fun RabiesProphylaxisCard(
             }
             Spacer(modifier = Modifier.height(14.dp))
             ProphylaxisRow(
+                label = stringResource(R.string.animal_rabies_last_vaccination_label),
+                value = vaccinationDateLabel(animal.rabiesVaccinationDate),
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            ProphylaxisRow(
                 label = stringResource(R.string.animal_rabies_next_due_label),
                 value = vaccinationDateLabel(animal.nextRabiesVaccinationDate),
             )

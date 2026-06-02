@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pokiepaws.mobile.ui.common.SecureScreen
 
 @Composable
 fun AnimalCardScreen(
@@ -19,6 +20,8 @@ fun AnimalCardScreen(
     modifier: Modifier = Modifier,
     viewModel: AnimalCardViewModel = hiltViewModel(),
 ) {
+    SecureScreen()
+
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(animalId) {
